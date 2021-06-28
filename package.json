@@ -1,5 +1,5 @@
 {
-  "name": "hello-microservice",
+  "name": "doppler-account-plans",
   "private": true,
   "devDependencies": {
     "eclint": "^2.8.1",
