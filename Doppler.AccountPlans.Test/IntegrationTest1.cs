@@ -18,6 +18,7 @@ namespace Doppler.AccountPlans
         }
 
         [Theory]
+        [InlineData("/WeatherForecast", HttpStatusCode.OK, "application/json; charset=utf-8")]
         [InlineData("/swagger", HttpStatusCode.Moved, null)]
         [InlineData("/swagger/index.html", HttpStatusCode.OK, "text/html; charset=utf-8")]
         [InlineData("/robots.txt", HttpStatusCode.OK, "text/plain")]
