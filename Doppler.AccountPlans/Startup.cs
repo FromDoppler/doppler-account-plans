@@ -59,6 +59,7 @@ namespace Doppler.AccountPlans
                     c.AddServer(new OpenApiServer() { Url = baseUrl });
                 };
             });
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -82,6 +83,12 @@ namespace Doppler.AccountPlans
             {
                 endpoints.MapControllers();
             });
+
+            app.UseCors(policy => policy
+                .SetIsOriginAllowed(isOriginAllowed: _ => true)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials());
         }
     }
 }
