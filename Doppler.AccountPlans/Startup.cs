@@ -30,6 +30,7 @@ namespace Doppler.AccountPlans
             services.AddDopplerSecurity();
             services.AddRepositories();
             services.AddControllers();
+            services.AddCors();
             services.AddSingleton<Weather.WeatherForecastService>();
             services.AddSingleton<Weather.DataService>();
             services.AddSwaggerGen(c =>
@@ -62,7 +63,6 @@ namespace Doppler.AccountPlans
                     c.AddServer(new OpenApiServer() { Url = baseUrl });
                 };
             });
-            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -80,6 +80,12 @@ namespace Doppler.AccountPlans
 
             app.UseRouting();
 
+            app.UseCors(policy => policy
+                .SetIsOriginAllowed(isOriginAllowed: _ => true)
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials());
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -87,11 +93,7 @@ namespace Doppler.AccountPlans
                 endpoints.MapControllers();
             });
 
-            app.UseCors(policy => policy
-                .SetIsOriginAllowed(isOriginAllowed: _ => true)
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials());
+
         }
     }
 }

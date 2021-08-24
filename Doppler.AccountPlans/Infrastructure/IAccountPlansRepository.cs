@@ -6,6 +6,6 @@ namespace Doppler.AccountPlans.Infrastructure
 {
     public interface IAccountPlansRepository
     {
-        Task<IEnumerable<PlanRenewalInformation>> GetPlanRenewalInformation(int planId, string paymentMethod);
+        Task<IEnumerable<PlanDiscountInformation>> GetPlanDiscountInformation(int planId, string paymentMethod);
     }
 }

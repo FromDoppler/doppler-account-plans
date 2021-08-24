@@ -31,11 +31,10 @@ namespace Doppler.AccountPlans.Controllers
             return $"Hello! \"you\" that have access to the account name: '{accountName}' planId: '{planId}' and promocode:'{promocode}'";
         }
 
-        [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
-        [HttpGet("/accounts/plans/{planId}/{paymentMethod}/discounts")]
-        public async Task<IActionResult> GetPaymentRenewalInformation([FromRoute] int planId, [FromRoute] string paymentMethod)
+        [HttpGet("/plans/{planId}/{paymentMethod}/discounts")]
+        public async Task<IActionResult> GetPlanDiscountInformation([FromRoute] int planId, [FromRoute] string paymentMethod)
         {
-            var contactInformation = await _accountPlansRepository.GetPlanRenewalInformation(planId, paymentMethod);
+            var contactInformation = await _accountPlansRepository.GetPlanDiscountInformation(planId, paymentMethod);
 
             if (contactInformation == null)
             {

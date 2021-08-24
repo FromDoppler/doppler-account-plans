@@ -13,11 +13,12 @@ namespace Doppler.AccountPlans.Infrastructure
             _connectionFactory = connectionFactory;
         }
 
-        public async Task<IEnumerable<PlanRenewalInformation>> GetPlanRenewalInformation(int planId, string paymentMethod)
+        public async Task<IEnumerable<PlanDiscountInformation>> GetPlanDiscountInformation(int planId, string paymentMethod)
         {
             using var connection = await _connectionFactory.GetConnection();
-            var result = await connection.QueryAsync<PlanRenewalInformation>(@"
+            var result = await connection.QueryAsync<PlanDiscountInformation>(@"
 SELECT
+    DP.[IdDiscountPlan],
     DP.[DiscountPlanFee],
     DP.[MonthPlan]
 FROM
