@@ -8,6 +8,6 @@ namespace Doppler.AccountPlans.Infrastructure
     {
         Task<IEnumerable<PlanDiscountInformation>> GetPlanDiscountInformation(int planId, string paymentMethod);
 
-        Task<IEnumerable<PlanInformation>> GetPlanInformation(int planId);
+        Task<PlanInformation> GetPlanInformation(int planId);
     }
 }

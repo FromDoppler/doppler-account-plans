@@ -1,6 +1,7 @@
 using Dapper;
 using Doppler.AccountPlans.Model;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Doppler.AccountPlans.Infrastructure
@@ -30,23 +31,23 @@ WHERE
             return result;
         }
 
-        public async Task<IEnumerable<PlanInformation>> GetPlanInformation(int planId)
+        public async Task<PlanInformation> GetPlanInformation(int planId)
         {
             using var connection = await _connectionFactory.GetConnection();
             var result = await connection.QueryAsync<PlanInformation>(@"
 SELECT
-      UTP.[IdUserType],
-      UTP.[EmailQty],
-      UTP.[Fee],
-      UTP.[SubscribersQty],
-      UTP.[PlanType] AS Type
+    UTP.[IdUserType],
+    UTP.[EmailQty],
+    UTP.[Fee],
+    UTP.[SubscribersQty],
+    UTP.[PlanType] AS Type
 FROM
     [UserTypesPlans] UTP
 WHERE
     UTP.[IdUserTypePlan] = @planId",
-    new { planId});
+    new { planId });
 
-            return result;
+            return result.FirstOrDefault();
         }
     }
 }
