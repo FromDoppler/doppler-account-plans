@@ -43,5 +43,18 @@ namespace Doppler.AccountPlans.Controllers
 
             return new OkObjectResult(contactInformation);
         }
+
+        [HttpGet("/plans/{planId}")]
+        public async Task<IActionResult> GetPlanInformation([FromRoute] int planId)
+        {
+            var contactInformation = await _accountPlansRepository.GetPlanInformation(planId);
+
+            if (contactInformation == null)
+            {
+                return new NotFoundResult();
+            }
+
+            return new OkObjectResult(contactInformation);
+        }
     }
 }
