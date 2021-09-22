@@ -1,15 +1,13 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Doppler.AccountPlans.Factory;
 using Doppler.AccountPlans.Infrastructure;
+using Doppler.AccountPlans.RenewalHandlers;
+using Doppler.AccountPlans.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
 namespace Doppler.AccountPlans
@@ -33,6 +31,14 @@ namespace Doppler.AccountPlans
             services.AddCors();
             services.AddSingleton<Weather.WeatherForecastService>();
             services.AddSingleton<Weather.DataService>();
+
+            services.AddSingleton<IRenewalFactory, RenewalFactory>();
+            services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+            services.AddSingleton<MonthlyHandler>();
+            services.AddSingleton<QuarterlyHandler>();
+            services.AddSingleton<BiannualHandler>();
+            services.AddSingleton<AnnualHandler>();
+
             services.AddSwaggerGen(c =>
             {
                 c.AddSecurityDefinition("Bearer",
@@ -61,7 +67,7 @@ namespace Doppler.AccountPlans
                 if (!string.IsNullOrEmpty(baseUrl))
                 {
                     c.AddServer(new OpenApiServer() { Url = baseUrl });
-                };
+                }
             });
         }
 

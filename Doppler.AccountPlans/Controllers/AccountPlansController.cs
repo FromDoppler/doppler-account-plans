@@ -1,7 +1,5 @@
 using Doppler.AccountPlans.DopplerSecurity;
 using Doppler.AccountPlans.Infrastructure;
-using Doppler.AccountPlans.Model;
-using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -25,10 +23,19 @@ namespace Doppler.AccountPlans.Controllers
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
-        [HttpGet("/accounts/{accountName}/newplan/{planId}/calculate")]
-        public string GetCalculateUpgradeCost([FromRoute] string accountName, [FromRoute] int planId, [FromQuery] string promocode = null)
+        [HttpGet("/accounts/{accountName}/newplan/{newPlanId}/calculate")]
+        public async Task<IActionResult> GetCalculateUpgradeCost([FromRoute] string accountName, [FromRoute] int newPlanId, [FromQuery] int discountId, [FromQuery] string promocode = null)
         {
-            return $"Hello! \"you\" that have access to the account name: '{accountName}' planId: '{planId}' and promocode:'{promocode}'";
+            _logger.LogInformation("Calculating plan amount details.");
+
+            var planDetails = await _accountPlansRepository.GetPlanAmountDetails(newPlanId, accountName, discountId);
+
+            if (planDetails == null)
+            {
+                return new NotFoundResult();
+            }
+
+            return new OkObjectResult(planDetails);
         }
 
         [HttpGet("/plans/{planId}/{paymentMethod}/discounts")]

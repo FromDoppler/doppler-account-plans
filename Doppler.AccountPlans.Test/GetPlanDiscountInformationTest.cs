@@ -3,13 +3,12 @@ using Doppler.AccountPlans.Model;
 using Doppler.AccountPlans.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Moq.Dapper;
 using System.Data.Common;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Doppler.AccountPlans.Enums;
 using Xunit;
 
 namespace Doppler.AccountPlans
@@ -28,28 +27,28 @@ namespace Doppler.AccountPlans
         public async Task GET_PlanDiscountInformation_method_should_get_right_values_when_plan_and_paymentmethod_are_valid()
         {
             // Arrange
-            const string expectedContent = "[{\"idDiscountPlan\":\"1\",\"discountPlanFee\":\"0\",\"monthPlan\":\"1\"},{\"idDiscountPlan\":\"2\",\"discountPlanFee\":\"5\",\"monthPlan\":\"3\"},{\"idDiscountPlan\":\"3\",\"discountPlanFee\":\"15\",\"monthPlan\":\"6\"},{\"idDiscountPlan\":\"4\",\"discountPlanFee\":\"25\",\"monthPlan\":\"12\"}]";
+            const string expectedContent = "[{\"idDiscountPlan\":\"1\",\"discountPlanFee\":0,\"monthPlan\":1},{\"idDiscountPlan\":\"2\",\"discountPlanFee\":5,\"monthPlan\":3},{\"idDiscountPlan\":\"3\",\"discountPlanFee\":15,\"monthPlan\":6},{\"idDiscountPlan\":\"4\",\"discountPlanFee\":25,\"monthPlan\":12}]";
 
             var planRenewalInformation = new[] { new PlanDiscountInformation
             {
                 IdDiscountPlan = "1",
-                DiscountPlanFee = "0",
-                MonthPlan = "1"
+                DiscountPlanFee = 0,
+                MonthPlan = (int)RenewalPeriodEnum.Monthly
             }, new PlanDiscountInformation
             {
                 IdDiscountPlan = "2",
-                DiscountPlanFee = "5",
-                MonthPlan = "3"
+                DiscountPlanFee = 5,
+                MonthPlan = (int)RenewalPeriodEnum.Quarterly
             }, new PlanDiscountInformation
             {
                 IdDiscountPlan = "3",
-                DiscountPlanFee = "15",
-                MonthPlan = "6"
+                DiscountPlanFee = 15,
+                MonthPlan = (int)RenewalPeriodEnum.Biannual
             }, new PlanDiscountInformation
             {
                 IdDiscountPlan = "4",
-                DiscountPlanFee = "25",
-                MonthPlan = "12"
+                DiscountPlanFee = 25,
+                MonthPlan = (int)RenewalPeriodEnum.Annual
             } };
 
             var mockConnection = new Mock<DbConnection>();

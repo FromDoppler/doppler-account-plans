@@ -3,11 +3,9 @@ using Doppler.AccountPlans.Model;
 using Doppler.AccountPlans.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Moq.Dapper;
 using System.Data.Common;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
@@ -28,7 +26,7 @@ namespace Doppler.AccountPlans
         public async Task GET_PlanInformation_method_should_get_right_values_when_plan_id_is_valid()
         {
             // Arrange
-            const string expectedContent = "{\"emailQty\":100000,\"fee\":180,\"subscribersQty\":0,\"type\":\"STANDARD\"}";
+            const string expectedContent = "{\"emailQty\":100000,\"fee\":180,\"subscribersQty\":0,\"type\":\"STANDARD\",\"currentMonthPlan\":0}";
 
             var planRenewalInformation = new PlanInformation
             {
