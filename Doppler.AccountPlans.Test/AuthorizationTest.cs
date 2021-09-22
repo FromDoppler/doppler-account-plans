@@ -1,17 +1,18 @@
-using System;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Doppler.AccountPlans;
+using Doppler.AccountPlans.Infrastructure;
+using Doppler.AccountPlans.Model;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Doppler.AccountPlans
 {
-    public class AuthorizationTest
-        : IClassFixture<WebApplicationFactory<Startup>>
+    public class AuthorizationTest : IClassFixture<WebApplicationFactory<Startup>>
     {
         const string TOKEN_EMPTY = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.e30.Nbd00AAiP2vJjxr78oPZoPRsDml5dx2bdD1Y6SXomfZN8pzJdKel2zrplvXCGBBYNBOo90rdYSlBCCo15rxsVydiFcAP84qZv-2mh4pFED9tVyDbxV5hvYDSg2bHPFyYFAi26fJusu_oYY3ne8OWxx-W1MEzNxh2hPfEKTkd0zVBm4dZv_irizRpa_qBwjn3hbCLUtOhBFbTTFItM9hESo6RwHvtQaB0667Sj8N97-bleCY5Ppf6bUUMz2A35PDb8-roF5Scf97lTZfug_DymgpPRSNK2VcRjfAynKfbBSih4QqVeaxR5AhYtXVFbQgByrynYNLok1SFD-M48WpzSA";
         const string TOKEN_BROKEN = "eyJhbGciOiJSzI1NiIsInR5cCI6IkpXVCJ9.e0.Nbd00AAiP2vJjxr8oPZoPRsDml5dx2bdD1Y6SXomfZN8pzJdKel2zrplvXCGBBYNBOo90rdYSlBCCo15rxsVydiFcAP84qZv-2mh4pFED9tVyDbxV5hvYDSg2bHPFyYFAi26fJusu_oYY3ne8OWxx-W1MEzNxh2hPfEKTkd0zVBm4dZv_irizRpa_qBwjn3hbCLUtOhBFbTTFItM9hESo6RwHvtQaB0667Sj8N97-bleCY5Ppf6bUUMz2A35PDb8-roF5Scf97lTZfug_DymgpPRSNK2VcRjfAynKfbBSih4QqVeaxR5AhYtXVbQgByrynYNLok1SFD-M48WpzSA";
@@ -34,7 +35,6 @@ namespace Doppler.AccountPlans
             _factory = factory;
             _output = output;
         }
-
 
         [Theory]
         [InlineData("/accounts/123/newplan/1234/calculate?promocode=PROMO-123", HttpStatusCode.Unauthorized)]
@@ -123,7 +123,17 @@ namespace Doppler.AccountPlans
         public async Task GET_account_endpoint_should_accept_valid_token_with_isSU_flag_or_a_token_for_the_right_account(string url, string token, HttpStatusCode expectedStatusCode)
         {
             // Arrange
-            var client = _factory.CreateClient(new WebApplicationFactoryClientOptions());
+            var accountPlanRepositoryMock = new Mock<IAccountPlansRepository>();
+            accountPlanRepositoryMock.Setup(x => x.GetPlanAmountDetails(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>()))
+                .ReturnsAsync(new PlanAmountDetails());
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(accountPlanRepositoryMock.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
 
             var request = new HttpRequestMessage(HttpMethod.Get, url)
             {
