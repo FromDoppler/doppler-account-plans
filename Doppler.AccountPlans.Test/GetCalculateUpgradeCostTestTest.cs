@@ -27,40 +27,6 @@ namespace Doppler.AccountPlans
         }
 
         [Fact]
-        public async Task GET_calculateUpgradeCost_method_should_return_not_found_when_renewal_handle_is_not_exist()
-        {
-            // Arrange
-            var mockConnection = new Mock<DbConnection>();
-            mockConnection.SetupDapperAsync(c =>
-                    c.QueryFirstOrDefaultAsync<PlanDiscountInformation>(null, null, null, null, null))
-                .ReturnsAsync(new PlanDiscountInformation());
-
-            var client = _factory.WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureTestServices(services =>
-                {
-                    services.SetupConnectionFactory(mockConnection.Object);
-                });
-            }).CreateClient(new WebApplicationFactoryClientOptions());
-
-            var request = new HttpRequestMessage(HttpMethod.Get, "/accounts/1/newplan/1/calculate")
-            {
-                Headers =
-                {
-                    {
-                        "Authorization", $"Bearer {TokenAccount123Test1AtTestDotComExpire20330518}"
-                    }
-                }
-            };
-
-            // Act
-            var response = await client.SendAsync(request);
-
-            // Assert
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        }
-
-        [Fact]
         public async Task GET_calculateUpgradeCost_method_should_get_right_values_when_plan_and_are_valid()
         {
             var mockConnection = new Mock<DbConnection>();

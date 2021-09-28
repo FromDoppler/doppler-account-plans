@@ -8,7 +8,6 @@ using Moq.Dapper;
 using System.Data.Common;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Doppler.AccountPlans.Enums;
 using Xunit;
 
 namespace Doppler.AccountPlans
@@ -33,22 +32,22 @@ namespace Doppler.AccountPlans
             {
                 IdDiscountPlan = "1",
                 DiscountPlanFee = 0,
-                MonthPlan = (int)RenewalPeriodEnum.Monthly
+                MonthPlan = 1
             }, new PlanDiscountInformation
             {
                 IdDiscountPlan = "2",
                 DiscountPlanFee = 5,
-                MonthPlan = (int)RenewalPeriodEnum.Quarterly
+                MonthPlan = 3
             }, new PlanDiscountInformation
             {
                 IdDiscountPlan = "3",
                 DiscountPlanFee = 15,
-                MonthPlan = (int)RenewalPeriodEnum.Biannual
+                MonthPlan = 6
             }, new PlanDiscountInformation
             {
                 IdDiscountPlan = "4",
                 DiscountPlanFee = 25,
-                MonthPlan = (int)RenewalPeriodEnum.Annual
+                MonthPlan = 12
             } };
 
             var mockConnection = new Mock<DbConnection>();
