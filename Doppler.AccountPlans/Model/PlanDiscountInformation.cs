@@ -1,4 +1,3 @@
-using Doppler.AccountPlans.Enums;
 
 namespace Doppler.AccountPlans.Model
 {

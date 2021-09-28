@@ -1,7 +1,5 @@
 using System;
-using Doppler.AccountPlans.Factory;
 using Doppler.AccountPlans.Infrastructure;
-using Doppler.AccountPlans.RenewalHandlers;
 using Doppler.AccountPlans.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,13 +29,7 @@ namespace Doppler.AccountPlans
             services.AddCors();
             services.AddSingleton<Weather.WeatherForecastService>();
             services.AddSingleton<Weather.DataService>();
-
-            services.AddSingleton<IRenewalFactory, RenewalFactory>();
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
-            services.AddSingleton<MonthlyHandler>();
-            services.AddSingleton<QuarterlyHandler>();
-            services.AddSingleton<BiannualHandler>();
-            services.AddSingleton<AnnualHandler>();
 
             services.AddSwaggerGen(c =>
             {

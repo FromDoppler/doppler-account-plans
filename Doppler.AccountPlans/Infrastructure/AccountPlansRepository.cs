@@ -3,19 +3,19 @@ using Doppler.AccountPlans.Model;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Doppler.AccountPlans.Factory;
+using Doppler.AccountPlans.Utils;
 
 namespace Doppler.AccountPlans.Infrastructure
 {
     public class AccountPlansRepository : IAccountPlansRepository
     {
         private readonly IDatabaseConnectionFactory _connectionFactory;
-        private readonly IRenewalFactory _renewalFactory;
+        private readonly IDateTimeProvider _dateTimeProvider;
 
-        public AccountPlansRepository(IDatabaseConnectionFactory connectionFactory, IRenewalFactory renewalFactory)
+        public AccountPlansRepository(IDatabaseConnectionFactory connectionFactory, IDateTimeProvider dateTimeProvider)
         {
             _connectionFactory = connectionFactory;
-            _renewalFactory = renewalFactory;
+            _dateTimeProvider = dateTimeProvider;
         }
 
         public async Task<IEnumerable<PlanDiscountInformation>> GetPlanDiscountInformation(int planId, string paymentMethod)
@@ -71,11 +71,6 @@ WHERE
                     discountId
                 });
 
-            var renewalHandler = _renewalFactory.CreateHandler(currentDiscountPlan.MonthPlan);
-
-            if (renewalHandler == null)
-                return null;
-
             var newPlan = await GetPlanInformation(newPlanId);
 
             var currentPlan = await connection.QueryFirstOrDefaultAsync<PlanInformation>(@"
@@ -91,7 +86,7 @@ WHERE
                     @email = accountName
                 });
 
-            return renewalHandler.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan);
+            return CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, _dateTimeProvider.Now);
         }
     }
 }
