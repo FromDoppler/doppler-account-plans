@@ -7,19 +7,44 @@ namespace Doppler.AccountPlans.Utils
     {
         public static PlanAmountDetails CalculatePlanAmountDetails(PlanInformation newPlan, PlanDiscountInformation newDiscount, PlanInformation currentPlan, DateTime now)
         {
-            var currentBaseMonth = now.Day >= 21 ? currentPlan.CurrentMonthPlan : currentPlan.CurrentMonthPlan - 1;
-            var totalPlan = newDiscount.MonthPlan != currentBaseMonth ? (newPlan.Fee - currentPlan.Fee) * (1 - (newDiscount.DiscountPlanFee / 100)) : newPlan.Fee * (1 - (newDiscount.DiscountPlanFee / 100));
-
-            return new PlanAmountDetails
+            if (currentPlan == null) //update from free
             {
-                Total = Math.Round((newDiscount.MonthPlan != currentBaseMonth ? totalPlan * (newDiscount.MonthPlan - currentBaseMonth) : totalPlan * newDiscount.MonthPlan), MidpointRounding.AwayFromZero),
-                DiscountPaymentAlreadyPaid = Math.Round((currentPlan.Fee * (newDiscount.MonthPlan - currentBaseMonth)), MidpointRounding.AwayFromZero),
+                currentPlan = new PlanInformation
+                {
+                    Fee = 0,
+                    CurrentMonthPlan = 0
+                };
+            }
+
+            var isMonthPlan = currentPlan.CurrentMonthPlan == 0;
+
+            var currentMonthPlan = !isMonthPlan ?
+                currentPlan.CurrentMonthPlan :
+                1;
+
+            var currentBaseMonth = now.Day < 21 ?
+                currentMonthPlan - 1 :
+                currentMonthPlan;
+
+            var differenceBetweenMonthPlans = newDiscount.MonthPlan - currentBaseMonth;
+
+            var numberOfMonthsToDiscount = (!isMonthPlan || differenceBetweenMonthPlans == 0) ?
+                differenceBetweenMonthPlans :
+                1;
+
+            var result = new PlanAmountDetails
+            {
+                DiscountPaymentAlreadyPaid = Math.Round(currentPlan.Fee * numberOfMonthsToDiscount, MidpointRounding.AwayFromZero),
                 DiscountPrepayment = new DiscountPrepayment
                 {
-                    Amount = Math.Round(((newPlan.Fee * newDiscount.DiscountPlanFee) / 100), MidpointRounding.AwayFromZero),
+                    Amount = Math.Round((newPlan.Fee * newDiscount.MonthPlan * newDiscount.DiscountPlanFee) / 100, MidpointRounding.AwayFromZero),
                     DiscountPercentage = newDiscount.DiscountPlanFee
                 }
             };
+
+            result.Total = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPaymentAlreadyPaid - result.DiscountPrepayment.Amount;
+
+            return result;
         }
     }
 }
