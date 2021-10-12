@@ -1,7 +1,9 @@
+using Doppler.AccountPlans.Infrastructure;
 using Doppler.AccountPlans.Model;
 using Doppler.AccountPlans.Utils;
 using Moq;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace Doppler.AccountPlans
@@ -29,7 +31,9 @@ namespace Doppler.AccountPlans
 
             PlanInformation currentPlan = null;
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(5, result.Total);
@@ -56,7 +60,9 @@ namespace Doppler.AccountPlans
 
             PlanInformation currentPlan = null;
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(14, result.Total);
@@ -83,7 +89,9 @@ namespace Doppler.AccountPlans
 
             PlanInformation currentPlan = null;
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(25, result.Total);
@@ -110,7 +118,9 @@ namespace Doppler.AccountPlans
 
             PlanInformation currentPlan = null;
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(45, result.Total);
@@ -141,7 +151,9 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 0
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(3, result.Total);
@@ -172,7 +184,9 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 0
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(5, result.Total);
@@ -203,7 +217,9 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 0
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(5, result.Total);
@@ -234,7 +250,9 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 0
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(12, result.Total);
@@ -265,7 +283,9 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 0
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(23, result.Total);
@@ -296,7 +316,9 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 0
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(43, result.Total);
@@ -327,7 +349,9 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 1
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(8, result.Total);
@@ -358,7 +382,9 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 1
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(10, result.Total);
@@ -389,7 +415,9 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 2
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
             // Assert
             Assert.Equal(15, result.Total);
             Assert.Equal(10, result.DiscountPaymentAlreadyPaid);
@@ -419,7 +447,9 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 2
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(17, result.Total);
@@ -450,7 +480,9 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 4
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(27, result.Total);
@@ -481,11 +513,76 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 4
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
+            var taxesSettings = new List<TaxSettings>();
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(29, result.Total);
             Assert.Equal(16, result.DiscountPaymentAlreadyPaid);
+        }
+
+        [Fact]
+        public void CalculateUpgradeCostHelper_with_percentage_in_tax_should_return_correct_amount_for_the_taxes()
+        {
+            var dateTimeProviderMock = new Mock<IDateTimeProvider>();
+            dateTimeProviderMock.Setup(x => x.Now)
+                .Returns(new DateTime(2021, 9, 22));
+
+            var currentDiscountPlan = new PlanDiscountInformation
+            {
+                DiscountPlanFee = 25,
+                MonthPlan = 12
+            };
+
+            var newPlan = new PlanInformation
+            {
+                Fee = 5,
+            };
+
+            var currentPlan = new PlanInformation
+            {
+                Fee = 2,
+                CurrentMonthPlan = 4
+            };
+
+            var taxesSettings = new List<TaxSettings> { new TaxSettings { Percentage = 21 } };
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxesSettings, dateTimeProviderMock.Object.Now);
+
+            // Assert
+            Assert.Equal(1, result.Taxes.Count);
+            Assert.Equal(6.09m, result.Taxes[0].Amount);
+        }
+
+        [Fact]
+        public void CalculateUpgradeCostHelper_without_taxes_setting_should_return_empty_list_for_the_taxes()
+        {
+            var dateTimeProviderMock = new Mock<IDateTimeProvider>();
+            dateTimeProviderMock.Setup(x => x.Now)
+                .Returns(new DateTime(2021, 9, 22));
+
+            var currentDiscountPlan = new PlanDiscountInformation
+            {
+                DiscountPlanFee = 25,
+                MonthPlan = 12
+            };
+
+            var newPlan = new PlanInformation
+            {
+                Fee = 5,
+            };
+
+            var currentPlan = new PlanInformation
+            {
+                Fee = 2,
+                CurrentMonthPlan = 4
+            };
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, null, dateTimeProviderMock.Object.Now);
+
+            // Assert
+            Assert.Equal(0, result.Taxes.Count);
         }
     }
 }

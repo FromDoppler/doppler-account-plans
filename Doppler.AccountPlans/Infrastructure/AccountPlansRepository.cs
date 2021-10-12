@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Doppler.AccountPlans.Utils;
+using Microsoft.Extensions.Options;
 
 namespace Doppler.AccountPlans.Infrastructure
 {
@@ -11,11 +12,13 @@ namespace Doppler.AccountPlans.Infrastructure
     {
         private readonly IDatabaseConnectionFactory _connectionFactory;
         private readonly IDateTimeProvider _dateTimeProvider;
+        private readonly TaxesSettings _taxesSettings;
 
-        public AccountPlansRepository(IDatabaseConnectionFactory connectionFactory, IDateTimeProvider dateTimeProvider)
+        public AccountPlansRepository(IDatabaseConnectionFactory connectionFactory, IDateTimeProvider dateTimeProvider, IOptions<TaxesSettings> taxesSettings)
         {
             _connectionFactory = connectionFactory;
             _dateTimeProvider = dateTimeProvider;
+            _taxesSettings = taxesSettings.Value;
         }
 
         public async Task<IEnumerable<PlanDiscountInformation>> GetPlanDiscountInformation(int planId, string paymentMethod)
@@ -54,7 +57,7 @@ WHERE
             return result.FirstOrDefault();
         }
 
-        public async Task<PlanAmountDetails> GetPlanAmountDetails(int newPlanId, string accountName, int discountId)
+        public async Task<PlanAmountDetails> GetPlanAmountDetails(int newPlanId, string accountName, int discountId, string paymentMethod, string country)
         {
             using var connection = await _connectionFactory.GetConnection();
 
@@ -86,7 +89,14 @@ WHERE
                     @email = accountName
                 });
 
-            return CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, _dateTimeProvider.Now);
+            _taxesSettings.Taxes.TryGetValue(country, out var taxes);
+
+            if (taxes != null)
+            {
+                taxes = taxes.Where(t => t.PaymentMethod == paymentMethod).ToList();
+            }
+            
+            return CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, taxes, _dateTimeProvider.Now);
         }
     }
 }

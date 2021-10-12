@@ -1,11 +1,14 @@
+using Doppler.AccountPlans.Infrastructure;
 using Doppler.AccountPlans.Model;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Doppler.AccountPlans.Utils
 {
     public static class CalculateUpgradeCostHelper
     {
-        public static PlanAmountDetails CalculatePlanAmountDetails(PlanInformation newPlan, PlanDiscountInformation newDiscount, PlanInformation currentPlan, DateTime now)
+        public static PlanAmountDetails CalculatePlanAmountDetails(PlanInformation newPlan, PlanDiscountInformation newDiscount, PlanInformation currentPlan, IList<TaxSettings> taxesSettings, DateTime now)
         {
             if (currentPlan == null) //update from free
             {
@@ -42,7 +45,9 @@ namespace Doppler.AccountPlans.Utils
                 }
             };
 
-            result.Total = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPaymentAlreadyPaid - result.DiscountPrepayment.Amount;
+            var total = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPaymentAlreadyPaid - result.DiscountPrepayment.Amount;
+            result.Taxes = taxesSettings != null ? taxesSettings.Select(t => new Tax { Percentage = t.Percentage, Amount = (total * t.Percentage) / 100 }).ToList() : new List<Tax>();
+            result.Total = total + result.Taxes.Sum(t => t.Amount);
 
             return result;
         }

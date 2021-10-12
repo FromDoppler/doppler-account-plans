@@ -23,12 +23,12 @@ namespace Doppler.AccountPlans.Controllers
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
-        [HttpGet("/accounts/{accountName}/newplan/{newPlanId}/calculate")]
-        public async Task<IActionResult> GetCalculateUpgradeCost([FromRoute] string accountName, [FromRoute] int newPlanId, [FromQuery] int discountId, [FromQuery] string promocode = null)
+        [HttpGet("/accounts/{accountName}/newplan/{newPlanId}/calculate/{paymentMethod?}/{country?}")]
+        public async Task<IActionResult> GetCalculateUpgradeCost([FromRoute] string accountName, [FromRoute] int newPlanId, [FromQuery] int discountId, [FromQuery] string promocode = null, [FromRoute] string paymentMethod = "", [FromRoute] string country = "")
         {
             _logger.LogInformation("Calculating plan amount details.");
 
-            var planDetails = await _accountPlansRepository.GetPlanAmountDetails(newPlanId, accountName, discountId);
+            var planDetails = await _accountPlansRepository.GetPlanAmountDetails(newPlanId, accountName, discountId, paymentMethod, country);
 
             if (planDetails == null)
             {

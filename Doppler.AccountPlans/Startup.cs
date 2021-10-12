@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using Doppler.AccountPlans.Infrastructure;
+using Doppler.AccountPlans.Model;
 using Doppler.AccountPlans.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -22,6 +24,7 @@ namespace Doppler.AccountPlans
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<TaxesSettings>(Configuration.GetSection(nameof(TaxesSettings)));
             services.Configure<DopplerDatabaseSettings>(Configuration.GetSection(nameof(DopplerDatabaseSettings)));
             services.AddDopplerSecurity();
             services.AddRepositories();
