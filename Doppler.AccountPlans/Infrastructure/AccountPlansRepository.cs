@@ -29,7 +29,7 @@ SELECT
 FROM
     [DiscountXPlan] DP INNER JOIN [PaymentMethods] PM ON DP.IdPaymentMethod = PM.IdPaymentMethod
 WHERE
-    DP.[IdUserTypePlan] = @planId AND PM.PaymentMethodName = @paymentMethod",
+    DP.[IdUserTypePlan] = @planId AND PM.PaymentMethodName = @paymentMethod AND DP.Active = 1",
     new { planId, paymentMethod });
 
             return result;
