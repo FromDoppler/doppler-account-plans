@@ -330,8 +330,8 @@ namespace Doppler.AccountPlans
             var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
 
             // Assert
-            Assert.Equal(8, result.Total);
-            Assert.Equal(6, result.DiscountPaymentAlreadyPaid);
+            Assert.Equal(12, result.Total);
+            Assert.Equal(2, result.DiscountPaymentAlreadyPaid);
         }
 
         [Fact]
@@ -361,8 +361,8 @@ namespace Doppler.AccountPlans
             var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now);
 
             // Assert
-            Assert.Equal(10, result.Total);
-            Assert.Equal(4, result.DiscountPaymentAlreadyPaid);
+            Assert.Equal(12, result.Total);
+            Assert.Equal(2, result.DiscountPaymentAlreadyPaid);
         }
 
         [Fact]

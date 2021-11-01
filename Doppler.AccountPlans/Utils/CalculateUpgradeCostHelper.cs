@@ -25,7 +25,7 @@ namespace Doppler.AccountPlans.Utils
                 };
             }
 
-            var isMonthPlan = currentPlan.CurrentMonthPlan == 0;
+            var isMonthPlan = currentPlan.CurrentMonthPlan <= 1;
 
             var currentMonthPlan = !isMonthPlan ?
                 currentPlan.CurrentMonthPlan :
