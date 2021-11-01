@@ -16,6 +16,15 @@ namespace Doppler.AccountPlans.Utils
                 };
             }
 
+            if (newDiscount == null)
+            {
+                newDiscount = new PlanDiscountInformation
+                {
+                    MonthPlan = 1,
+                    DiscountPlanFee = 0
+                };
+            }
+
             var isMonthPlan = currentPlan.CurrentMonthPlan == 0;
 
             var currentMonthPlan = !isMonthPlan ?
