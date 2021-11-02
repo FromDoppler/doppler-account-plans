@@ -43,10 +43,10 @@ namespace Doppler.AccountPlans.Utils
 
             var result = new PlanAmountDetails
             {
-                DiscountPaymentAlreadyPaid = Math.Round(currentPlan.Fee * numberOfMonthsToDiscount, MidpointRounding.AwayFromZero),
+                DiscountPaymentAlreadyPaid = Math.Round(currentPlan.Fee * numberOfMonthsToDiscount, 2),
                 DiscountPrepayment = new DiscountPrepayment
                 {
-                    Amount = Math.Round((newPlan.Fee * newDiscount.MonthPlan * newDiscount.DiscountPlanFee) / 100, MidpointRounding.AwayFromZero),
+                    Amount = Math.Round((newPlan.Fee * newDiscount.MonthPlan * newDiscount.DiscountPlanFee) / 100, 2),
                     DiscountPercentage = newDiscount.DiscountPlanFee
                 }
             };
