@@ -1,3 +1,5 @@
+using Doppler.AccountPlans.Enums;
+
 namespace Doppler.AccountPlans.Model
 {
     public class PlanInformation
@@ -7,5 +9,6 @@ namespace Doppler.AccountPlans.Model
         public int SubscribersQty { get; set; }
         public string Type { get; set; }
         public int CurrentMonthPlan { get; set; }
+        public UserTypesEnum IdUserType { get; set; }
     }
 }

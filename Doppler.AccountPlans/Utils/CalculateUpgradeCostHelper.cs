@@ -1,5 +1,6 @@
 using Doppler.AccountPlans.Model;
 using System;
+using Doppler.AccountPlans.Enums;
 
 namespace Doppler.AccountPlans.Utils
 {
@@ -7,23 +8,17 @@ namespace Doppler.AccountPlans.Utils
     {
         public static PlanAmountDetails CalculatePlanAmountDetails(PlanInformation newPlan, PlanDiscountInformation newDiscount, PlanInformation currentPlan, DateTime now)
         {
-            if (currentPlan == null) //update from free
+            currentPlan ??= new PlanInformation
             {
-                currentPlan = new PlanInformation
-                {
-                    Fee = 0,
-                    CurrentMonthPlan = 0
-                };
-            }
+                Fee = 0,
+                CurrentMonthPlan = 0
+            };
 
-            if (newDiscount == null)
+            newDiscount ??= new PlanDiscountInformation
             {
-                newDiscount = new PlanDiscountInformation
-                {
-                    MonthPlan = 1,
-                    DiscountPlanFee = 0
-                };
-            }
+                MonthPlan = 1,
+                DiscountPlanFee = 0
+            };
 
             var isMonthPlan = currentPlan.CurrentMonthPlan <= 1;
 
@@ -37,9 +32,7 @@ namespace Doppler.AccountPlans.Utils
 
             var differenceBetweenMonthPlans = newDiscount.MonthPlan - currentBaseMonth;
 
-            var numberOfMonthsToDiscount = (!isMonthPlan || differenceBetweenMonthPlans == 0) ?
-                differenceBetweenMonthPlans :
-                1;
+            var numberOfMonthsToDiscount = GetMonthsToDiscount(isMonthPlan, differenceBetweenMonthPlans, newPlan.IdUserType);
 
             var result = new PlanAmountDetails
             {
@@ -54,6 +47,14 @@ namespace Doppler.AccountPlans.Utils
             result.Total = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPaymentAlreadyPaid - result.DiscountPrepayment.Amount;
 
             return result;
+        }
+
+        private static int GetMonthsToDiscount(bool isMonthPlan, int differenceBetweenMonthPlans, UserTypesEnum idUserType)
+        {
+            if (idUserType == UserTypesEnum.Individual)
+                return 0;
+
+            return (!isMonthPlan || differenceBetweenMonthPlans == 0) ? differenceBetweenMonthPlans : 1;
         }
     }
 }

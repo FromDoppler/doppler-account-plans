@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Dapper;
+using Doppler.AccountPlans.Enums;
 using Doppler.AccountPlans.Model;
 using Doppler.AccountPlans.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -38,6 +39,54 @@ namespace Doppler.AccountPlans
                     {
                         Fee = 8,
                         EmailQty = 1003
+                    }
+
+                });
+
+            mockConnection.SetupDapperAsync(c => c.QueryFirstOrDefaultAsync<PlanDiscountInformation>(null, null, null, null, null))
+                .ReturnsAsync(new PlanDiscountInformation
+                {
+                    MonthPlan = 1
+                });
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.SetupConnectionFactory(mockConnection.Object);
+                });
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "/accounts/1/newplan/1/calculate")
+            {
+                Headers =
+                {
+                    {
+                        "Authorization", $"Bearer {TokenAccount123Test1AtTestDotComExpire20330518}"
+                    }
+                }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task GET_calculateUpgradeCost_method_should_get_right_values_when_new_plan_isPrepaid()
+        {
+            var mockConnection = new Mock<DbConnection>();
+
+            mockConnection.SetupDapperAsync(x => x.QueryAsync<PlanInformation>(null, null, null, null, null))
+                .ReturnsAsync(new List<PlanInformation>
+                {
+                    new PlanInformation
+                    {
+                        Fee = 8,
+                        EmailQty = 1003,
+                        IdUserType = UserTypesEnum.Individual
                     }
 
                 });
