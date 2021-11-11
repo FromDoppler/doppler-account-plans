@@ -11,7 +11,8 @@ namespace Doppler.AccountPlans.Utils
             currentPlan ??= new PlanInformation
             {
                 Fee = 0,
-                CurrentMonthPlan = 0
+                CurrentMonthPlan = 0,
+                IdUserType = UserTypesEnum.Free
             };
 
             newDiscount ??= new PlanDiscountInformation
@@ -32,7 +33,7 @@ namespace Doppler.AccountPlans.Utils
 
             var differenceBetweenMonthPlans = newDiscount.MonthPlan - currentBaseMonth;
 
-            var numberOfMonthsToDiscount = GetMonthsToDiscount(isMonthPlan, differenceBetweenMonthPlans, newPlan.IdUserType);
+            var numberOfMonthsToDiscount = GetMonthsToDiscount(isMonthPlan, differenceBetweenMonthPlans, currentPlan.IdUserType);
 
             var result = new PlanAmountDetails
             {
@@ -51,7 +52,7 @@ namespace Doppler.AccountPlans.Utils
 
         private static int GetMonthsToDiscount(bool isMonthPlan, int differenceBetweenMonthPlans, UserTypesEnum idUserType)
         {
-            if (idUserType == UserTypesEnum.Individual)
+            if (idUserType == UserTypesEnum.Individual || idUserType == UserTypesEnum.Free)
                 return 0;
 
             return (!isMonthPlan || differenceBetweenMonthPlans == 0) ? differenceBetweenMonthPlans : 1;
