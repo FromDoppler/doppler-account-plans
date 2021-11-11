@@ -497,13 +497,40 @@ namespace Doppler.AccountPlans
             var currentPlan = new PlanInformation
             {
                 Fee = 2,
-                CurrentMonthPlan = 4
+                CurrentMonthPlan = 4,
+                IdUserType = UserTypesEnum.Individual
             };
 
             var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, null, currentPlan, dateTimeProviderMock.Object.Now);
 
             // Assert
             Assert.Equal(5, result.Total);
+            Assert.Equal(0, result.DiscountPaymentAlreadyPaid);
+        }
+
+        [Fact]
+        public void CalculateUpgradeCostHelper_Prepaid_method_should_return_correct_value_when_newPlan_is_montly()
+        {
+            var dateTimeProviderMock = new Mock<IDateTimeProvider>();
+            dateTimeProviderMock.Setup(x => x.Now)
+                .Returns(new DateTime(2021, 9, 22));
+
+            var newPlan = new PlanInformation
+            {
+                Fee = 15,
+                IdUserType = UserTypesEnum.Monthly
+            };
+
+            var currentPlan = new PlanInformation
+            {
+                Fee = 2,
+                IdUserType = UserTypesEnum.Individual
+            };
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, null, currentPlan, dateTimeProviderMock.Object.Now);
+
+            // Assert
+            Assert.Equal(15, result.Total);
             Assert.Equal(0, result.DiscountPaymentAlreadyPaid);
         }
     }

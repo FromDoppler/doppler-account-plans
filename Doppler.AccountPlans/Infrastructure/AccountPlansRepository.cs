@@ -77,10 +77,12 @@ WHERE
 
             var currentPlan = await connection.QueryFirstOrDefaultAsync<PlanInformation>(@"
 SELECT
-    b.[PlanFee] AS Fee,
-    b.[CurrentMonthPlan]
+    B.[PlanFee] AS Fee,
+    B.[CurrentMonthPlan],
+    UTP.[IdUserType]
 FROM
-    [BillingCredits] b
+    [BillingCredits] B
+INNER JOIN [UserTypesPlans] UTP ON UTP.IdUserTypePlan = B.IdUserTypePlan
 WHERE
     b.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email) ORDER BY b.[Date] DESC;",
                 new
