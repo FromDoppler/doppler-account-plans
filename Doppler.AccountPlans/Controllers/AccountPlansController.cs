@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using Doppler.AccountPlans.Utils;
 
 namespace Doppler.AccountPlans.Controllers
 {
@@ -13,13 +14,16 @@ namespace Doppler.AccountPlans.Controllers
     {
         private readonly ILogger _logger;
         private readonly IAccountPlansRepository _accountPlansRepository;
+        private readonly IDateTimeProvider _dateTimeProvider;
 
         public AccountPlansController(
             ILogger<AccountPlansController> logger,
-            IAccountPlansRepository accountPlansRepository)
+            IAccountPlansRepository accountPlansRepository,
+            IDateTimeProvider dateTimeProvider)
         {
             _logger = logger;
             _accountPlansRepository = accountPlansRepository;
+            _dateTimeProvider = dateTimeProvider;
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
@@ -28,14 +32,15 @@ namespace Doppler.AccountPlans.Controllers
         {
             _logger.LogInformation("Calculating plan amount details.");
 
-            var planDetails = await _accountPlansRepository.GetPlanAmountDetails(newPlanId, accountName, discountId);
+            var newPlan = await _accountPlansRepository.GetPlanInformation(newPlanId);
+            var currentPlan = await _accountPlansRepository.GetCurrentPlanInformation(accountName);
+            var discountPlan = await _accountPlansRepository.GetDiscountInformation(discountId);
 
-            if (planDetails == null)
-            {
+            if (newPlan == null)
                 return new NotFoundResult();
-            }
 
-            return new OkObjectResult(planDetails);
+            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now);
+            return new OkObjectResult(upgradeCost);
         }
 
         [HttpGet("/plans/{planId}/{paymentMethod}/discounts")]
