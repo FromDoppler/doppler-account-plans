@@ -124,8 +124,11 @@ namespace Doppler.AccountPlans
         {
             // Arrange
             var accountPlanRepositoryMock = new Mock<IAccountPlansRepository>();
-            accountPlanRepositoryMock.Setup(x => x.GetPlanAmountDetails(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<int>()))
-                .ReturnsAsync(new PlanAmountDetails());
+            accountPlanRepositoryMock.Setup(x => x.GetPlanInformation(It.IsAny<int>()))
+                .ReturnsAsync(new PlanInformation
+                {
+                    Fee = 1
+                });
 
             var client = _factory.WithWebHostBuilder(builder =>
             {

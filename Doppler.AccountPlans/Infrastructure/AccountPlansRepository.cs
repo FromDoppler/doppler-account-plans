@@ -3,19 +3,16 @@ using Doppler.AccountPlans.Model;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Doppler.AccountPlans.Utils;
 
 namespace Doppler.AccountPlans.Infrastructure
 {
     public class AccountPlansRepository : IAccountPlansRepository
     {
         private readonly IDatabaseConnectionFactory _connectionFactory;
-        private readonly IDateTimeProvider _dateTimeProvider;
 
-        public AccountPlansRepository(IDatabaseConnectionFactory connectionFactory, IDateTimeProvider dateTimeProvider)
+        public AccountPlansRepository(IDatabaseConnectionFactory connectionFactory)
         {
             _connectionFactory = connectionFactory;
-            _dateTimeProvider = dateTimeProvider;
         }
 
         public async Task<IEnumerable<PlanDiscountInformation>> GetPlanDiscountInformation(int planId, string paymentMethod)
@@ -56,24 +53,9 @@ WHERE
             return result.FirstOrDefault();
         }
 
-        public async Task<PlanAmountDetails> GetPlanAmountDetails(int newPlanId, string accountName, int discountId)
+        public async Task<PlanInformation> GetCurrentPlanInformation(string accountName)
         {
             using var connection = await _connectionFactory.GetConnection();
-
-            var currentDiscountPlan = await connection.QueryFirstOrDefaultAsync<PlanDiscountInformation>(@"
-SELECT
-    d.[MonthPlan],
-    d.[DiscountPlanFee]
-FROM
-    DiscountXPlan d
-WHERE
-    d.[IdDiscountPlan] = @discountId;",
-                new
-                {
-                    discountId
-                });
-
-            var newPlan = await GetPlanInformation(newPlanId);
 
             var currentPlan = await connection.QueryFirstOrDefaultAsync<PlanInformation>(@"
 SELECT
@@ -90,7 +72,27 @@ WHERE
                     @email = accountName
                 });
 
-            return CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, _dateTimeProvider.Now);
+            return currentPlan;
+        }
+
+        public async Task<PlanDiscountInformation> GetDiscountInformation(int discountId)
+        {
+            using var connection = await _connectionFactory.GetConnection();
+
+            var discountPlan = await connection.QueryFirstOrDefaultAsync<PlanDiscountInformation>(@"
+SELECT
+    d.[MonthPlan],
+    d.[DiscountPlanFee]
+FROM
+    DiscountXPlan d
+WHERE
+    d.[IdDiscountPlan] = @discountId;",
+                new
+                {
+                    discountId
+                });
+
+            return discountPlan;
         }
     }
 }
