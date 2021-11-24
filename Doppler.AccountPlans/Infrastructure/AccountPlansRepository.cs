@@ -22,7 +22,8 @@ namespace Doppler.AccountPlans.Infrastructure
 SELECT
     DP.[IdDiscountPlan],
     DP.[DiscountPlanFee],
-    DP.[MonthPlan]
+    DP.[MonthPlan],
+    DP.[ApplyPromo]
 FROM
     [DiscountXPlan] DP INNER JOIN [PaymentMethods] PM ON DP.IdPaymentMethod = PM.IdPaymentMethod
 WHERE
