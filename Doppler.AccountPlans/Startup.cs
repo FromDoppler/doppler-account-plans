@@ -1,4 +1,5 @@
 using System;
+using Doppler.AccountPlans.Encryption;
 using Doppler.AccountPlans.Infrastructure;
 using Doppler.AccountPlans.Utils;
 using Microsoft.AspNetCore.Builder;
@@ -30,6 +31,9 @@ namespace Doppler.AccountPlans
             services.AddSingleton<Weather.WeatherForecastService>();
             services.AddSingleton<Weather.DataService>();
             services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+            services.AddScoped<IEncryptionService, EncryptionService>();
+            services.Configure<EncryptionSettings>(Configuration.GetSection(nameof(EncryptionSettings)));
+            services.AddScoped<IPromotionRepository, PromotionRepository>();
 
             services.AddSwaggerGen(c =>
             {

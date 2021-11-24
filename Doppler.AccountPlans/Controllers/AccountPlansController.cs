@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using Doppler.AccountPlans.Encryption;
 using Doppler.AccountPlans.Utils;
 
 namespace Doppler.AccountPlans.Controllers
@@ -15,15 +16,21 @@ namespace Doppler.AccountPlans.Controllers
         private readonly ILogger _logger;
         private readonly IAccountPlansRepository _accountPlansRepository;
         private readonly IDateTimeProvider _dateTimeProvider;
+        private readonly IPromotionRepository _promotionRepository;
+        private readonly IEncryptionService _encryptionService;
 
         public AccountPlansController(
             ILogger<AccountPlansController> logger,
             IAccountPlansRepository accountPlansRepository,
-            IDateTimeProvider dateTimeProvider)
+            IDateTimeProvider dateTimeProvider,
+            IPromotionRepository promotionRepository,
+            IEncryptionService encryptionService)
         {
             _logger = logger;
             _accountPlansRepository = accountPlansRepository;
             _dateTimeProvider = dateTimeProvider;
+            _promotionRepository = promotionRepository;
+            _encryptionService = encryptionService;
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
@@ -41,6 +48,19 @@ namespace Doppler.AccountPlans.Controllers
 
             var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now);
             return new OkObjectResult(upgradeCost);
+        }
+
+        [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
+        [HttpGet("/plans/{planId}/validate/{promocode}")]
+        public async Task<IActionResult> GetPromocodeInformation([FromRoute] int planId, [FromRoute] string promocode)
+        {
+            var encryptedCode = _encryptionService.EncryptAES256(promocode);
+            var promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, planId);
+
+            if (promotion == null)
+                return new NotFoundResult();
+
+            return new OkObjectResult(promotion);
         }
 
         [HttpGet("/plans/{planId}/{paymentMethod}/discounts")]
