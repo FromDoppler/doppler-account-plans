@@ -63,7 +63,6 @@ namespace Doppler.AccountPlans.Controllers
             return new OkObjectResult(upgradeCost);
         }
 
-        [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpGet("/plans/{planId}/validate/{promocode}")]
         public async Task<IActionResult> GetPromocodeInformation([FromRoute] int planId, [FromRoute] string promocode)
         {
