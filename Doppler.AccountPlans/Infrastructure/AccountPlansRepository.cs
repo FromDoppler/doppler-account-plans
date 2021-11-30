@@ -83,7 +83,8 @@ WHERE
             var discountPlan = await connection.QueryFirstOrDefaultAsync<PlanDiscountInformation>(@"
 SELECT
     d.[MonthPlan],
-    d.[DiscountPlanFee]
+    d.[DiscountPlanFee],
+    d.[ApplyPromo]
 FROM
     DiscountXPlan d
 WHERE

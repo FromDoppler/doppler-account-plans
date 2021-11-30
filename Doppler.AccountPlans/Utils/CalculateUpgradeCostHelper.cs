@@ -6,7 +6,7 @@ namespace Doppler.AccountPlans.Utils
 {
     public static class CalculateUpgradeCostHelper
     {
-        public static PlanAmountDetails CalculatePlanAmountDetails(PlanInformation newPlan, PlanDiscountInformation newDiscount, PlanInformation currentPlan, DateTime now)
+        public static PlanAmountDetails CalculatePlanAmountDetails(PlanInformation newPlan, PlanDiscountInformation newDiscount, PlanInformation currentPlan, DateTime now, Promotion promotion)
         {
             currentPlan ??= new PlanInformation
             {
@@ -18,7 +18,8 @@ namespace Doppler.AccountPlans.Utils
             newDiscount ??= new PlanDiscountInformation
             {
                 MonthPlan = 1,
-                DiscountPlanFee = 0
+                DiscountPlanFee = 0,
+                ApplyPromo = true
             };
 
             var isMonthPlan = currentPlan.CurrentMonthPlan <= 1;
@@ -42,10 +43,30 @@ namespace Doppler.AccountPlans.Utils
                 {
                     Amount = Math.Round((newPlan.Fee * newDiscount.MonthPlan * newDiscount.DiscountPlanFee) / 100, 2),
                     DiscountPercentage = newDiscount.DiscountPlanFee
+                },
+                DiscountPromocode = new DiscountPromocode
+                {
+                    Amount = 0,
+                    DiscountPercentage = 0
                 }
             };
 
             result.Total = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPaymentAlreadyPaid - result.DiscountPrepayment.Amount;
+
+            if (promotion != null && newDiscount.ApplyPromo && promotion.DiscountPercentage > 0)
+            {
+                var discount = Math.Round(newPlan.Fee * promotion.DiscountPercentage.Value / 100, 2);
+
+                result.Total -= discount;
+                result.DiscountPromocode = new DiscountPromocode
+                {
+                    Amount = discount,
+                    DiscountPercentage = promotion.DiscountPercentage ?? 0
+                };
+
+                result.DiscountPrepayment.Amount = 0;
+                result.DiscountPrepayment.DiscountPercentage = 0;
+            }
 
             return result;
         }
