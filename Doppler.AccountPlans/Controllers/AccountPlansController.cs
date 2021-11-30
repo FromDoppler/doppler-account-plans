@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using Doppler.AccountPlans.Encryption;
+using Doppler.AccountPlans.Model;
 using Doppler.AccountPlans.Utils;
 
 namespace Doppler.AccountPlans.Controllers
@@ -35,7 +36,11 @@ namespace Doppler.AccountPlans.Controllers
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpGet("/accounts/{accountName}/newplan/{newPlanId}/calculate")]
-        public async Task<IActionResult> GetCalculateUpgradeCost([FromRoute] string accountName, [FromRoute] int newPlanId, [FromQuery] int discountId, [FromQuery] string promocode = null)
+        public async Task<IActionResult> GetCalculateUpgradeCost(
+            [FromRoute] string accountName,
+            [FromRoute] int newPlanId,
+            [FromQuery] int discountId,
+            [FromQuery] string promocode = null)
         {
             _logger.LogInformation("Calculating plan amount details.");
 
@@ -46,11 +51,18 @@ namespace Doppler.AccountPlans.Controllers
             if (newPlan == null)
                 return new NotFoundResult();
 
-            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now);
+            var promotion = new Promotion();
+            if (!string.IsNullOrEmpty(promocode))
+            {
+                var encryptedCode = _encryptionService.EncryptAES256(promocode);
+                promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, newPlanId);
+            }
+
+            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion);
+
             return new OkObjectResult(upgradeCost);
         }
 
-        [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpGet("/plans/{planId}/validate/{promocode}")]
         public async Task<IActionResult> GetPromocodeInformation([FromRoute] int planId, [FromRoute] string promocode)
         {

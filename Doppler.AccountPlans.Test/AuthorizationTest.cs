@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Doppler.AccountPlans.Encryption;
 using Doppler.AccountPlans.Infrastructure;
 using Doppler.AccountPlans.Model;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -129,12 +130,20 @@ namespace Doppler.AccountPlans
                 {
                     Fee = 1
                 });
+            var promotionRepositoryMock = new Mock<IPromotionRepository>();
+            promotionRepositoryMock.Setup(x => x.GetPromotionByCode(It.IsAny<string>(), It.IsAny<int>()))
+                .ReturnsAsync(new Promotion
+                {
+                    DiscountPercentage = 0
+                });
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureTestServices(services =>
                 {
                     services.AddSingleton(accountPlanRepositoryMock.Object);
+                    services.AddSingleton(promotionRepositoryMock.Object);
+                    services.AddSingleton(Mock.Of<IEncryptionService>());
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 

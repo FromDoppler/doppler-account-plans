@@ -4,11 +4,14 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Dapper;
+using Doppler.AccountPlans.Encryption;
 using Doppler.AccountPlans.Enums;
+using Doppler.AccountPlans.Infrastructure;
 using Doppler.AccountPlans.Model;
 using Doppler.AccountPlans.Test.Utils;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Moq.Dapper;
 using Xunit;
@@ -54,6 +57,8 @@ namespace Doppler.AccountPlans
                 builder.ConfigureTestServices(services =>
                 {
                     services.SetupConnectionFactory(mockConnection.Object);
+                    services.AddSingleton(Mock.Of<IEncryptionService>());
+                    services.AddSingleton(Mock.Of<IPromotionRepository>());
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
@@ -102,6 +107,8 @@ namespace Doppler.AccountPlans
                 builder.ConfigureTestServices(services =>
                 {
                     services.SetupConnectionFactory(mockConnection.Object);
+                    services.AddSingleton(Mock.Of<IEncryptionService>());
+                    services.AddSingleton(Mock.Of<IPromotionRepository>());
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
