@@ -26,13 +26,14 @@ namespace Doppler.AccountPlans
         public async Task GET_PromoCode_Information_should_get_right_values_when_promoCode_is_valid()
         {
             // Arrange
-            const string expectedContent = "{\"extraCredits\":1,\"discountPercentage\":2}";
+            const string expectedContent = "{\"idPromotion\":3,\"extraCredits\":1,\"discountPercentage\":2}";
             var promoCodeRepositoryMock = new Mock<IPromotionRepository>();
             promoCodeRepositoryMock.Setup(x => x.GetPromotionByCode(It.IsAny<string>(), It.IsAny<int>()))
                 .ReturnsAsync(new Promotion
                 {
                     ExtraCredits = 1,
-                    DiscountPercentage = 2
+                    DiscountPercentage = 2,
+                    IdPromotion = 3
                 });
 
             var client = _factory.WithWebHostBuilder(builder =>
