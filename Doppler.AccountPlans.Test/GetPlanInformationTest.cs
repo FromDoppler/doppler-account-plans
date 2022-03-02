@@ -14,7 +14,7 @@ namespace Doppler.AccountPlans
 {
     public class GetPlanInformationTest : IClassFixture<WebApplicationFactory<Startup>>
     {
-        private const string TokenAccount123Test1AtTestDotComExpire20330518 = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc1NVIjp0cnVlLCJpYXQiOjE1ODQ0NjM1MjksImV4cCI6MTY0NTU2NzUyOX0.eJZYYKZOw439rWO98urRkmR4H9UqhVoD870RECWtOQlsUEpTeNPFgQfz-bQHyYZ73lkNunvmW4s31wJB1BFrVr4JqklhvM0zEem70aGDrxa1WwNB268p-dzGZqG_RAU4k7oW1JwSvrg6DGVQTlP2DyeNvyO1qwpt8m0yS4z6x3jTzn4V-6iEOIBMp2DxwzMU6x03e_I4jZJRal2T9941BoM88c2S-IXWR_uS0AGbH1Yl7ZMUSx7wQEZi2o7UpOefR6TpKkOTj5iSeSMSVvpGvOjKP5Lk_Y7TSLpNEKTcMaahA1DK4R_EYAbtiIWIvSscEqxlWBzo7AB1MQdNbqrVlA";
+        private const string TokenExpire20330518 = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc1NVIjp0cnVlLCJleHAiOjIwMDAwMDAwMDB9.rUtvRqMxrnQzVHDuAjgWa2GJAJwZ-wpaxqdjwP7gmVa7XJ1pEmvdTMBdirKL5BJIE7j2_hsMvEOKUKVjWUY-IE0e0u7c82TH0l_4zsIztRyHMKtt9QE9rBRQnJf8dcT5PnLiWkV_qEkpiIKQ-wcMZ1m7vQJ0auEPZyyFBKmU2caxkZZOZ8Kw_1dx-7lGUdOsUYad-1Rt-iuETGAFijQrWggcm3kV_KmVe8utznshv2bAdLJWydbsAUEfNof0kZK5Wu9A80DJd3CRiNk8mWjQxF_qPOrGCANOIYofhB13yuYi48_8zVPYku-llDQjF77BmQIIIMrCXs8IMT3Lksdxuw";
         private readonly WebApplicationFactory<Startup> _factory;
 
         public GetPlanInformationTest(WebApplicationFactory<Startup> factory)
@@ -55,7 +55,7 @@ namespace Doppler.AccountPlans
                 Headers =
                 {
                     {
-                        "Authorization", $"Bearer {TokenAccount123Test1AtTestDotComExpire20330518}"
+                        "Authorization", $"Bearer {TokenExpire20330518}"
                     }
                 }
             };
