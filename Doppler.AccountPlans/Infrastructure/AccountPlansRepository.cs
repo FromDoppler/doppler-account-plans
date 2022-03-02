@@ -17,7 +17,7 @@ namespace Doppler.AccountPlans.Infrastructure
 
         public async Task<IEnumerable<PlanDiscountInformation>> GetPlanDiscountInformation(int planId, string paymentMethod)
         {
-            using var connection = await _connectionFactory.GetConnection();
+            using var connection = _connectionFactory.GetConnection();
             var result = await connection.QueryAsync<PlanDiscountInformation>(@"
 SELECT
     DP.[IdDiscountPlan],
@@ -37,7 +37,7 @@ ORDER BY
 
         public async Task<PlanInformation> GetPlanInformation(int planId)
         {
-            using var connection = await _connectionFactory.GetConnection();
+            using var connection = _connectionFactory.GetConnection();
             var result = await connection.QueryAsync<PlanInformation>(@"
 SELECT
     UTP.[IdUserType],
@@ -56,7 +56,7 @@ WHERE
 
         public async Task<PlanInformation> GetCurrentPlanInformation(string accountName)
         {
-            using var connection = await _connectionFactory.GetConnection();
+            using var connection = _connectionFactory.GetConnection();
 
             var currentPlan = await connection.QueryFirstOrDefaultAsync<PlanInformation>(@"
 SELECT
@@ -78,7 +78,7 @@ WHERE
 
         public async Task<PlanDiscountInformation> GetDiscountInformation(int discountId)
         {
-            using var connection = await _connectionFactory.GetConnection();
+            using var connection = _connectionFactory.GetConnection();
 
             var discountPlan = await connection.QueryFirstOrDefaultAsync<PlanDiscountInformation>(@"
 SELECT
