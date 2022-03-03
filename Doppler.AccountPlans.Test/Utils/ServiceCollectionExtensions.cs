@@ -10,7 +10,7 @@ namespace Doppler.AccountPlans.Test.Utils
         public static void SetupConnectionFactory(this IServiceCollection services, DbConnection dbConnection)
         {
             var mockDatabaseConnectionFactory = new Mock<IDatabaseConnectionFactory>();
-            mockDatabaseConnectionFactory.Setup(a => a.GetConnection()).ReturnsAsync(dbConnection);
+            mockDatabaseConnectionFactory.Setup(a => a.GetConnection()).Returns(dbConnection);
             services.AddSingleton(mockDatabaseConnectionFactory.Object);
         }
     }

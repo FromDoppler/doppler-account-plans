@@ -17,7 +17,7 @@ namespace Doppler.AccountPlans.Infrastructure
 
         public async Task<Promotion> GetPromotionByCode(string code, int planId)
         {
-            using var connection = await _connectionFactory.GetConnection();
+            using var connection = _connectionFactory.GetConnection();
 
             var userType = await GetUserTypeByPlan(planId);
 
@@ -66,7 +66,7 @@ WHERE
 
         private async Task<int> GetUserTypeByPlan(int planId)
         {
-            using var connection = await _connectionFactory.GetConnection();
+            using var connection = _connectionFactory.GetConnection();
 
             var userPlanTypeId = await connection.QueryFirstOrDefaultAsync<int>(@"
 SELECT
