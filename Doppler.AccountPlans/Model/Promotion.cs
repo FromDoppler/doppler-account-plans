@@ -5,5 +5,6 @@ namespace Doppler.AccountPlans.Model
         public int IdPromotion { get; set; }
         public int? ExtraCredits { get; set; }
         public int? DiscountPercentage { get; set; }
+        public int? Duration { get; set; }
     }
 }
