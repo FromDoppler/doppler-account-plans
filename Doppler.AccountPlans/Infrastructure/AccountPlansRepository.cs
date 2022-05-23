@@ -66,8 +66,10 @@ SELECT
 FROM
     [BillingCredits] B
 INNER JOIN [UserTypesPlans] UTP ON UTP.IdUserTypePlan = B.IdUserTypePlan
+INNER JOIN [User] U ON U.IdUser = B.IdUser
 WHERE
-    b.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email) ORDER BY b.[Date] DESC;",
+    b.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email) AND U.IdCurrentBillingCredit IS NOT NULL
+ORDER BY b.[Date] DESC;",
                 new
                 {
                     @email = accountName
