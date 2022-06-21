@@ -52,13 +52,22 @@ namespace Doppler.AccountPlans.Controllers
                 return new NotFoundResult();
 
             var promotion = new Promotion();
+            var timesAppliedPromocode = 0;
+            Promotion currentPromotion = null;
+
             if (!string.IsNullOrEmpty(promocode))
             {
                 var encryptedCode = _encryptionService.EncryptAES256(promocode);
                 promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, newPlanId);
             }
 
-            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion);
+            if (currentPlan != null)
+            {
+                currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan);
+                timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName);
+            }
+
+            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion);
 
             return new OkObjectResult(upgradeCost);
         }

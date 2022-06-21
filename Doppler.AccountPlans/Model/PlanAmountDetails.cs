@@ -5,6 +5,9 @@ namespace Doppler.AccountPlans.Model
         public decimal DiscountPaymentAlreadyPaid { get; set; }
         public DiscountPrepayment DiscountPrepayment { get; set; }
         public decimal Total { get; set; }
+        public decimal CurrentMonthTotal { get; set; }
         public DiscountPromocode DiscountPromocode { get; set; }
+        public DiscountPlanFeeAdmin DiscountPlanFeeAdmin { get; set; }
+        public decimal NextMonthTotal { get; set; }
     }
 }
