@@ -26,14 +26,15 @@ namespace Doppler.AccountPlans
         public async Task GET_PlanInformation_method_should_get_right_values_when_plan_id_is_valid()
         {
             // Arrange
-            const string expectedContent = "{\"emailQty\":100000,\"fee\":180,\"subscribersQty\":0,\"type\":\"STANDARD\",\"currentMonthPlan\":0,\"idUserType\":0}";
+            const string expectedContent = "{\"emailQty\":100000,\"fee\":180,\"subscribersQty\":0,\"type\":\"STANDARD\",\"currentMonthPlan\":0,\"idUserType\":0,\"discountPlanFeeAdmin\":0}";
 
             var planRenewalInformation = new PlanInformation
             {
                 EmailQty = 100000,
                 Fee = 180,
                 SubscribersQty = 0,
-                Type = "STANDARD"
+                Type = "STANDARD",
+                DiscountPlanFeeAdmin = 0
             };
 
             var mockConnection = new Mock<DbConnection>();

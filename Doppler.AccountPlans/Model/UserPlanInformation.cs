@@ -2,7 +2,7 @@ using Doppler.AccountPlans.Enums;
 
 namespace Doppler.AccountPlans.Model
 {
-    public class PlanInformation
+    public class UserPlanInformation
     {
         public int EmailQty { get; set; }
         public decimal Fee { get; set; }
@@ -11,5 +11,8 @@ namespace Doppler.AccountPlans.Model
         public int CurrentMonthPlan { get; set; }
         public UserTypesEnum IdUserType { get; set; }
         public int? DiscountPlanFeeAdmin { get; set; }
+        public int? DiscountPlanFeePromotion { get; set; }
+        public string PromotionCode { get; set; }
+        public int IdUserTypePlan { get; set; }
     }
 }
