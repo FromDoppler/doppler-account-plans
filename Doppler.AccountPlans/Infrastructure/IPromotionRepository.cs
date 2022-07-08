@@ -6,6 +6,6 @@ namespace Doppler.AccountPlans.Infrastructure
     public interface IPromotionRepository
     {
         Task<Promotion> GetPromotionByCode(string code, int planId);
-        Task<int> GetHowManyTimesApplyedPromocode(string code, string accountName);
+        Task<TimesApplyedPromocode> GetHowManyTimesApplyedPromocode(string code, string accountName);
     }
 }

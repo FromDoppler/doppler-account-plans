@@ -1,4 +1,5 @@
 using Doppler.AccountPlans.Enums;
+using System;
 
 namespace Doppler.AccountPlans.Model
 {
@@ -14,5 +15,6 @@ namespace Doppler.AccountPlans.Model
         public int? DiscountPlanFeePromotion { get; set; }
         public string PromotionCode { get; set; }
         public int IdUserTypePlan { get; set; }
+        public DateTime Date { get; set; }
     }
 }

@@ -83,12 +83,14 @@ WHERE
         }
 
 
-        public async Task<int> GetHowManyTimesApplyedPromocode(string code, string accountName)
+        public async Task<TimesApplyedPromocode> GetHowManyTimesApplyedPromocode(string code, string accountName)
         {
             using var connection = _connectionFactory.GetConnection();
-            var times = await connection.QueryFirstOrDefaultAsync<int>(@"
+            var times = await connection.QueryFirstOrDefaultAsync<TimesApplyedPromocode>(@"
 SELECT
-    COUNT(B.IdBillingCredit)
+    MAX(MONTH(B.Date)) AS LastMonthApplied,
+    MAX(YEAR(B.Date)) AS LastYearApplied,
+    COUNT(DISTINCT MONTH(B.Date)) AS CountApplied
 FROM
     [BillingCredits] B
 INNER JOIN [User] U ON U.IdUser = B.IdUser
