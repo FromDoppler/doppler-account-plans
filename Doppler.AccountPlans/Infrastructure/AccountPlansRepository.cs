@@ -83,6 +83,36 @@ ORDER BY b.[Date] DESC;",
             return currentPlan;
         }
 
+        public async Task<UserPlanInformation> GetFirstUpgrade(string accountName)
+        {
+            using var connection = _connectionFactory.GetConnection();
+
+            var currentPlan = await connection.QueryFirstOrDefaultAsync<UserPlanInformation>(@"
+SELECT
+    B.[PlanFee] AS Fee,
+    B.[CurrentMonthPlan],
+    UTP.[IdUserType],
+    B.[DiscountPlanFeeAdmin],
+    B.[DiscountPlanFeePromotion],
+    P.Code AS PromotionCode,
+    B.IdUserTypePlan,
+    B.Date
+FROM
+    [BillingCredits] B
+INNER JOIN [UserTypesPlans] UTP ON UTP.IdUserTypePlan = B.IdUserTypePlan
+INNER JOIN [User] U ON U.IdUser = B.IdUser
+LEFT JOIN [Promotions] P ON P.IdPromotion = B.IdPromotion
+WHERE
+    b.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email) AND IdBillingCreditType = 1
+ORDER BY b.[Date] DESC;",
+                new
+                {
+                    @email = accountName
+                });
+
+            return currentPlan;
+        }
+
         public async Task<PlanDiscountInformation> GetDiscountInformation(int discountId)
         {
             using var connection = _connectionFactory.GetConnection();

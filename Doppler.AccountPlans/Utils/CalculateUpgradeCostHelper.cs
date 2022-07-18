@@ -11,8 +11,9 @@ namespace Doppler.AccountPlans.Utils
             PlanDiscountInformation newDiscount,
             UserPlanInformation currentPlan,
             DateTime now, Promotion promotion,
-            int timesAppliedPromocode,
-            Promotion currentPromotion)
+            TimesApplyedPromocode timesAppliedPromocode,
+            Promotion currentPromotion,
+            UserPlanInformation firstUpgrade)
         {
             currentPlan ??= new UserPlanInformation
             {
@@ -36,7 +37,8 @@ namespace Doppler.AccountPlans.Utils
 
             var currentBaseMonth = now.Day < 21 ?
                 currentMonthPlan - 1 :
-                currentMonthPlan;
+                firstUpgrade != null && firstUpgrade.Date.Month == now.Month && firstUpgrade.Date.Year == now.Year && firstUpgrade.Date.Day >= 21 ?
+                currentMonthPlan - 1 : currentMonthPlan;
 
             var differenceBetweenMonthPlans = newDiscount.MonthPlan - currentBaseMonth;
 
@@ -87,7 +89,7 @@ namespace Doppler.AccountPlans.Utils
             }
             else
             {
-                if (currentPromotion != null && (!currentPromotion.Duration.HasValue || currentPromotion.Duration.Value > timesAppliedPromocode))
+                if (currentPromotion != null && (!currentPromotion.Duration.HasValue || currentPromotion.Duration.Value > timesAppliedPromocode.CountApplied))
                 {
                     var discount = Math.Round(newPlan.Fee * currentPromotion.DiscountPercentage.Value / 100, 2);
 
@@ -114,7 +116,9 @@ namespace Doppler.AccountPlans.Utils
                 };
             }
 
-            result.CurrentMonthTotal = now.Day >= 21 && currentPlan.IdUserType != UserTypesEnum.Free ? 0 : result.Total;
+            result.CurrentMonthTotal = now.Day >= 21 && currentPlan.IdUserType != UserTypesEnum.Free ?
+                firstUpgrade != null && firstUpgrade.Date.Month == now.Month && firstUpgrade.Date.Year == now.Year && firstUpgrade.Date.Day >= 21 ?
+                result.Total : 0 : result.Total;
 
             //Check if for the next month apply the current promocode
             decimal nextDiscountPromocodeAmmount = 0;
@@ -126,9 +130,13 @@ namespace Doppler.AccountPlans.Utils
             }
             else
             {
-                if (currentPromotion != null && (!currentPromotion.Duration.HasValue || currentPromotion.Duration.Value > timesAppliedPromocode + 1))
+                if (currentPromotion != null)
                 {
-                    nextDiscountPromocodeAmmount = Math.Round(newPlan.Fee * currentPromotion.DiscountPercentage.Value / 100, 2);
+                    var count = (now.Month == timesAppliedPromocode.LastMonthApplied && now.Year == timesAppliedPromocode.LastYearApplied) ? timesAppliedPromocode.CountApplied : timesAppliedPromocode.CountApplied + 1;
+                    if (!currentPromotion.Duration.HasValue || currentPromotion.Duration.Value > count)
+                    {
+                        nextDiscountPromocodeAmmount = Math.Round(newPlan.Fee * currentPromotion.DiscountPercentage.Value / 100, 2);
+                    }
                 }
             }
 

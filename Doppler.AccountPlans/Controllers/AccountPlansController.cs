@@ -52,8 +52,9 @@ namespace Doppler.AccountPlans.Controllers
                 return new NotFoundResult();
 
             var promotion = new Promotion();
-            var timesAppliedPromocode = 0;
+            TimesApplyedPromocode timesAppliedPromocode = null;
             Promotion currentPromotion = null;
+            UserPlanInformation firstUpgrade = null;
 
             if (!string.IsNullOrEmpty(promocode))
             {
@@ -65,9 +66,10 @@ namespace Doppler.AccountPlans.Controllers
             {
                 currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan);
                 timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName);
+                firstUpgrade = await _accountPlansRepository.GetFirstUpgrade(accountName);
             }
 
-            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion);
+            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgrade);
 
             return new OkObjectResult(upgradeCost);
         }

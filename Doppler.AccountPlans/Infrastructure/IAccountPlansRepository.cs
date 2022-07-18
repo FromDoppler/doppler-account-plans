@@ -10,5 +10,6 @@ namespace Doppler.AccountPlans.Infrastructure
         Task<PlanInformation> GetPlanInformation(int planId);
         Task<UserPlanInformation> GetCurrentPlanInformation(string accountName);
         Task<PlanDiscountInformation> GetDiscountInformation(int discountId);
+        Task<UserPlanInformation> GetFirstUpgrade(string accountName);
     }
 }
