@@ -140,7 +140,7 @@ namespace Doppler.AccountPlans.Utils
                 }
             }
 
-            result.NextMonthTotal = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPlanFeeAdmin.Amount - nextDiscountPromocodeAmmount;
+            result.NextMonthTotal = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPlanFeeAdmin.Amount - nextDiscountPromocodeAmmount - result.DiscountPrepayment.Amount;
 
             return result;
         }
