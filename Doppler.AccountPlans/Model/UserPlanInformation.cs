@@ -16,5 +16,7 @@ namespace Doppler.AccountPlans.Model
         public string PromotionCode { get; set; }
         public int IdUserTypePlan { get; set; }
         public DateTime Date { get; set; }
+        public int TotalMonthPlan { get; set; }
+        public int IdDiscountPlan { get; set; }
     }
 }
