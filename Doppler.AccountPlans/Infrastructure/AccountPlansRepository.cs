@@ -66,7 +66,9 @@ SELECT
     B.[DiscountPlanFeeAdmin],
     B.[DiscountPlanFeePromotion],
     P.Code AS PromotionCode,
-    B.IdUserTypePlan
+    B.IdUserTypePlan,
+    B.TotalMonthPlan,
+    B.IdDiscountPlan
 FROM
     [BillingCredits] B
 INNER JOIN [UserTypesPlans] UTP ON UTP.IdUserTypePlan = B.IdUserTypePlan

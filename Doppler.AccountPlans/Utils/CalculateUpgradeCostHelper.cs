@@ -13,7 +13,8 @@ namespace Doppler.AccountPlans.Utils
             DateTime now, Promotion promotion,
             TimesApplyedPromocode timesAppliedPromocode,
             Promotion currentPromotion,
-            UserPlanInformation firstUpgrade)
+            UserPlanInformation firstUpgrade,
+            PlanDiscountInformation currentDiscountPlan)
         {
             currentPlan ??= new UserPlanInformation
             {
@@ -29,35 +30,61 @@ namespace Doppler.AccountPlans.Utils
                 ApplyPromo = true
             };
 
-            var isMonthPlan = currentPlan.CurrentMonthPlan <= 1;
+            var isMonthPlan = currentPlan.TotalMonthPlan <= 1;
 
             var currentMonthPlan = !isMonthPlan ?
                 currentPlan.CurrentMonthPlan :
                 1;
 
-            var currentBaseMonth = now.Day < 21 ?
-                currentMonthPlan - 1 :
+            var currentBaseMonth = currentMonthPlan > 0 ?
+                isMonthPlan ?
+                (now.Day < 21 ? currentMonthPlan - 1 :
                 firstUpgrade != null && firstUpgrade.Date.Month == now.Month && firstUpgrade.Date.Year == now.Year && firstUpgrade.Date.Day >= 21 ?
-                currentMonthPlan - 1 : currentMonthPlan;
+                currentMonthPlan - 1 : currentMonthPlan) :
+                now.Day < 21 ? currentMonthPlan - 1 : currentMonthPlan :
+                0;
 
             var differenceBetweenMonthPlans = newDiscount.MonthPlan - currentBaseMonth;
 
-            var numberOfMonthsToDiscount = GetMonthsToDiscount(isMonthPlan, differenceBetweenMonthPlans, currentPlan.IdUserType);
+            int numberOfMonthsToDiscount;
+            decimal currentDiscountPrepayment;
+            decimal amount;
+
+            if (isMonthPlan)
+            {
+                numberOfMonthsToDiscount = GetMonthsToDiscount(isMonthPlan, differenceBetweenMonthPlans, currentPlan.IdUserType);
+                amount = currentPlan.Fee * numberOfMonthsToDiscount;
+                currentDiscountPrepayment = currentDiscountPlan != null ?
+                    Math.Round((currentPlan.Fee * numberOfMonthsToDiscount * currentDiscountPlan.DiscountPlanFee) / 100, 2) :
+                    0;
+            }
+            else
+            {
+                numberOfMonthsToDiscount = GetMonthsToDiscount(isMonthPlan, currentBaseMonth, currentPlan.IdUserType);
+                decimal ammountToDiscount = (currentPlan.Fee * numberOfMonthsToDiscount);
+                amount = currentPlan.Fee * currentDiscountPlan.MonthPlan - ammountToDiscount;
+                currentDiscountPrepayment = currentDiscountPlan != null ?
+                    Math.Round(amount * currentDiscountPlan.DiscountPlanFee / 100, 2) :
+                    0;
+            }
+
 
             var currentDiscountPlanFeePromotion = currentPlan.DiscountPlanFeePromotion ?? 0;
             var currentDiscountPlanFeeAdmin = currentPlan.DiscountPlanFeeAdmin ?? 0;
 
-            var planAmount = Math.Round(currentPlan.Fee * numberOfMonthsToDiscount, 2);
+            var planAmount = Math.Round(amount, 2);
             var discountAmountPromotion = Math.Round(((currentPlan.Fee * numberOfMonthsToDiscount) * currentDiscountPlanFeePromotion) / 100, 2);
             var discountAmountAdmin = Math.Round(((currentPlan.Fee * numberOfMonthsToDiscount) * currentDiscountPlanFeeAdmin) / 100, 2);
 
             var result = new PlanAmountDetails
             {
-                DiscountPaymentAlreadyPaid = planAmount - discountAmountPromotion - discountAmountAdmin,
+                DiscountPaymentAlreadyPaid = planAmount - discountAmountPromotion - discountAmountAdmin - currentDiscountPrepayment,
                 DiscountPrepayment = new DiscountPrepayment
                 {
-                    Amount = Math.Round((newPlan.Fee * newDiscount.MonthPlan * newDiscount.DiscountPlanFee) / 100, 2),
-                    DiscountPercentage = newDiscount.DiscountPlanFee
+                    Amount = Math.Round((newPlan.Fee * differenceBetweenMonthPlans * newDiscount.DiscountPlanFee) / 100, 2),
+                    DiscountPercentage = newDiscount.DiscountPlanFee,
+                    MonthsToPay = differenceBetweenMonthPlans,
+                    NextAmount = Math.Round((newPlan.Fee * newDiscount.MonthPlan * newDiscount.DiscountPlanFee) / 100, 2),
                 },
                 DiscountPromocode = new DiscountPromocode
                 {
@@ -71,7 +98,7 @@ namespace Doppler.AccountPlans.Utils
                 }
             };
 
-            result.Total = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPaymentAlreadyPaid - result.DiscountPrepayment.Amount;
+            result.Total = (newPlan.Fee * differenceBetweenMonthPlans) - result.DiscountPaymentAlreadyPaid - result.DiscountPrepayment.Amount;
 
             if (promotion != null && newDiscount.ApplyPromo && promotion.DiscountPercentage > 0)
             {
@@ -140,7 +167,7 @@ namespace Doppler.AccountPlans.Utils
                 }
             }
 
-            result.NextMonthTotal = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPlanFeeAdmin.Amount - nextDiscountPromocodeAmmount - result.DiscountPrepayment.Amount;
+            result.NextMonthTotal = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPlanFeeAdmin.Amount - nextDiscountPromocodeAmmount - result.DiscountPrepayment.NextAmount;
 
             return result;
         }
