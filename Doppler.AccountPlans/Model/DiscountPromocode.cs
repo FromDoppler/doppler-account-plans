@@ -4,5 +4,6 @@ namespace Doppler.AccountPlans.Model
     {
         public decimal Amount { get; set; }
         public decimal DiscountPercentage { get; set; }
+        public int ExtraCredits { get; set; }
     }
 }

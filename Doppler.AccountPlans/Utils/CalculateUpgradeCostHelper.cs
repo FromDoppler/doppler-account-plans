@@ -118,13 +118,15 @@ namespace Doppler.AccountPlans.Utils
             {
                 if (currentPromotion != null && (!currentPromotion.Duration.HasValue || currentPromotion.Duration.Value > timesAppliedPromocode.CountApplied))
                 {
-                    var discount = Math.Round(newPlan.Fee * currentPromotion.DiscountPercentage.Value / 100, 2);
+                    var discountPercentage = currentPromotion.DiscountPercentage.HasValue ? currentPromotion.DiscountPercentage.Value : 0;
+                    var discount = Math.Round(newPlan.Fee * discountPercentage / 100, 2);
 
                     result.Total -= discount;
                     result.DiscountPromocode = new DiscountPromocode
                     {
                         Amount = discount,
-                        DiscountPercentage = currentPromotion.DiscountPercentage ?? 0
+                        DiscountPercentage = currentPromotion.DiscountPercentage ?? 0,
+                        ExtraCredits = currentPromotion.ExtraCredits ?? 0
                     };
 
                     result.DiscountPrepayment.Amount = 0;
@@ -162,7 +164,8 @@ namespace Doppler.AccountPlans.Utils
                     var count = (now.Month == timesAppliedPromocode.LastMonthApplied && now.Year == timesAppliedPromocode.LastYearApplied) ? timesAppliedPromocode.CountApplied : timesAppliedPromocode.CountApplied + 1;
                     if (!currentPromotion.Duration.HasValue || currentPromotion.Duration.Value > count)
                     {
-                        nextDiscountPromocodeAmmount = Math.Round(newPlan.Fee * currentPromotion.DiscountPercentage.Value / 100, 2);
+                        var discountPercentage = currentPromotion.DiscountPercentage.HasValue ? currentPromotion.DiscountPercentage.Value : 0;
+                        nextDiscountPromocodeAmmount = Math.Round(newPlan.Fee * discountPercentage / 100, 2);
                     }
                 }
             }

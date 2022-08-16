@@ -65,8 +65,12 @@ namespace Doppler.AccountPlans.Controllers
 
             if (currentPlan != null)
             {
-                currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan);
-                timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName);
+                if (currentPlan.IdUserType != Enums.UserTypesEnum.Individual)
+                {
+                    currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan);
+                    timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName);
+                }
+
                 firstUpgrade = await _accountPlansRepository.GetFirstUpgrade(accountName);
                 currentDiscountPlan = await _accountPlansRepository.GetDiscountInformation(currentPlan.IdDiscountPlan);
             }
