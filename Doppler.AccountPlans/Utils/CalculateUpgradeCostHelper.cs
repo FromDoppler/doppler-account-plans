@@ -74,7 +74,7 @@ namespace Doppler.AccountPlans.Utils
 
             var planAmount = Math.Round(amount, 2);
             var discountAmountPromotion = Math.Round(((currentPlan.Fee * numberOfMonthsToDiscount) * currentDiscountPlanFeePromotion) / 100, 2);
-            var discountAmountAdmin = Math.Round(((currentPlan.Fee * numberOfMonthsToDiscount) * currentDiscountPlanFeeAdmin) / 100, 2);
+            var discountAmountAdmin = Math.Round((amount * currentDiscountPlanFeeAdmin) / 100, 2);
 
             var result = new PlanAmountDetails
             {
@@ -136,7 +136,7 @@ namespace Doppler.AccountPlans.Utils
 
             if (currentPlan != null && currentPlan.DiscountPlanFeeAdmin.HasValue)
             {
-                var discount = Math.Round(newPlan.Fee * currentPlan.DiscountPlanFeeAdmin.Value / 100, 2);
+                var discount = Math.Round(newPlan.Fee * differenceBetweenMonthPlans * currentPlan.DiscountPlanFeeAdmin.Value / 100, 2);
                 result.Total -= discount;
                 result.DiscountPlanFeeAdmin = new DiscountPlanFeeAdmin
                 {
