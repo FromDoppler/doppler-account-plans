@@ -36,7 +36,8 @@ namespace Doppler.AccountPlans.Utils
                 currentPlan.CurrentMonthPlan :
                 1;
 
-            var currentBaseMonth = currentMonthPlan > 0 ?
+            var currentBaseMonth = currentMonthPlan > 0 &&
+                (currentPlan.IdUserType != UserTypesEnum.Individual && currentPlan.IdUserType != UserTypesEnum.Free) ?
                 isMonthPlan ?
                 (now.Day < 21 ? currentMonthPlan - 1 :
                 firstUpgrade != null && firstUpgrade.Date.Month == now.Month && firstUpgrade.Date.Year == now.Year && firstUpgrade.Date.Day >= 21 ?
