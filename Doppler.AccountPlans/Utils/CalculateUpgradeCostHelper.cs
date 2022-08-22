@@ -145,9 +145,11 @@ namespace Doppler.AccountPlans.Utils
                 };
             }
 
-            result.CurrentMonthTotal = (now.Day >= 21 && currentPlan.IdUserType != UserTypesEnum.Free && isMonthPlan) ?
+            result.CurrentMonthTotal = (now.Day >= 21 && currentPlan.IdUserType != UserTypesEnum.Free) ?
+                currentPlan.IdUserType != UserTypesEnum.Individual && isMonthPlan ?
                 firstUpgrade != null && firstUpgrade.Date.Month == now.Month && firstUpgrade.Date.Year == now.Year && firstUpgrade.Date.Day >= 21 ?
                 result.Total : 0 :
+                result.Total :
                 result.Total;
 
             //Check if for the next month apply the current promocode
