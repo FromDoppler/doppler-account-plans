@@ -142,12 +142,13 @@ namespace Doppler.AccountPlans.Utils
                 result.DiscountPlanFeeAdmin = new DiscountPlanFeeAdmin
                 {
                     Amount = discount,
-                    DiscountPercentage = currentPlan.DiscountPlanFeeAdmin ?? 0
+                    DiscountPercentage = currentPlan.DiscountPlanFeeAdmin ?? 0,
+                    NextAmount = Math.Round((newPlan.Fee * newDiscount.MonthPlan * currentPlan.DiscountPlanFeeAdmin.Value) / 100, 2),
                 };
             }
 
             result.CurrentMonthTotal = (now.Day >= 21 && currentPlan.IdUserType != UserTypesEnum.Free) ?
-                currentPlan.IdUserType != UserTypesEnum.Individual && isMonthPlan ?
+                currentPlan.IdUserType != UserTypesEnum.Individual && result.DiscountPrepayment.MonthsToPay <= 1 ?
                 firstUpgrade != null && firstUpgrade.Date.Month == now.Month && firstUpgrade.Date.Year == now.Year && firstUpgrade.Date.Day >= 21 ?
                 result.Total : 0 :
                 result.Total :
@@ -174,7 +175,7 @@ namespace Doppler.AccountPlans.Utils
                 }
             }
 
-            result.NextMonthTotal = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPlanFeeAdmin.Amount - nextDiscountPromocodeAmmount - result.DiscountPrepayment.NextAmount;
+            result.NextMonthTotal = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPlanFeeAdmin.NextAmount - nextDiscountPromocodeAmmount - result.DiscountPrepayment.NextAmount;
 
             return result;
         }
