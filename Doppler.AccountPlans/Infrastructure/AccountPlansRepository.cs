@@ -68,7 +68,9 @@ SELECT
     P.Code AS PromotionCode,
     B.IdUserTypePlan,
     B.TotalMonthPlan,
-    B.IdDiscountPlan
+    B.IdDiscountPlan,
+    B.CreditsQty AS EmailQty,
+    B.SubscribersQty
 FROM
     [BillingCredits] B
 INNER JOIN [UserTypesPlans] UTP ON UTP.IdUserTypePlan = B.IdUserTypePlan
@@ -134,6 +136,28 @@ WHERE
                 });
 
             return discountPlan;
+        }
+
+        public async Task<int> GetAvailableCredit(string accountName)
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var partialBalance = await connection.QueryFirstOrDefaultAsync<int>(@"
+SELECT
+    MC.PartialBalance
+FROM
+    [dbo].[MovementsCredits] MC
+INNER JOIN [User] U ON U.IdUser = MC.IdUser
+WHERE
+    U.Email = @email
+ORDER BY
+    MC.IdMovementCredit
+DESC",
+                new
+                {
+                    @email = accountName
+                });
+
+            return partialBalance;
         }
     }
 }
