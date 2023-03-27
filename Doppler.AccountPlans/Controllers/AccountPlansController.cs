@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Doppler.AccountPlans.Encryption;
 using Doppler.AccountPlans.Model;
 using Doppler.AccountPlans.Utils;
+using Doppler.AccountPlans.Enums;
 
 namespace Doppler.AccountPlans.Controllers
 {
@@ -56,6 +57,7 @@ namespace Doppler.AccountPlans.Controllers
             Promotion currentPromotion = null;
             UserPlanInformation firstUpgrade = null;
             PlanDiscountInformation currentDiscountPlan = null;
+            decimal creditsDiscount = 0;
 
             if (!string.IsNullOrEmpty(promocode))
             {
@@ -70,12 +72,22 @@ namespace Doppler.AccountPlans.Controllers
                     currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan);
                     timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName);
                 }
+                else
+                {
+                    var availableCredits = 0;
+                    if (currentPlan.IdUserType == UserTypesEnum.Individual && newPlan.IdUserType != UserTypesEnum.Individual)
+                    {
+                        availableCredits = await _accountPlansRepository.GetAvailableCredit(accountName);
+                        var priceByCredit = currentPlan.Fee / currentPlan.EmailQty;
+                        creditsDiscount = availableCredits * priceByCredit;
+                    }
+                }
 
                 firstUpgrade = await _accountPlansRepository.GetFirstUpgrade(accountName);
                 currentDiscountPlan = await _accountPlansRepository.GetDiscountInformation(currentPlan.IdDiscountPlan);
             }
 
-            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgrade, currentDiscountPlan);
+            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgrade, currentDiscountPlan, creditsDiscount);
 
             return new OkObjectResult(upgradeCost);
         }

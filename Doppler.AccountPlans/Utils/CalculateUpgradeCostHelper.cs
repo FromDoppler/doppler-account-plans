@@ -14,7 +14,8 @@ namespace Doppler.AccountPlans.Utils
             TimesApplyedPromocode timesAppliedPromocode,
             Promotion currentPromotion,
             UserPlanInformation firstUpgrade,
-            PlanDiscountInformation currentDiscountPlan)
+            PlanDiscountInformation currentDiscountPlan,
+            decimal creditsDiscount)
         {
             currentPlan ??= new UserPlanInformation
             {
@@ -79,7 +80,7 @@ namespace Doppler.AccountPlans.Utils
 
             var result = new PlanAmountDetails
             {
-                DiscountPaymentAlreadyPaid = planAmount - discountAmountPromotion - discountAmountAdmin - currentDiscountPrepayment,
+                DiscountPaymentAlreadyPaid = (planAmount - discountAmountPromotion - discountAmountAdmin - currentDiscountPrepayment) + creditsDiscount,
                 DiscountPrepayment = new DiscountPrepayment
                 {
                     Amount = Math.Round((newPlan.Fee * differenceBetweenMonthPlans * newDiscount.DiscountPlanFee) / 100, 2),
@@ -99,7 +100,9 @@ namespace Doppler.AccountPlans.Utils
                 }
             };
 
-            result.Total = (newPlan.Fee * differenceBetweenMonthPlans) - result.DiscountPaymentAlreadyPaid - result.DiscountPrepayment.Amount;
+            var total = (newPlan.Fee * differenceBetweenMonthPlans) - result.DiscountPaymentAlreadyPaid - result.DiscountPrepayment.Amount;
+            result.Total = total > 0 ? total : 0;
+            result.PositiveBalance = (-1) * total;
 
             if (promotion != null && newDiscount.ApplyPromo && promotion.DiscountPercentage > 0)
             {
@@ -175,7 +178,8 @@ namespace Doppler.AccountPlans.Utils
                 }
             }
 
-            result.NextMonthTotal = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPlanFeeAdmin.NextAmount - nextDiscountPromocodeAmmount - result.DiscountPrepayment.NextAmount;
+            var nextMonthTotal = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPlanFeeAdmin.NextAmount - nextDiscountPromocodeAmmount - result.DiscountPrepayment.NextAmount - result.PositiveBalance;
+            result.NextMonthTotal = nextMonthTotal > 0 ? nextMonthTotal : 0;
 
             return result;
         }
