@@ -102,7 +102,7 @@ namespace Doppler.AccountPlans.Utils
 
             var total = (newPlan.Fee * differenceBetweenMonthPlans) - result.DiscountPaymentAlreadyPaid - result.DiscountPrepayment.Amount;
             result.Total = total > 0 ? total : 0;
-            result.PositiveBalance = (-1) * total;
+            result.PositiveBalance = result.Total > 0 ? 0 : (-1) * total;
 
             if (promotion != null && newDiscount.ApplyPromo && promotion.DiscountPercentage > 0)
             {
