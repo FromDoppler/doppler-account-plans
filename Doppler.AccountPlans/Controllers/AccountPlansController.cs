@@ -74,12 +74,12 @@ namespace Doppler.AccountPlans.Controllers
                 }
                 else
                 {
-                    var availableCredits = 0;
                     if (currentPlan.IdUserType == UserTypesEnum.Individual && newPlan.IdUserType != UserTypesEnum.Individual)
                     {
-                        availableCredits = await _accountPlansRepository.GetAvailableCredit(accountName);
+                        var availableCredits = await _accountPlansRepository.GetAvailableCredit(accountName);
+                        var credits = availableCredits > currentPlan.EmailQty ? currentPlan.EmailQty : availableCredits;
                         var priceByCredit = currentPlan.Fee / currentPlan.EmailQty;
-                        creditsDiscount = availableCredits * priceByCredit;
+                        creditsDiscount = credits * priceByCredit;
                     }
                 }
 
