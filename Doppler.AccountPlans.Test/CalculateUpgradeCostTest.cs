@@ -219,12 +219,14 @@ namespace Doppler.AccountPlans
             var newPlan = new PlanInformation
             {
                 Fee = 5,
+                IdUserType = UserTypesEnum.Monthly
             };
 
             var currentPlan = new UserPlanInformation
             {
                 Fee = 2,
-                CurrentMonthPlan = 0
+                CurrentMonthPlan = 0,
+                IdUserType = UserTypesEnum.Monthly
             };
 
             var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0);
@@ -466,12 +468,14 @@ namespace Doppler.AccountPlans
             var newPlan = new PlanInformation
             {
                 Fee = 5,
+                IdUserType = UserTypesEnum.Subscribers
             };
 
             var currentPlan = new UserPlanInformation
             {
                 Fee = 2,
-                CurrentMonthPlan = 4
+                CurrentMonthPlan = 4,
+                IdUserType = UserTypesEnum.Subscribers
             };
 
             var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0);
@@ -527,10 +531,12 @@ namespace Doppler.AccountPlans
                 IdUserType = UserTypesEnum.Individual
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, null, currentPlan, dateTimeProviderMock.Object.Now, new Promotion(), null, null, null, null, 0);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, null, currentPlan, dateTimeProviderMock.Object.Now, new Promotion(), null, null, null, null, 2);
 
             // Assert
             Assert.Equal(15, result.Total);
+            Assert.Equal(13, result.NextMonthTotal);
+            Assert.Equal(2, result.PositiveBalance);
             Assert.Equal(0, result.DiscountPaymentAlreadyPaid);
         }
 

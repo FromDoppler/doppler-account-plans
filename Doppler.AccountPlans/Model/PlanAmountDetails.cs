@@ -10,5 +10,6 @@ namespace Doppler.AccountPlans.Model
         public DiscountPlanFeeAdmin DiscountPlanFeeAdmin { get; set; }
         public decimal NextMonthTotal { get; set; }
         public decimal PositiveBalance { get; set; }
+        public bool MajorThat21st { get; set; }
     }
 }
