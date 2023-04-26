@@ -9,6 +9,7 @@ using Doppler.AccountPlans.Model;
 using Doppler.AccountPlans.Utils;
 using Doppler.AccountPlans.Enums;
 using System;
+using System.Numerics;
 
 namespace Doppler.AccountPlans.Controllers
 {
@@ -86,7 +87,16 @@ namespace Doppler.AccountPlans.Controllers
                         decimal creditsDiscount = credits * priceByCredit;
                         totalCreditDiscount = creditsDiscount - (currentPromotion != null && currentPromotion.DiscountPercentage != null ? Math.Round(creditsDiscount * currentPromotion.DiscountPercentage.Value / 100, 2) : 0);
 
-                        timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName);
+                        //Validate if the current promocode is valid for the new plan
+                        if (currentPromotion != null)
+                        {
+                            currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, newPlanId);
+
+                            if (currentPromotion != null)
+                            {
+                                timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName);
+                            }
+                        }
                     }
                 }
 
