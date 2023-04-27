@@ -8,6 +8,8 @@ using Doppler.AccountPlans.Encryption;
 using Doppler.AccountPlans.Model;
 using Doppler.AccountPlans.Utils;
 using Doppler.AccountPlans.Enums;
+using System;
+using System.Numerics;
 
 namespace Doppler.AccountPlans.Controllers
 {
@@ -57,7 +59,7 @@ namespace Doppler.AccountPlans.Controllers
             Promotion currentPromotion = null;
             UserPlanInformation firstUpgrade = null;
             PlanDiscountInformation currentDiscountPlan = null;
-            decimal creditsDiscount = 0;
+            decimal totalCreditDiscount = 0;
 
             if (!string.IsNullOrEmpty(promocode))
             {
@@ -76,10 +78,25 @@ namespace Doppler.AccountPlans.Controllers
                 {
                     if (currentPlan.IdUserType == UserTypesEnum.Individual && newPlan.IdUserType != UserTypesEnum.Individual)
                     {
+                        currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan);
+
                         var availableCredits = await _accountPlansRepository.GetAvailableCredit(accountName);
                         var credits = availableCredits > currentPlan.EmailQty ? currentPlan.EmailQty : availableCredits;
                         var priceByCredit = currentPlan.Fee / currentPlan.EmailQty;
-                        creditsDiscount = credits * priceByCredit;
+
+                        decimal creditsDiscount = credits * priceByCredit;
+                        totalCreditDiscount = creditsDiscount - (currentPromotion != null && currentPromotion.DiscountPercentage != null ? Math.Round(creditsDiscount * currentPromotion.DiscountPercentage.Value / 100, 2) : 0);
+
+                        //Validate if the current promocode is valid for the new plan
+                        if (currentPromotion != null)
+                        {
+                            currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, newPlanId);
+
+                            if (currentPromotion != null)
+                            {
+                                timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName);
+                            }
+                        }
                     }
                 }
 
@@ -87,7 +104,7 @@ namespace Doppler.AccountPlans.Controllers
                 currentDiscountPlan = await _accountPlansRepository.GetDiscountInformation(currentPlan.IdDiscountPlan);
             }
 
-            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgrade, currentDiscountPlan, creditsDiscount);
+            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgrade, currentDiscountPlan, totalCreditDiscount);
 
             return new OkObjectResult(upgradeCost);
         }
