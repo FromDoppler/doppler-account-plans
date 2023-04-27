@@ -78,25 +78,14 @@ namespace Doppler.AccountPlans.Controllers
                 {
                     if (currentPlan.IdUserType == UserTypesEnum.Individual && newPlan.IdUserType != UserTypesEnum.Individual)
                     {
-                        currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan);
+                        var prepaidPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan);
 
                         var availableCredits = await _accountPlansRepository.GetAvailableCredit(accountName);
                         var credits = availableCredits > currentPlan.EmailQty ? currentPlan.EmailQty : availableCredits;
                         var priceByCredit = currentPlan.Fee / currentPlan.EmailQty;
 
                         decimal creditsDiscount = credits * priceByCredit;
-                        totalCreditDiscount = creditsDiscount - (currentPromotion != null && currentPromotion.DiscountPercentage != null ? Math.Round(creditsDiscount * currentPromotion.DiscountPercentage.Value / 100, 2) : 0);
-
-                        //Validate if the current promocode is valid for the new plan
-                        if (currentPromotion != null)
-                        {
-                            currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, newPlanId);
-
-                            if (currentPromotion != null)
-                            {
-                                timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName);
-                            }
-                        }
+                        totalCreditDiscount = creditsDiscount - (prepaidPromotion != null && prepaidPromotion.DiscountPercentage != null ? Math.Round(creditsDiscount * prepaidPromotion.DiscountPercentage.Value / 100, 2) : 0);
                     }
                 }
 
