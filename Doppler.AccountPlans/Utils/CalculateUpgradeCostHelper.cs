@@ -288,7 +288,7 @@ namespace Doppler.AccountPlans.Utils
 
             result.CurrentMonthTotal = now.Day > 21 ? 0 : (result.Total > 0 ? result.Total : 0);
             result.MajorThat21st = now.Day > 21;
-            result.PositiveBalance = result.CurrentMonthTotal > 0 ? 0 : (now.Day < 21 ? (-1) * result.Total : creditsDiscount);
+            result.PositiveBalance = result.CurrentMonthTotal > 0 ? 0 : (now.Day < 21 ? (-1) * total : creditsDiscount);
 
             //Check if for the next month apply the current promocode
             decimal nextDiscountPromocodeAmmount = 0;
