@@ -157,7 +157,7 @@ namespace Doppler.AccountPlans.Utils
                 result.CurrentMonthTotal = (now.Day >= 21 && currentPlan.IdUserType != UserTypesEnum.Free) ?
                     currentPlan.IdUserType != UserTypesEnum.Individual && result.DiscountPrepayment.MonthsToPay <= 1 ?
                     firstUpgrade != null && firstUpgrade.Date.Month == now.Month && firstUpgrade.Date.Year == now.Year && firstUpgrade.Date.Day >= 21 ?
-                    result.Total : 0 :
+                    result.Total : (differenceBetweenMonthPlans > 0 ? result.Total : 0) :
                     result.Total :
                     result.Total;
 
