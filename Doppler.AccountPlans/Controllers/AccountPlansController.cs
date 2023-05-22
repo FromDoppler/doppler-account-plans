@@ -82,7 +82,7 @@ namespace Doppler.AccountPlans.Controllers
 
                         var availableCredits = await _accountPlansRepository.GetAvailableCredit(accountName);
                         var credits = availableCredits > currentPlan.EmailQty ? currentPlan.EmailQty : availableCredits;
-                        var priceByCredit = currentPlan.Fee / currentPlan.EmailQty;
+                        var priceByCredit = currentPlan.EmailQty > 0 ? currentPlan.Fee / currentPlan.EmailQty : 0;
 
                         decimal creditsDiscount = credits * priceByCredit;
                         totalCreditDiscount = creditsDiscount - (prepaidPromotion != null && prepaidPromotion.DiscountPercentage != null ? Math.Round(creditsDiscount * prepaidPromotion.DiscountPercentage.Value / 100, 2) : 0);
