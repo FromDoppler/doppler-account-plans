@@ -18,5 +18,7 @@ namespace Doppler.AccountPlans.Model
         public DateTime Date { get; set; }
         public int TotalMonthPlan { get; set; }
         public int IdDiscountPlan { get; set; }
+        public decimal? ChatPlanFee { get; set; }
+        public int? ChatPlanConversationQty { get; set; }
     }
 }

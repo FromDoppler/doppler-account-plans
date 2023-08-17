@@ -1,3 +1,4 @@
+using Doppler.AccountPlans.Enums;
 using Doppler.AccountPlans.Model;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,5 +13,9 @@ namespace Doppler.AccountPlans.Infrastructure
         Task<PlanDiscountInformation> GetDiscountInformation(int discountId);
         Task<UserPlanInformation> GetFirstUpgrade(string accountName);
         Task<int> GetAvailableCredit(string accountName);
+
+        Task<PlanInformation> GetChatPlanInformation(int chatPlanId);
+        Task<UserPlanInformation> GetCurrentPlanInformationWithAdditionalServices(string accountName);
+        Task<PlanInformation> GetPlanInformation(PlanTypeEnum planType, int planId);
     }
 }

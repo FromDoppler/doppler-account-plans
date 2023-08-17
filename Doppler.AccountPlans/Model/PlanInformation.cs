@@ -11,5 +11,7 @@ namespace Doppler.AccountPlans.Model
         public int CurrentMonthPlan { get; set; }
         public UserTypesEnum IdUserType { get; set; }
         public int? DiscountPlanFeeAdmin { get; set; }
+        public decimal? ChatPlanFee { get; set; }
+        public int? ChatPlanConversationQty { get; set; }
     }
 }
