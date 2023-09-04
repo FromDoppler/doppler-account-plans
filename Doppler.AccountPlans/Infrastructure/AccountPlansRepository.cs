@@ -1,5 +1,7 @@
 using Dapper;
+using Doppler.AccountPlans.Enums;
 using Doppler.AccountPlans.Model;
+using Microsoft.AspNetCore.Connections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -158,6 +160,72 @@ DESC",
                 });
 
             return partialBalance;
+        }
+
+        public async Task<PlanInformation> GetChatPlanInformation(int chatPlanId)
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<PlanInformation>(@"
+SELECT
+    CP.[ConversationQty] AS ChatPlanConversationQty,
+    CP.[Fee] AS ChatPlanFee
+FROM
+    [dbo].[ChatPlans] CP
+WHERE
+    CP.[IdChatPlan] = @chatPlanId",
+    new { chatPlanId });
+
+            return result.FirstOrDefault();
+        }
+
+        public async Task<UserPlanInformation> GetCurrentPlanInformationWithAdditionalServices(string accountName)
+        {
+            using var connection = _connectionFactory.GetConnection();
+
+            var currentPlan = await connection.QueryFirstOrDefaultAsync<UserPlanInformation>(@"
+SELECT
+    B.[PlanFee] AS Fee,
+    B.[CurrentMonthPlan],
+    UTP.[IdUserType],
+    B.[DiscountPlanFeeAdmin],
+    B.[DiscountPlanFeePromotion],
+    P.Code AS PromotionCode,
+    B.IdUserTypePlan,
+    B.TotalMonthPlan,
+    B.IdDiscountPlan,
+    B.CreditsQty AS EmailQty,
+    B.SubscribersQty,
+    CP.Fee AS ChatPlanFee,
+    CP.ConversationQty AS ChatPlanConversationQty
+FROM
+    [BillingCredits] B
+INNER JOIN [UserTypesPlans] UTP ON UTP.IdUserTypePlan = B.IdUserTypePlan
+INNER JOIN [User] U ON U.IdUser = B.IdUser
+LEFT JOIN [Promotions] P ON P.IdPromotion = B.IdPromotion
+LEFT JOIN [ChatPlanUsers] CUP ON CUP.IdBillingCredit = B.IdBillingCredit
+LEFT JOIN [ChatPlans] CP ON CP.IdChatPlan = CUP.IdChatPlan
+WHERE
+    b.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email) AND U.IdCurrentBillingCredit IS NOT NULL
+ORDER BY b.[Date] DESC;",
+                new
+                {
+                    @email = accountName
+                });
+
+            return currentPlan;
+        }
+
+
+        public async Task<PlanInformation> GetPlanInformation(PlanTypeEnum planType, int planId)
+        {
+            switch (planType)
+            {
+                case PlanTypeEnum.Marketing:
+                    return await GetPlanInformation(planId);
+                case PlanTypeEnum.Chat:
+                    return await GetChatPlanInformation(planId);
+                default: return null;
+            }
         }
     }
 }

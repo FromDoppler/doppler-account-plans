@@ -93,7 +93,84 @@ namespace Doppler.AccountPlans.Controllers
                 currentDiscountPlan = await _accountPlansRepository.GetDiscountInformation(currentPlan.IdDiscountPlan);
             }
 
-            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgrade, currentDiscountPlan, totalCreditDiscount);
+            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgrade, currentDiscountPlan, totalCreditDiscount, PlanTypeEnum.Marketing);
+
+            return new OkObjectResult(upgradeCost);
+        }
+
+        [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
+        [HttpGet("/accounts/{accountName}/newplan/{newPlanType}/{newPlanId}/calculate-amount")]
+        public async Task<IActionResult> GetCalculateUpgradeCostWithChatPlan(
+            [FromRoute] string accountName,
+            [FromRoute] int newPlanId,
+            [FromRoute] PlanTypeEnum newPlanType,
+            [FromQuery] int discountId,
+            [FromQuery] string promocode = null)
+        {
+            _logger.LogInformation("Calculating plan amount details.");
+
+            PlanInformation newPlan = null;
+
+            switch (newPlanType)
+            {
+                case PlanTypeEnum.Marketing:
+                    newPlan = await _accountPlansRepository.GetPlanInformation(newPlanId);
+                    break;
+                case PlanTypeEnum.Chat:
+                    newPlan = await _accountPlansRepository.GetChatPlanInformation(newPlanId);
+                    break;
+                default:
+                    newPlan = null;
+                    break;
+            }
+
+            if (newPlan == null)
+                return new NotFoundResult();
+
+            var currentPlan = await _accountPlansRepository.GetCurrentPlanInformationWithAdditionalServices(accountName);
+            var discountPlan = await _accountPlansRepository.GetDiscountInformation(discountId);
+
+            var promotion = new Promotion();
+            TimesApplyedPromocode timesAppliedPromocode = null;
+            Promotion currentPromotion = null;
+            UserPlanInformation firstUpgrade = null;
+            PlanDiscountInformation currentDiscountPlan = null;
+            decimal totalCreditDiscount = 0;
+
+            if (!string.IsNullOrEmpty(promocode))
+            {
+                var encryptedCode = _encryptionService.EncryptAES256(promocode);
+                promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, newPlanId);
+            }
+
+            if (currentPlan != null)
+            {
+                if (currentPlan.IdUserType != Enums.UserTypesEnum.Individual)
+                {
+                    currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan);
+                    timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName);
+                }
+                else
+                {
+                    if (currentPlan.IdUserType == UserTypesEnum.Individual && newPlan.IdUserType != UserTypesEnum.Individual)
+                    {
+                        var prepaidPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan);
+
+                        var availableCredits = await _accountPlansRepository.GetAvailableCredit(accountName);
+                        var credits = availableCredits > currentPlan.EmailQty ? currentPlan.EmailQty : availableCredits;
+                        var priceByCredit = currentPlan.EmailQty > 0 ? currentPlan.Fee / currentPlan.EmailQty : 0;
+
+                        decimal creditsDiscount = credits * priceByCredit;
+                        totalCreditDiscount = creditsDiscount - (prepaidPromotion != null && prepaidPromotion.DiscountPercentage != null ? Math.Round(creditsDiscount * prepaidPromotion.DiscountPercentage.Value / 100, 2) : 0);
+                    }
+                }
+
+                firstUpgrade = await _accountPlansRepository.GetFirstUpgrade(accountName);
+                currentDiscountPlan = await _accountPlansRepository.GetDiscountInformation(currentPlan.IdDiscountPlan);
+            }
+
+            /* Marketing plan */
+            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgrade, currentDiscountPlan, totalCreditDiscount, newPlanType);
 
             return new OkObjectResult(upgradeCost);
         }
@@ -134,6 +211,19 @@ namespace Doppler.AccountPlans.Controllers
             }
 
             return new OkObjectResult(contactInformation);
+        }
+
+        [HttpGet("/plans/{planType}/{planId}")]
+        public async Task<IActionResult> GetPlanInformationByTypeAndId([FromRoute] PlanTypeEnum planType, [FromRoute] int planId)
+        {
+            var planInformation = await _accountPlansRepository.GetPlanInformation(planType, planId);
+
+            if (planInformation == null)
+            {
+                return new NotFoundResult();
+            }
+
+            return new OkObjectResult(planInformation);
         }
     }
 }
