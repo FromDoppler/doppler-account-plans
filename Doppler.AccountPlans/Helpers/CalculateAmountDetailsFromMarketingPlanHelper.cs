@@ -125,7 +125,8 @@ namespace Doppler.AccountPlans.Helpers
                         {
                             Amount = discount,
                             DiscountPercentage = currentPromotion.DiscountPercentage ?? 0,
-                            ExtraCredits = currentPromotion.ExtraCredits ?? 0
+                            ExtraCredits = currentPromotion.ExtraCredits ?? 0,
+                            Duration = currentPromotion.Duration ?? 0
                         };
 
                         result.DiscountPrepayment.Amount = 0;
