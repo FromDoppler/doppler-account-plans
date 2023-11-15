@@ -121,11 +121,19 @@ namespace Doppler.AccountPlans.Helpers
                         var discount = Math.Round(newPlan.Fee * discountPercentage / 100, 2);
 
                         result.Total -= discount;
+
+                        int promocodeDuration = 0;
+                        if (currentPromotion.Duration.HasValue)
+                        {
+                            promocodeDuration = currentPromotion.Duration.Value - timesAppliedPromocode.CountApplied;
+                        }
+
                         result.DiscountPromocode = new DiscountPromocode
                         {
                             Amount = discount,
                             DiscountPercentage = currentPromotion.DiscountPercentage ?? 0,
-                            ExtraCredits = currentPromotion.ExtraCredits ?? 0
+                            ExtraCredits = currentPromotion.ExtraCredits ?? 0,
+                            Duration = promocodeDuration
                         };
 
                         result.DiscountPrepayment.Amount = 0;
