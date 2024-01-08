@@ -184,6 +184,9 @@ namespace Doppler.AccountPlans.Helpers
                 result.NextMonthTotal = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPlanFeeAdmin.NextAmount - nextDiscountPromocodeAmmount - result.DiscountPrepayment.NextAmount;
                 result.MajorThat21st = now.Day > 21;
 
+                var nexMonnthInvoiceDate = now.AddMonths(differenceBetweenMonthPlans);
+                result.NextMonthDate = new DateTime(nexMonnthInvoiceDate.Year, nexMonnthInvoiceDate.Month, 1);
+
                 return result;
             }
         }

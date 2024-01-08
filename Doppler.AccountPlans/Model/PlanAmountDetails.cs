@@ -1,3 +1,5 @@
+using System;
+
 namespace Doppler.AccountPlans.Model
 {
     public class PlanAmountDetails
@@ -11,5 +13,6 @@ namespace Doppler.AccountPlans.Model
         public decimal NextMonthTotal { get; set; }
         public decimal PositiveBalance { get; set; }
         public bool MajorThat21st { get; set; }
+        public DateTime NextMonthDate { get; set; }
     }
 }
