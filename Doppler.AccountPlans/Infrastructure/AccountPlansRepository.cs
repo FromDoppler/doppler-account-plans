@@ -178,6 +178,23 @@ WHERE
             return result.FirstOrDefault();
         }
 
+        public async Task<BasePlanInformation> GetConversationPlanInformation(int conversationPlanId)
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<ConversationPlanInformation>(@"
+SELECT  [IdChatPlan] AS PlanId,
+        [ConversationQty] AS ConversationsQty,
+        [Fee] AS Fee,
+        [Agents] AS Agents,
+        [Canales] AS Channels,
+        2 AS PlanType
+FROM [dbo].[ChatPlans]
+WHERE [IdChatPlan] = @conversationPlanId",
+    new { conversationPlanId });
+
+            return result.FirstOrDefault();
+        }
+
         public async Task<UserPlanInformation> GetCurrentPlanInformationWithAdditionalServices(string accountName)
         {
             using var connection = _connectionFactory.GetConnection();
@@ -216,16 +233,14 @@ ORDER BY b.[Date] DESC;",
         }
 
 
-        public async Task<PlanInformation> GetPlanInformation(PlanTypeEnum planType, int planId)
+        public async Task<BasePlanInformation> GetPlanInformation(PlanTypeEnum planType, int planId)
         {
-            switch (planType)
+            return planType switch
             {
-                case PlanTypeEnum.Marketing:
-                    return await GetPlanInformation(planId);
-                case PlanTypeEnum.Chat:
-                    return await GetChatPlanInformation(planId);
-                default: return null;
-            }
+                PlanTypeEnum.Marketing => new BasePlanInformation { PlanId = planId, PlanType = planType },
+                PlanTypeEnum.Chat => await GetConversationPlanInformation(planId),
+                _ => null,
+            };
         }
     }
 }
