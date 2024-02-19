@@ -17,5 +17,6 @@ namespace Doppler.AccountPlans.Infrastructure
         Task<PlanInformation> GetChatPlanInformation(int chatPlanId);
         Task<UserPlanInformation> GetCurrentPlanInformationWithAdditionalServices(string accountName);
         Task<BasePlanInformation> GetPlanInformation(PlanTypeEnum planType, int planId);
+        Task<IEnumerable<ConversationPlanInformation>> GetConversationPlans();
     }
 }
