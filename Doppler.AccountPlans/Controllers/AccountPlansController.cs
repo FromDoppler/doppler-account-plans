@@ -225,5 +225,18 @@ namespace Doppler.AccountPlans.Controllers
 
             return new OkObjectResult(planInformation);
         }
+
+        [HttpGet("/conversation-plans")]
+        public async Task<IActionResult> GetConversationPlans()
+        {
+            var planInformation = await _accountPlansRepository.GetConversationPlans();
+
+            if (planInformation == null)
+            {
+                return new NotFoundResult();
+            }
+
+            return new OkObjectResult(planInformation);
+        }
     }
 }

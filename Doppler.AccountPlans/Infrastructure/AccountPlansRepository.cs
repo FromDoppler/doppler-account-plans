@@ -242,5 +242,21 @@ ORDER BY b.[Date] DESC;",
                 _ => null,
             };
         }
+
+        public async Task<IEnumerable<ConversationPlanInformation>> GetConversationPlans()
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<ConversationPlanInformation>(@"
+SELECT  [IdChatPlan] AS PlanId,
+        [ConversationQty] AS ConversationsQty,
+        [Fee] AS Fee,
+        [Agents] AS Agents,
+        [Canales] AS Channels,
+        2 AS PlanType
+FROM [dbo].[ChatPlans]
+WHERE [Fee] > 0");
+
+            return result;
+        }
     }
 }
