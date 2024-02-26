@@ -71,7 +71,7 @@ namespace Doppler.AccountPlans.Controllers
             {
                 if (currentPlan.IdUserType != Enums.UserTypesEnum.Individual)
                 {
-                    currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan);
+                    currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, newPlanId);
                     timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName);
                 }
                 else
@@ -147,7 +147,7 @@ namespace Doppler.AccountPlans.Controllers
             {
                 if (currentPlan.IdUserType != Enums.UserTypesEnum.Individual)
                 {
-                    currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan);
+                    currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, newPlanId);
                     timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName);
                 }
                 else
