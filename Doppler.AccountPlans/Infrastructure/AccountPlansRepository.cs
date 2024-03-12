@@ -280,7 +280,7 @@ SELECT  [IdLandingPlan] AS PlanId,
         [LandingQty] AS LandingsQty,
         [Fee] AS Fee,
         3 AS PlanType
-FROM [dbo].[LandingPlans]
+FROM [dbo].[LandingPlans] WITH(NOLOCK)
 WHERE [Active] = 1");
 
             return result;
