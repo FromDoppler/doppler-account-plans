@@ -39,7 +39,7 @@ SELECT
     [AllMonthlyPlans],
     [Duration]
 FROM
-    [Promotions]
+    [Promotions]  WITH(NOLOCK)
 WHERE
     [Code] = @code AND
     [Active] = 1 AND
@@ -92,9 +92,9 @@ SELECT
     MAX(YEAR(B.Date)) AS LastYearApplied,
     COUNT(DISTINCT MONTH(B.Date)) AS CountApplied
 FROM
-    [BillingCredits] B
-INNER JOIN [User] U ON U.IdUser = B.IdUser
-INNER JOIN [Promotions] P ON  P.IdPromotion = B.IdPromotion
+    [BillingCredits] B  WITH(NOLOCK)
+INNER JOIN [User] U  WITH(NOLOCK) ON U.IdUser = B.IdUser
+INNER JOIN [Promotions] P  WITH(NOLOCK) ON  P.IdPromotion = B.IdPromotion
 WHERE
     U.Email = @email AND
     U.IdCurrentBillingCredit IS NOT NULL AND
