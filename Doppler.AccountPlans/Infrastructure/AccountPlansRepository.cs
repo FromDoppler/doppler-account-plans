@@ -270,5 +270,20 @@ WHERE [Fee] > 0");
 
             return result;
         }
+
+        public async Task<IEnumerable<LandingPlanInformation>> GetLandingPlans()
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<LandingPlanInformation>(@"
+SELECT  [IdLandingPlan] AS PlanId,
+		[Description],
+        [LandingQty] AS LandingsQty,
+		[Fee] AS Fee,
+        3 AS PlanType
+FROM [dbo].[LandingPlans]
+WHERE [Active] = 1");
+
+            return result;
+        }
     }
 }
