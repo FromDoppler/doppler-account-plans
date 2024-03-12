@@ -27,7 +27,8 @@ SELECT
     DP.[MonthPlan],
     DP.[ApplyPromo]
 FROM
-    [DiscountXPlan] DP INNER JOIN [PaymentMethods] PM ON DP.IdPaymentMethod = PM.IdPaymentMethod
+    [DiscountXPlan] DP WITH(NOLOCK)
+INNER JOIN [PaymentMethods] PM WITH(NOLOCK) ON DP.IdPaymentMethod = PM.IdPaymentMethod
 WHERE
     DP.[IdUserTypePlan] = @planId AND PM.PaymentMethodName = @paymentMethod AND DP.Active = 1
 ORDER BY
@@ -48,7 +49,7 @@ SELECT
     UTP.[SubscribersQty],
     UTP.[PlanType] AS Type
 FROM
-    [UserTypesPlans] UTP
+    [UserTypesPlans] UTP WITH(NOLOCK)
 WHERE
     UTP.[IdUserTypePlan] = @planId",
     new { planId });
@@ -74,12 +75,12 @@ SELECT
     B.CreditsQty AS EmailQty,
     B.SubscribersQty
 FROM
-    [BillingCredits] B
-INNER JOIN [UserTypesPlans] UTP ON UTP.IdUserTypePlan = B.IdUserTypePlan
-INNER JOIN [User] U ON U.IdUser = B.IdUser
-LEFT JOIN [Promotions] P ON P.IdPromotion = B.IdPromotion
+    [BillingCredits] B WITH(NOLOCK)
+INNER JOIN [UserTypesPlans] UTP WITH(NOLOCK) ON UTP.IdUserTypePlan = B.IdUserTypePlan
+INNER JOIN [User] U WITH(NOLOCK) ON U.IdUser = B.IdUser
+LEFT JOIN [Promotions] P WITH(NOLOCK) ON P.IdPromotion = B.IdPromotion
 WHERE
-    b.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email) AND U.IdCurrentBillingCredit IS NOT NULL
+    b.IdUser = (SELECT IdUser FROM [User] WITH(NOLOCK) WHERE Email = @email) AND U.IdCurrentBillingCredit IS NOT NULL
 ORDER BY b.[Date] DESC;",
                 new
                 {
@@ -129,7 +130,7 @@ SELECT
     d.[DiscountPlanFee],
     d.[ApplyPromo]
 FROM
-    DiscountXPlan d
+    DiscountXPlan d  WITH(NOLOCK)
 WHERE
     d.[IdDiscountPlan] = @discountId;",
                 new
@@ -147,8 +148,8 @@ WHERE
 SELECT
     MC.PartialBalance
 FROM
-    [dbo].[MovementsCredits] MC
-INNER JOIN [User] U ON U.IdUser = MC.IdUser
+    [dbo].[MovementsCredits] MC  WITH(NOLOCK)
+INNER JOIN [User] U  WITH(NOLOCK) ON U.IdUser = MC.IdUser
 WHERE
     U.Email = @email
 ORDER BY
@@ -170,7 +171,7 @@ SELECT
     CP.[ConversationQty] AS ChatPlanConversationQty,
     CP.[Fee] AS ChatPlanFee
 FROM
-    [dbo].[ChatPlans] CP
+    [dbo].[ChatPlans] CP  WITH(NOLOCK)
 WHERE
     CP.[IdChatPlan] = @chatPlanId",
     new { chatPlanId });
@@ -188,7 +189,7 @@ SELECT  [IdChatPlan] AS PlanId,
         [Agents] AS Agents,
         [Canales] AS Channels,
         2 AS PlanType
-FROM [dbo].[ChatPlans]
+FROM [dbo].[ChatPlans]  WITH(NOLOCK)
 WHERE [IdChatPlan] = @conversationPlanId",
     new { conversationPlanId });
 
@@ -215,12 +216,12 @@ SELECT
     CP.Fee AS ChatPlanFee,
     CP.ConversationQty AS ChatPlanConversationQty
 FROM
-    [BillingCredits] B
-INNER JOIN [UserTypesPlans] UTP ON UTP.IdUserTypePlan = B.IdUserTypePlan
-INNER JOIN [User] U ON U.IdUser = B.IdUser
-LEFT JOIN [Promotions] P ON P.IdPromotion = B.IdPromotion
-LEFT JOIN [ChatPlanUsers] CUP ON CUP.IdBillingCredit = B.IdBillingCredit
-LEFT JOIN [ChatPlans] CP ON CP.IdChatPlan = CUP.IdChatPlan
+    [BillingCredits] B  WITH(NOLOCK)
+INNER JOIN [UserTypesPlans] UTP WITH(NOLOCK) ON UTP.IdUserTypePlan = B.IdUserTypePlan
+INNER JOIN [User] U WITH(NOLOCK) ON U.IdUser = B.IdUser
+LEFT JOIN [Promotions] P WITH(NOLOCK) ON P.IdPromotion = B.IdPromotion
+LEFT JOIN [ChatPlanUsers] CUP WITH(NOLOCK) ON CUP.IdBillingCredit = B.IdBillingCredit
+LEFT JOIN [ChatPlans] CP WITH(NOLOCK) ON CP.IdChatPlan = CUP.IdChatPlan
 WHERE
     b.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email) AND U.IdCurrentBillingCredit IS NOT NULL
 ORDER BY b.[Date] DESC;",
@@ -253,7 +254,7 @@ SELECT  [IdChatPlan] AS PlanId,
         [Agents] AS Agents,
         [Canales] AS Channels,
         2 AS PlanType
-FROM [dbo].[ChatPlans]
+FROM [dbo].[ChatPlans] WITH(NOLOCK)
 WHERE [Fee] > 0");
 
             return result;
