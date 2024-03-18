@@ -50,7 +50,7 @@ namespace Doppler.AccountPlans.Controllers
             [FromQuery] string promocode = null)
         {
             using var _ = _timeCollector.StartScope();
-            
+
             _logger.LogInformation("Calculating plan amount details.");
 
             var newPlan = await _accountPlansRepository.GetPlanInformation(newPlanId);
@@ -114,7 +114,7 @@ namespace Doppler.AccountPlans.Controllers
             [FromQuery] string promocode = null)
         {
             using var _ = _timeCollector.StartScope();
-            
+
             _logger.LogInformation("Calculating plan amount details.");
 
             PlanInformation newPlan = null;
@@ -187,7 +187,7 @@ namespace Doppler.AccountPlans.Controllers
         public async Task<IActionResult> GetPromocodeInformation([FromRoute] int planId, [FromRoute] string promocode)
         {
             using var _ = _timeCollector.StartScope();
-            
+
             var encryptedCode = _encryptionService.EncryptAES256(promocode);
             var promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, planId);
 
