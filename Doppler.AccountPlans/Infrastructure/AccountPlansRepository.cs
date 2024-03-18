@@ -1,6 +1,7 @@
 using Dapper;
 using Doppler.AccountPlans.Enums;
 using Doppler.AccountPlans.Model;
+using Doppler.AccountPlans.TimeCollector;
 using Microsoft.AspNetCore.Connections;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +13,12 @@ namespace Doppler.AccountPlans.Infrastructure
     {
         private readonly IDatabaseConnectionFactory _connectionFactory;
 
-        public AccountPlansRepository(IDatabaseConnectionFactory connectionFactory)
+        private readonly ITimeCollector _timeCollector;
+
+        public AccountPlansRepository(IDatabaseConnectionFactory connectionFactory, ITimeCollector timeCollector)
         {
             _connectionFactory = connectionFactory;
+            _timeCollector = timeCollector;
         }
 
         public async Task<IEnumerable<PlanDiscountInformation>> GetPlanDiscountInformation(int planId, string paymentMethod)
@@ -40,6 +44,7 @@ ORDER BY
 
         public async Task<PlanInformation> GetPlanInformation(int planId)
         {
+            using var _ = _timeCollector.StartScope();
             using var connection = _connectionFactory.GetConnection();
             var result = await connection.QueryAsync<PlanInformation>(@"
 SELECT
@@ -59,6 +64,7 @@ WHERE
 
         public async Task<UserPlanInformation> GetCurrentPlanInformation(string accountName)
         {
+            using var _ = _timeCollector.StartScope();
             using var connection = _connectionFactory.GetConnection();
 
             var currentPlan = await connection.QueryFirstOrDefaultAsync<UserPlanInformation>(@"
@@ -92,6 +98,7 @@ ORDER BY b.[Date] DESC;",
 
         public async Task<UserPlanInformation> GetFirstUpgrade(string accountName)
         {
+            using var _ = _timeCollector.StartScope();
             using var connection = _connectionFactory.GetConnection();
 
             var currentPlan = await connection.QueryFirstOrDefaultAsync<UserPlanInformation>(@"
@@ -122,6 +129,7 @@ ORDER BY b.[Date] DESC;",
 
         public async Task<PlanDiscountInformation> GetDiscountInformation(int discountId)
         {
+            using var _ = _timeCollector.StartScope();
             using var connection = _connectionFactory.GetConnection();
 
             var discountPlan = await connection.QueryFirstOrDefaultAsync<PlanDiscountInformation>(@"
@@ -143,6 +151,7 @@ WHERE
 
         public async Task<int> GetAvailableCredit(string accountName)
         {
+            using var _ = _timeCollector.StartScope();
             using var connection = _connectionFactory.GetConnection();
             var partialBalance = await connection.QueryFirstOrDefaultAsync<int>(@"
 SELECT
@@ -165,6 +174,7 @@ DESC",
 
         public async Task<PlanInformation> GetChatPlanInformation(int chatPlanId)
         {
+            using var _ = _timeCollector.StartScope();
             using var connection = _connectionFactory.GetConnection();
             var result = await connection.QueryAsync<PlanInformation>(@"
 SELECT
@@ -198,6 +208,7 @@ WHERE [IdChatPlan] = @conversationPlanId",
 
         public async Task<UserPlanInformation> GetCurrentPlanInformationWithAdditionalServices(string accountName)
         {
+            using var _ = _timeCollector.StartScope();
             using var connection = _connectionFactory.GetConnection();
 
             var currentPlan = await connection.QueryFirstOrDefaultAsync<UserPlanInformation>(@"

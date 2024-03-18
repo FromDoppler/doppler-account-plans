@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Doppler.AccountPlans.Enums;
 using Doppler.AccountPlans.Model;
+using Doppler.AccountPlans.TimeCollector;
 
 namespace Doppler.AccountPlans.Infrastructure
 {
@@ -10,13 +11,17 @@ namespace Doppler.AccountPlans.Infrastructure
     {
         private readonly IDatabaseConnectionFactory _connectionFactory;
 
-        public PromotionRepository(IDatabaseConnectionFactory connectionFactory)
+        private readonly ITimeCollector _timeCollector;
+
+        public PromotionRepository(IDatabaseConnectionFactory connectionFactory, ITimeCollector timeCollector)
         {
             _connectionFactory = connectionFactory;
+            _timeCollector = timeCollector;
         }
 
         public async Task<Promotion> GetPromotionByCode(string code, int planId)
         {
+            using var _ = _timeCollector.StartScope();
             using var connection = _connectionFactory.GetConnection();
 
             var userType = await GetUserTypeByPlan(planId);
@@ -85,6 +90,7 @@ WHERE
 
         public async Task<TimesApplyedPromocode> GetHowManyTimesApplyedPromocode(string code, string accountName)
         {
+            using var _ = _timeCollector.StartScope();
             using var connection = _connectionFactory.GetConnection();
             var times = await connection.QueryFirstOrDefaultAsync<TimesApplyedPromocode>(@"
 SELECT
