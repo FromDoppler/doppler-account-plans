@@ -1,6 +1,7 @@
 using System;
 using Doppler.AccountPlans.Encryption;
 using Doppler.AccountPlans.Infrastructure;
+using Doppler.AccountPlans.TimeCollector;
 using Doppler.AccountPlans.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,6 +35,7 @@ namespace Doppler.AccountPlans
             services.AddScoped<IEncryptionService, EncryptionService>();
             services.Configure<EncryptionSettings>(Configuration.GetSection(nameof(EncryptionSettings)));
             services.AddScoped<IPromotionRepository, PromotionRepository>();
+            services.AddTimeCollector(Configuration);
 
             services.AddSwaggerGen(c =>
             {
