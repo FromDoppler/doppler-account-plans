@@ -184,18 +184,27 @@ namespace Doppler.AccountPlans.Controllers
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
-        [HttpGet("/accounts/{accountName}/landingplan")]
+        [HttpGet("/accounts/{accountName}/newplan/landingplan/calculate")]
         public async Task<IActionResult> GetCalculateUpgradeLandingPlanCost(
-            [FromQuery] Dictionary<string, string> landingPlanParams,
+            [FromQuery] string landingIds,
+            [FromQuery] string landingPacks,
             [FromQuery] int discountId)
         {
             var landingPlans = await _accountPlansRepository.GetLandingPlans();
             var discountPlan = discountId > 0 ? await _accountPlansRepository.GetDiscountInformation(discountId) : null;
             var landingPlansSummary = new List<LandingPlanSummary>();
 
-            foreach (var param in landingPlanParams)
+            var landingIdsList = landingIds.Split(",", StringSplitOptions.RemoveEmptyEntries);
+            var landingPacksList = landingPacks.Split(",", StringSplitOptions.RemoveEmptyEntries);
+
+            if (landingIdsList.Length != landingPacksList.Length)
             {
-                if (int.TryParse(param.Key, out int idPlan) && int.TryParse(param.Value, out int numberOfPlan))
+                return new BadRequestObjectResult(new { message = "The number of landing ids and landing pakcs must be the same" });
+            }
+
+            for (int i = 0; i < landingIdsList.Length; i++)
+            {
+                if (int.TryParse(landingIdsList[i], out int idPlan) && int.TryParse(landingPacksList[i], out int numberOfPlan))
                 {
                     landingPlansSummary.Add(new LandingPlanSummary { IdLandingPlan = idPlan, NumberOfPlans = numberOfPlan });
                 }
