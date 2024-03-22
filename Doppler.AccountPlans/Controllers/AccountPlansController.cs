@@ -11,6 +11,7 @@ using Doppler.AccountPlans.Enums;
 using System;
 using System.Numerics;
 using Doppler.AccountPlans.TimeCollector;
+using System.Collections.Generic;
 
 namespace Doppler.AccountPlans.Controllers
 {
@@ -186,12 +187,29 @@ namespace Doppler.AccountPlans.Controllers
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpGet("/accounts/{accountName}/newplan/landingplan/calculate")]
         public async Task<IActionResult> GetCalculateUpgradeLandingPlanCost(
+            [FromRoute] string accountName,
             [FromQuery] string landingIds,
-            [FromQuery] string landingPacks,
-            [FromQuery] int discountId)
+            [FromQuery] string landingPacks)
         {
+            if (string.IsNullOrEmpty(landingIds))
+            {
+                return new BadRequestObjectResult(new { message = "The 'landingIds' query parameter is required" });
+            }
+
+            if (string.IsNullOrEmpty(landingPacks))
+            {
+                return new BadRequestObjectResult(new { message = "The 'landingPacks' query parameter is required" });
+            }
+
+            var currentPlan = await _accountPlansRepository.GetCurrentPlanInformation(accountName);
+
+            if (currentPlan is null)
+            {
+                return new BadRequestObjectResult(new { message = "The given user has no billing credit" });
+            }
+
             var landingPlans = await _accountPlansRepository.GetLandingPlans();
-            var discountPlan = discountId > 0 ? await _accountPlansRepository.GetDiscountInformation(discountId) : null;
+            var discountPlan = currentPlan.IdDiscountPlan > 0 ? await _accountPlansRepository.GetDiscountInformation(currentPlan.IdDiscountPlan) : null;
             var landingPlansSummary = new List<LandingPlanSummary>();
 
             var landingIdsList = landingIds.Split(",", StringSplitOptions.RemoveEmptyEntries);
@@ -210,9 +228,9 @@ namespace Doppler.AccountPlans.Controllers
                 }
             }
 
-            var totalFee = CalculateUpgradeCostHelper.CalculateLandingPlanAmountDetails(landingPlansSummary, landingPlans, discountPlan);
+            var upgradeCost = CalculateUpgradeCostHelper.CalculateLandingPlanAmountDetails(currentPlan, _dateTimeProvider.Now, landingPlansSummary, landingPlans, discountPlan);
 
-            return new OkObjectResult(new { totalFee });
+            return new OkObjectResult(upgradeCost);
         }
 
         [HttpGet("/plans/{planId}/validate/{promocode}")]
