@@ -4,6 +4,7 @@ using Moq;
 using System;
 using Doppler.AccountPlans.Enums;
 using Xunit;
+using System.Collections.Generic;
 
 namespace Doppler.AccountPlans
 {
@@ -641,5 +642,109 @@ namespace Doppler.AccountPlans
             Assert.Equal(0, result.DiscountPromocode.DiscountPercentage);
             Assert.Equal(0, result.DiscountPromocode.Amount);
         }
+
+        #region CalculateLandingPlanAmountDetails
+
+        [Fact]
+        public void CalculateLandingPlanAmountDetails_Should_return_correct_when_has_monthly_plan_with_no_discount()
+        {
+            var dateTimeProviderMock = new Mock<IDateTimeProvider>();
+
+            var landingPlansSummary = new List<LandingPlanSummary>()
+            {
+                new LandingPlanSummary() { IdLandingPlan = 1, NumberOfPlans = 2 },
+                new LandingPlanSummary() { IdLandingPlan = 2, NumberOfPlans = 0 },
+                new LandingPlanSummary() { IdLandingPlan = 3, NumberOfPlans = 1 }
+            };
+
+            var landingPlansInformation = new List<LandingPlanInformation>()
+            {
+                new LandingPlanInformation() { PlanId = 1, PlanType = PlanTypeEnum.Landing, LandingsQty = 5, Fee = 10 },
+                new LandingPlanInformation() { PlanId = 2, PlanType = PlanTypeEnum.Landing, LandingsQty = 25, Fee = 45 },
+                new LandingPlanInformation() { PlanId = 3, PlanType = PlanTypeEnum.Landing, LandingsQty = 50, Fee = 80 },
+            };
+
+            var currentPlan = new UserPlanInformation() { TotalMonthPlan = 1, CurrentMonthPlan = 0 };
+
+            var result = CalculateUpgradeCostHelper.CalculateLandingPlanAmountDetails(
+                currentPlan,
+                dateTimeProviderMock.Object.Now,
+                landingPlansSummary,
+                landingPlansInformation,
+                discount: null);
+
+            Assert.Equal(0, result.Total);
+            Assert.Equal(100, result.NextMonthTotal);
+        }
+
+        [Fact]
+        public void CalculateLandingPlanAmountDetails_Should_return_correct_when_has_monthly_plan_with_discount()
+        {
+            var dateTimeProviderMock = new Mock<IDateTimeProvider>();
+
+            var landingPlansSummary = new List<LandingPlanSummary>()
+            {
+                new LandingPlanSummary() { IdLandingPlan = 1, NumberOfPlans = 2 },
+                new LandingPlanSummary() { IdLandingPlan = 2, NumberOfPlans = 0 },
+                new LandingPlanSummary() { IdLandingPlan = 3, NumberOfPlans = 1 }
+            };
+
+            var landingPlansInformation = new List<LandingPlanInformation>()
+            {
+                new LandingPlanInformation() { PlanId = 1, PlanType = PlanTypeEnum.Landing, LandingsQty = 5, Fee = 10 },
+                new LandingPlanInformation() { PlanId = 2, PlanType = PlanTypeEnum.Landing, LandingsQty = 25, Fee = 45 },
+                new LandingPlanInformation() { PlanId = 3, PlanType = PlanTypeEnum.Landing, LandingsQty = 50, Fee = 80 },
+            };
+
+            var currentPlan = new UserPlanInformation() { TotalMonthPlan = 1, CurrentMonthPlan = 0 };
+
+            var discount = new PlanDiscountInformation() { DiscountPlanFee = 5 };
+
+            var result = CalculateUpgradeCostHelper.CalculateLandingPlanAmountDetails(
+                currentPlan,
+                dateTimeProviderMock.Object.Now,
+                landingPlansSummary,
+                landingPlansInformation,
+                discount);
+
+            Assert.Equal(0, result.Total);
+            Assert.Equal(95, result.NextMonthTotal);
+        }
+
+        [Fact]
+        public void CalculateLandingPlanAmountDetails_Should_return_correct_when_has_quaterly_plan_with_discount_and_start_in_first_month()
+        {
+            var dateTimeProviderMock = new Mock<IDateTimeProvider>();
+
+            var landingPlansSummary = new List<LandingPlanSummary>()
+            {
+                new() { IdLandingPlan = 1, NumberOfPlans = 2 },
+                new() { IdLandingPlan = 2, NumberOfPlans = 0 },
+                new() { IdLandingPlan = 3, NumberOfPlans = 1 }
+            };
+
+            var landingPlansInformation = new List<LandingPlanInformation>()
+            {
+                new() { PlanId = 1, PlanType = PlanTypeEnum.Landing, LandingsQty = 5, Fee = 10 },
+                new() { PlanId = 2, PlanType = PlanTypeEnum.Landing, LandingsQty = 25, Fee = 45 },
+                new() { PlanId = 3, PlanType = PlanTypeEnum.Landing, LandingsQty = 50, Fee = 80 },
+            };
+
+            var currentPlan = new UserPlanInformation() { TotalMonthPlan = 3, CurrentMonthPlan = 0 };
+
+            var discount = new PlanDiscountInformation() { DiscountPlanFee = 10 };
+
+            var result = CalculateUpgradeCostHelper.CalculateLandingPlanAmountDetails(
+                currentPlan,
+                dateTimeProviderMock.Object.Now,
+                landingPlansSummary,
+                landingPlansInformation,
+                discount);
+
+            Assert.Equal(270, result.Total);
+            Assert.Equal(270, result.NextMonthTotal);
+        }
+
+        #endregion
     }
 }
