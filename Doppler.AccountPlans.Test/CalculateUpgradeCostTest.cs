@@ -673,7 +673,7 @@ namespace Doppler.AccountPlans
                 landingPlansInformation,
                 discount: null);
 
-            Assert.Equal(0, result.Total);
+            Assert.Equal(100, result.Total);
             Assert.Equal(100, result.NextMonthTotal);
         }
 
@@ -707,7 +707,7 @@ namespace Doppler.AccountPlans
                 landingPlansInformation,
                 discount);
 
-            Assert.Equal(0, result.Total);
+            Assert.Equal(95, result.Total);
             Assert.Equal(95, result.NextMonthTotal);
         }
 

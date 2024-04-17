@@ -46,16 +46,21 @@ namespace Doppler.AccountPlans.Utils
             }
 
             bool isMonthPlan = currentPlan.TotalMonthPlan <= 1;
+
+            var currentMonthPlan = !isMonthPlan ?
+                currentPlan.CurrentMonthPlan :
+                1;
+
             int currentBaseMonth;
 
             if (isMonthPlan)
             {
-                currentBaseMonth = 1;
+                currentBaseMonth = currentMonthPlan - 1;
             }
             else
             {
-                currentBaseMonth = currentPlan.CurrentMonthPlan > 0 ?
-                    now.Day < 21 ? currentPlan.CurrentMonthPlan - 1 : currentPlan.CurrentMonthPlan :
+                currentBaseMonth = currentMonthPlan > 0 ?
+                    now.Day < 21 ? currentMonthPlan - 1 : currentMonthPlan :
                     0;
             }
 
