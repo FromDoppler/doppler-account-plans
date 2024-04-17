@@ -11,6 +11,7 @@ using Doppler.AccountPlans.Enums;
 using System;
 using System.Numerics;
 using Doppler.AccountPlans.TimeCollector;
+using System.Collections.Generic;
 
 namespace Doppler.AccountPlans.Controllers
 {
@@ -179,6 +180,55 @@ namespace Doppler.AccountPlans.Controllers
 
             /* Marketing plan */
             var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgrade, currentDiscountPlan, totalCreditDiscount, newPlanType);
+
+            return new OkObjectResult(upgradeCost);
+        }
+
+        [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
+        [HttpGet("/accounts/{accountName}/newplan/landingplan/calculate")]
+        public async Task<IActionResult> GetCalculateUpgradeLandingPlanCost(
+            [FromRoute] string accountName,
+            [FromQuery] string landingIds,
+            [FromQuery] string landingPacks)
+        {
+            if (string.IsNullOrEmpty(landingIds))
+            {
+                return new BadRequestObjectResult(new { message = "The 'landingIds' query parameter is required" });
+            }
+
+            if (string.IsNullOrEmpty(landingPacks))
+            {
+                return new BadRequestObjectResult(new { message = "The 'landingPacks' query parameter is required" });
+            }
+
+            var currentPlan = await _accountPlansRepository.GetCurrentPlanInformation(accountName);
+
+            if (currentPlan is null)
+            {
+                return new BadRequestObjectResult(new { message = "The given user has no billing credit" });
+            }
+
+            var landingPlans = await _accountPlansRepository.GetLandingPlans();
+            var discountPlan = currentPlan.IdDiscountPlan > 0 ? await _accountPlansRepository.GetDiscountInformation(currentPlan.IdDiscountPlan) : null;
+            var landingPlansSummary = new List<LandingPlanSummary>();
+
+            var landingIdsList = landingIds.Split(",", StringSplitOptions.RemoveEmptyEntries);
+            var landingPacksList = landingPacks.Split(",", StringSplitOptions.RemoveEmptyEntries);
+
+            if (landingIdsList.Length != landingPacksList.Length)
+            {
+                return new BadRequestObjectResult(new { message = "The number of landing ids and landing pakcs must be the same" });
+            }
+
+            for (int i = 0; i < landingIdsList.Length; i++)
+            {
+                if (int.TryParse(landingIdsList[i], out int idPlan) && int.TryParse(landingPacksList[i], out int numberOfPlan))
+                {
+                    landingPlansSummary.Add(new LandingPlanSummary { IdLandingPlan = idPlan, NumberOfPlans = numberOfPlan });
+                }
+            }
+
+            var upgradeCost = CalculateUpgradeCostHelper.CalculateLandingPlanAmountDetails(currentPlan, _dateTimeProvider.Now, landingPlansSummary, landingPlans, discountPlan);
 
             return new OkObjectResult(upgradeCost);
         }
