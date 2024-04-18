@@ -303,9 +303,9 @@ FROM
     [BillingCredits] B
 INNER JOIN [User] U ON U.IdUser = B.IdUser
 WHERE
-    U.IdCurrentBillingCredit IS NOT NULL AND 
-	(B.IdUserTypePlan = 23 OR B.IdUserTypePlan = 24) AND
-	B.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email)
+    U.IdCurrentBillingCredit IS NOT NULL AND
+    (B.IdUserTypePlan = 23 OR B.IdUserTypePlan = 24) AND
+    B.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email)
 ORDER BY b.[Date] DESC", new
             {
                 @email = accountName
