@@ -666,12 +666,15 @@ namespace Doppler.AccountPlans
 
             var currentPlan = new UserPlanInformation() { TotalMonthPlan = 1, CurrentMonthPlan = 0 };
 
+            UserPlanInformation lastLandingPlan = null;
+
             var result = CalculateUpgradeCostHelper.CalculateLandingPlanAmountDetails(
                 currentPlan,
                 dateTimeProviderMock.Object.Now,
                 landingPlansSummary,
                 landingPlansInformation,
-                discount: null);
+                discount: null,
+                lastLandingPlan);
 
             Assert.Equal(100, result.Total);
             Assert.Equal(100, result.NextMonthTotal);
@@ -700,12 +703,15 @@ namespace Doppler.AccountPlans
 
             var discount = new PlanDiscountInformation() { DiscountPlanFee = 5 };
 
+            UserPlanInformation lastLandingPlan = null;
+
             var result = CalculateUpgradeCostHelper.CalculateLandingPlanAmountDetails(
                 currentPlan,
                 dateTimeProviderMock.Object.Now,
                 landingPlansSummary,
                 landingPlansInformation,
-                discount);
+                discount,
+                lastLandingPlan);
 
             Assert.Equal(95, result.Total);
             Assert.Equal(95, result.NextMonthTotal);
@@ -734,12 +740,15 @@ namespace Doppler.AccountPlans
 
             var discount = new PlanDiscountInformation() { DiscountPlanFee = 10 };
 
+            UserPlanInformation lastLandingPlan = null;
+
             var result = CalculateUpgradeCostHelper.CalculateLandingPlanAmountDetails(
                 currentPlan,
                 dateTimeProviderMock.Object.Now,
                 landingPlansSummary,
                 landingPlansInformation,
-                discount);
+                discount,
+                lastLandingPlan);
 
             Assert.Equal(270, result.Total);
             Assert.Equal(270, result.NextMonthTotal);
