@@ -285,5 +285,34 @@ WHERE [Active] = 1");
 
             return result;
         }
+
+        public async Task<UserPlanInformation> GetLastLandingPlanBillingInformation(string accountName)
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryFirstOrDefaultAsync<UserPlanInformation>(@$"SELECT
+    B.[PlanFee] AS Fee,
+    B.[CurrentMonthPlan],
+    B.[DiscountPlanFeeAdmin],
+    B.[DiscountPlanFeePromotion],
+    B.IdUserTypePlan,
+    B.TotalMonthPlan,
+    B.IdDiscountPlan,
+    B.CreditsQty AS EmailQty,
+    B.SubscribersQty
+FROM
+    [BillingCredits] B
+INNER JOIN [User] U ON U.IdUser = B.IdUser
+WHERE
+    U.IdCurrentBillingCredit IS NOT NULL AND
+    (B.IdUserTypePlan = {(int)BillingCreditTypeEnum.Landing_Request} OR
+    B.IdUserTypePlan = {(int)BillingCreditTypeEnum.Landing_Buyed_CC}) AND
+    B.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email)
+ORDER BY b.[Date] DESC", new
+            {
+                @email = accountName
+            });
+
+            return result;
+        }
     }
 }

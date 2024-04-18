@@ -30,7 +30,8 @@ namespace Doppler.AccountPlans.Utils
             DateTime now,
             List<LandingPlanSummary> landingPlansSummary,
             IEnumerable<LandingPlanInformation> landingsPlanInformation,
-            PlanDiscountInformation discount)
+            PlanDiscountInformation discount,
+            UserPlanInformation lastLandingPlan)
         {
             var result = new PlanAmountDetails { DiscountPromocode = null };
             decimal baseLandingPlansFee = 0;
@@ -85,10 +86,26 @@ namespace Doppler.AccountPlans.Utils
             }
 
             result.Total = totalFee;
-            result.CurrentMonthTotal = result.Total;
-
+            result.CurrentMonthTotal = totalFee;
             result.NextMonthTotal = nextTotalFee;
             result.MajorThat21st = now.Day > 21;
+
+            // Discount already paid plans
+            if (lastLandingPlan is not null)
+            {
+                // Plan Downgrade
+                if (result.CurrentMonthTotal <= lastLandingPlan.Fee)
+                {
+                    result.PositiveBalance = lastLandingPlan.Fee - result.CurrentMonthTotal;
+                    result.Total = 0;
+                    result.CurrentMonthTotal = 0;
+                }
+                else // Plan Upgrade
+                {
+                    result.Total -= lastLandingPlan.Fee;
+                    result.CurrentMonthTotal -= lastLandingPlan.Fee;
+                }
+            }
 
             var nexMonnthInvoiceDate = now.AddMonths(differenceBetweenMonthPlans);
             result.NextMonthDate = new DateTime(nexMonnthInvoiceDate.Year, nexMonnthInvoiceDate.Month, 1);

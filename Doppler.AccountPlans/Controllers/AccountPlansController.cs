@@ -228,7 +228,9 @@ namespace Doppler.AccountPlans.Controllers
                 }
             }
 
-            var upgradeCost = CalculateUpgradeCostHelper.CalculateLandingPlanAmountDetails(currentPlan, _dateTimeProvider.Now, landingPlansSummary, landingPlans, discountPlan);
+            var lastLandingPlan = await _accountPlansRepository.GetLastLandingPlanBillingInformation(accountName);
+
+            var upgradeCost = CalculateUpgradeCostHelper.CalculateLandingPlanAmountDetails(currentPlan, _dateTimeProvider.Now, landingPlansSummary, landingPlans, discountPlan, lastLandingPlan);
 
             return new OkObjectResult(upgradeCost);
         }
