@@ -46,6 +46,13 @@ namespace Doppler.AccountPlans.Utils
                 }
             }
 
+            discount ??= new PlanDiscountInformation
+            {
+                MonthPlan = 1,
+                DiscountPlanFee = 0,
+                ApplyPromo = true
+            };
+
             bool isMonthPlan = currentPlan.TotalMonthPlan <= 1;
 
             var currentMonthPlan = !isMonthPlan ?
@@ -71,41 +78,50 @@ namespace Doppler.AccountPlans.Utils
             decimal totalFee = baseLandingPlansFee * differenceBetweenMonthPlans;
             decimal nextTotalFee = baseLandingPlansFee * currentPlan.TotalMonthPlan;
 
-            if (discount is not null && discount.DiscountPlanFee > 0)
+            result.DiscountPrepayment = new DiscountPrepayment
             {
-                result.DiscountPrepayment = new DiscountPrepayment
-                {
-                    Amount = Math.Round((totalFee * discount.DiscountPlanFee) / 100, 2),
-                    DiscountPercentage = discount.DiscountPlanFee,
-                    MonthsToPay = differenceBetweenMonthPlans,
-                    NextAmount = Math.Round((nextTotalFee * discount.DiscountPlanFee) / 100, 2),
-                };
+                Amount = Math.Round((totalFee * discount.DiscountPlanFee) / 100, 2),
+                DiscountPercentage = discount.DiscountPlanFee,
+                MonthsToPay = differenceBetweenMonthPlans,
+                NextAmount = Math.Round((nextTotalFee * discount.DiscountPlanFee) / 100, 2),
+            };
 
-                totalFee -= result.DiscountPrepayment.Amount;
-                nextTotalFee -= result.DiscountPrepayment.NextAmount;
-            }
-
-            result.Total = totalFee;
-            result.CurrentMonthTotal = totalFee;
-            result.NextMonthTotal = nextTotalFee;
-            result.MajorThat21st = now.Day > 21;
-
-            // Discount already paid plans
+            //Discount already paid plans
             if (lastLandingPlan is not null)
             {
-                // Plan Downgrade
-                if (result.CurrentMonthTotal <= lastLandingPlan.Fee)
+                decimal amount = 0;
+                var numberOfMonthsToDiscount = 0;
+
+                var baseMonth = isMonthPlan ?
+                                now.Day < 21 ? 1 :
+                                (lastLandingPlan.Date.Month == now.Month &&
+                                lastLandingPlan.Date.Year == now.Year &&
+                                lastLandingPlan.Date.Day >= 21) ? 1 : 0 :
+                                now.Day < 21 ? currentMonthPlan - 1 : currentMonthPlan;
+
+                /* Calculate payment already paid */
+                if (isMonthPlan)
                 {
-                    result.PositiveBalance = lastLandingPlan.Fee - result.CurrentMonthTotal;
-                    result.Total = 0;
-                    result.CurrentMonthTotal = 0;
+                    numberOfMonthsToDiscount = baseMonth;
+                    amount = lastLandingPlan.Fee * numberOfMonthsToDiscount;
                 }
-                else // Plan Upgrade
+                else
                 {
-                    result.Total -= lastLandingPlan.Fee;
-                    result.CurrentMonthTotal -= lastLandingPlan.Fee;
+                    numberOfMonthsToDiscount = currentMonthPlan - baseMonth;
+                    amount = numberOfMonthsToDiscount > 0 ? (decimal)(lastLandingPlan.Fee / numberOfMonthsToDiscount) : 0.0m;
                 }
+
+                result.DiscountPaymentAlreadyPaid = Math.Round(amount, 2);
             }
+
+            totalFee = totalFee - result.DiscountPrepayment.Amount - result.DiscountPaymentAlreadyPaid;
+            nextTotalFee -= result.DiscountPrepayment.NextAmount;
+
+            result.Total = totalFee;
+            result.CurrentMonthTotal = result.Total > 0 ? result.Total : 0;
+            result.NextMonthTotal = nextTotalFee;
+            result.MajorThat21st = now.Day > 21;
+            result.PositiveBalance = result.CurrentMonthTotal > 0 ? 0 : result.Total;
 
             var nexMonnthInvoiceDate = now.AddMonths(differenceBetweenMonthPlans);
             result.NextMonthDate = new DateTime(nexMonnthInvoiceDate.Year, nexMonnthInvoiceDate.Month, 1);

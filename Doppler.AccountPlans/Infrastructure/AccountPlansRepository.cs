@@ -304,8 +304,8 @@ FROM
 INNER JOIN [User] U ON U.IdUser = B.IdUser
 WHERE
     U.IdCurrentBillingCredit IS NOT NULL AND
-    (B.IdUserTypePlan = {(int)BillingCreditTypeEnum.Landing_Request} OR
-    B.IdUserTypePlan = {(int)BillingCreditTypeEnum.Landing_Buyed_CC}) AND
+    (B.IdBillingCreditType = {(int)BillingCreditTypeEnum.Landing_Request} OR
+    B.IdBillingCreditType = {(int)BillingCreditTypeEnum.Landing_Buyed_CC}) AND
     B.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email)
 ORDER BY b.[Date] DESC", new
             {
