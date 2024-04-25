@@ -107,8 +107,9 @@ namespace Doppler.AccountPlans.Utils
                 }
                 else
                 {
-                    numberOfMonthsToDiscount = currentMonthPlan - baseMonth;
-                    amount = numberOfMonthsToDiscount > 0 ? (decimal)(lastLandingPlan.Fee / numberOfMonthsToDiscount) : 0.0m;
+                    var fee = (lastLandingPlan.Fee * currentPlan.TotalMonthPlan) - Math.Round((lastLandingPlan.Fee * currentPlan.TotalMonthPlan * discount.DiscountPlanFee) / 100, 2);
+                    numberOfMonthsToDiscount = currentPlan.TotalMonthPlan - baseMonth;
+                    amount = numberOfMonthsToDiscount > 0 ? (decimal)((fee / currentPlan.TotalMonthPlan)) * numberOfMonthsToDiscount : 0.0m;
                 }
 
                 result.DiscountPaymentAlreadyPaid = Math.Round(amount, 2);
