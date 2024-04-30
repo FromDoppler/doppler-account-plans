@@ -674,6 +674,7 @@ namespace Doppler.AccountPlans
                 landingPlansSummary,
                 landingPlansInformation,
                 discount: null,
+                lastLandingPlan,
                 lastLandingPlan);
 
             Assert.Equal(100, result.Total);
@@ -711,6 +712,7 @@ namespace Doppler.AccountPlans
                 landingPlansSummary,
                 landingPlansInformation,
                 discount,
+                lastLandingPlan,
                 lastLandingPlan);
 
             Assert.Equal(95, result.Total);
@@ -748,6 +750,7 @@ namespace Doppler.AccountPlans
                 landingPlansSummary,
                 landingPlansInformation,
                 discount,
+                lastLandingPlan,
                 lastLandingPlan);
 
             Assert.Equal(270, result.Total);

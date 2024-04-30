@@ -31,7 +31,8 @@ namespace Doppler.AccountPlans.Utils
             List<LandingPlanSummary> landingPlansSummary,
             IEnumerable<LandingPlanInformation> landingsPlanInformation,
             PlanDiscountInformation discount,
-            UserPlanInformation lastLandingPlan)
+            UserPlanInformation lastLandingPlan,
+            UserPlanInformation firstUpgrade)
         {
             var result = new PlanAmountDetails { DiscountPromocode = null };
             decimal baseLandingPlansFee = 0;
@@ -94,9 +95,9 @@ namespace Doppler.AccountPlans.Utils
 
                 var baseMonth = isMonthPlan ?
                                 now.Day < 21 ? 1 :
-                                (lastLandingPlan.Date.Month == now.Month &&
-                                lastLandingPlan.Date.Year == now.Year &&
-                                lastLandingPlan.Date.Day >= 21) ? 1 : 0 :
+                                (firstUpgrade.Date.Month == now.Month &&
+                                firstUpgrade.Date.Year == now.Year &&
+                                firstUpgrade.Date.Day >= 21) ? 1 : 0 :
                                 now.Day < 21 ? currentMonthPlan - 1 : currentMonthPlan;
 
                 /* Calculate payment already paid */
