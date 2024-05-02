@@ -64,7 +64,9 @@ namespace Doppler.AccountPlans.Utils
 
             if (isMonthPlan)
             {
-                currentBaseMonth = currentMonthPlan - 1;
+                currentBaseMonth = now.Day < 21 ? currentMonthPlan - 1 :
+                    firstUpgrade != null && firstUpgrade.Date.Month == now.Month && firstUpgrade.Date.Year == now.Year && firstUpgrade.Date.Day >= 21 ?
+                    currentMonthPlan - 1 : currentMonthPlan;
             }
             else
             {
@@ -73,11 +75,11 @@ namespace Doppler.AccountPlans.Utils
                     0;
             }
 
-            var differenceBetweenMonthPlans = currentPlan.TotalMonthPlan - currentBaseMonth;
+            var differenceBetweenMonthPlans = discount.MonthPlan - currentBaseMonth;
 
 
             decimal totalFee = baseLandingPlansFee * differenceBetweenMonthPlans;
-            decimal nextTotalFee = baseLandingPlansFee * currentPlan.TotalMonthPlan;
+            decimal nextTotalFee = baseLandingPlansFee * discount.MonthPlan;
 
             result.DiscountPrepayment = new DiscountPrepayment
             {
@@ -125,7 +127,7 @@ namespace Doppler.AccountPlans.Utils
             result.MajorThat21st = now.Day > 21;
             result.PositiveBalance = result.CurrentMonthTotal > 0 ? 0 : result.Total;
 
-            var nexMonnthInvoiceDate = now.AddMonths(differenceBetweenMonthPlans);
+            var nexMonnthInvoiceDate = now.AddMonths(!isMonthPlan ? differenceBetweenMonthPlans : 1);
             result.NextMonthDate = new DateTime(nexMonnthInvoiceDate.Year, nexMonnthInvoiceDate.Month, 1);
 
             return result;
