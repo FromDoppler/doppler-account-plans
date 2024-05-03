@@ -314,5 +314,34 @@ ORDER BY b.[Date] DESC", new
 
             return result;
         }
+
+        public async Task<UserPlanInformation> GetFirstLandingUpgrade(string accountName)
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+
+            var currentPlan = await connection.QueryFirstOrDefaultAsync<UserPlanInformation>(@$"
+SELECT
+    B.[PlanFee] AS Fee,
+    B.[CurrentMonthPlan],
+    B.[DiscountPlanFeeAdmin],
+    B.[DiscountPlanFeePromotion],
+    P.Code AS PromotionCode,
+    B.IdUserTypePlan,
+    B.Date
+FROM
+    [BillingCredits] B
+INNER JOIN [User] U ON U.IdUser = B.IdUser
+LEFT JOIN [Promotions] P ON P.IdPromotion = B.IdPromotion
+WHERE
+    b.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email) AND  IdBillingCreditType IN ({(int)BillingCreditTypeEnum.Landing_Request}, {(int)BillingCreditTypeEnum.Landing_Buyed_CC})
+ORDER BY b.[Date] ASC;",
+                new
+                {
+                    @email = accountName
+                });
+
+            return currentPlan;
+        }
     }
 }

@@ -674,6 +674,7 @@ namespace Doppler.AccountPlans
                 landingPlansSummary,
                 landingPlansInformation,
                 discount: null,
+                lastLandingPlan,
                 lastLandingPlan);
 
             Assert.Equal(100, result.Total);
@@ -701,7 +702,7 @@ namespace Doppler.AccountPlans
 
             var currentPlan = new UserPlanInformation() { TotalMonthPlan = 1, CurrentMonthPlan = 0 };
 
-            var discount = new PlanDiscountInformation() { DiscountPlanFee = 5 };
+            var discount = new PlanDiscountInformation() { DiscountPlanFee = 5, MonthPlan = 1 };
 
             UserPlanInformation lastLandingPlan = null;
 
@@ -711,6 +712,7 @@ namespace Doppler.AccountPlans
                 landingPlansSummary,
                 landingPlansInformation,
                 discount,
+                lastLandingPlan,
                 lastLandingPlan);
 
             Assert.Equal(95, result.Total);
@@ -738,7 +740,7 @@ namespace Doppler.AccountPlans
 
             var currentPlan = new UserPlanInformation() { TotalMonthPlan = 3, CurrentMonthPlan = 0 };
 
-            var discount = new PlanDiscountInformation() { DiscountPlanFee = 10 };
+            var discount = new PlanDiscountInformation() { DiscountPlanFee = 10, MonthPlan = 1 };
 
             UserPlanInformation lastLandingPlan = null;
 
@@ -748,10 +750,11 @@ namespace Doppler.AccountPlans
                 landingPlansSummary,
                 landingPlansInformation,
                 discount,
+                lastLandingPlan,
                 lastLandingPlan);
 
-            Assert.Equal(270, result.Total);
-            Assert.Equal(270, result.NextMonthTotal);
+            Assert.Equal(90, result.Total);
+            Assert.Equal(90, result.NextMonthTotal);
         }
 
         #endregion
