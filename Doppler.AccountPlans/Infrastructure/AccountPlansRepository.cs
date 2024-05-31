@@ -290,24 +290,27 @@ WHERE [Active] = 1");
         {
             using var connection = _connectionFactory.GetConnection();
             var result = await connection.QueryFirstOrDefaultAsync<UserPlanInformation>(@$"SELECT
-    B.[PlanFee] AS Fee,
-    B.[CurrentMonthPlan],
-    B.[DiscountPlanFeeAdmin],
-    B.[DiscountPlanFeePromotion],
-    B.IdUserTypePlan,
-    B.TotalMonthPlan,
-    B.IdDiscountPlan,
-    B.CreditsQty AS EmailQty,
-    B.SubscribersQty
-FROM
-    [BillingCredits] B
-INNER JOIN [User] U ON U.IdUser = B.IdUser
+    BC.[PlanFee] AS Fee,
+    BC.[CurrentMonthPlan],
+    BC.[DiscountPlanFeeAdmin],
+    BC.[DiscountPlanFeePromotion],
+    BC.IdUserTypePlan,
+    BC.TotalMonthPlan,
+    BC.IdDiscountPlan,
+    BC.CreditsQty AS EmailQty,
+    BC.SubscribersQty
+FROM [UserAddOn] UA
+INNER JOIN [BillingCredits] BC ON BC.IdBillingCredit = UA.IdCurrentBillingCredit
+INNER JOIN [User] U ON U.IdUser = UA.IdUser
 WHERE
     U.IdCurrentBillingCredit IS NOT NULL AND
-    (B.IdBillingCreditType = {(int)BillingCreditTypeEnum.Landing_Request} OR
-    B.IdBillingCreditType = {(int)BillingCreditTypeEnum.Landing_Buyed_CC}) AND
-    B.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email)
-ORDER BY b.[Date] DESC", new
+    UA.IdAddOnType =  1 AND
+    (BC.IdBillingCreditType IN ({(int)BillingCreditTypeEnum.Landing_Buyed_CC},
+                                {(int)BillingCreditTypeEnum.Landing_Request},
+                                {(int)BillingCreditTypeEnum.Downgrade_Between_Landings},
+                                {(int)BillingCreditTypeEnum.Landing_New_Month})) AND
+    UA.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email)
+ORDER BY BC.[Date] DESC", new
             {
                 @email = accountName
             });
