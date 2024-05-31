@@ -132,7 +132,7 @@ namespace Doppler.AccountPlans.Utils
             result.MajorThat21st = now.Day > 21;
             result.PositiveBalance = result.CurrentMonthTotal > 0 ? 0 : result.Total;
 
-            var nexMonnthInvoiceDate = now.AddMonths(!isMonthPlan ? differenceBetweenMonthPlans : 1);
+            var nexMonnthInvoiceDate = !isMonthPlan ? now.AddMonths(differenceBetweenMonthPlans) : now.Day > 21 ? now.AddMonths(2) : now.AddMonths(1);
             result.NextMonthDate = new DateTime(nexMonnthInvoiceDate.Year, nexMonnthInvoiceDate.Month, 1);
 
             return result;
