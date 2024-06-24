@@ -17,11 +17,10 @@ namespace Doppler.AccountPlans.Helpers
 
             newDiscount ??= new PlanDiscountInformation
             {
-                MonthPlan = 1,
-                DiscountPlanFee = 0,
-                ApplyPromo = true
+                MonthPlan = currentDiscountPlan != null ? currentDiscountPlan.MonthPlan : 1,
+                DiscountPlanFee = currentDiscountPlan != null ? currentDiscountPlan.DiscountPlanFee : 0,
+                ApplyPromo = currentDiscountPlan != null ? currentDiscountPlan.ApplyPromo : true
             };
-
 
             var isMonthPlan = currentPlan.TotalMonthPlan <= 1;
 
