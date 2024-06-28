@@ -77,7 +77,7 @@ namespace Doppler.AccountPlans.Utils
             {
                 currentBaseMonth = currentMonthPlan > 0 && firstUpgrade != null ?
                     now.Day < 21 ? currentMonthPlan - 1 : currentMonthPlan :
-                    0;
+                    currentMonthPlan;
             }
 
             var differenceBetweenMonthPlans = discount.MonthPlan - currentBaseMonth;
