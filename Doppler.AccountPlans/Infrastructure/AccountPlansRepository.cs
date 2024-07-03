@@ -264,6 +264,9 @@ SELECT  [IdChatPlan] AS PlanId,
         [Fee] AS Fee,
         [Agents] AS Agents,
         [Canales] AS Channels,
+        [AdditionalConversation] AS AdditionalConversation,
+        [AdditionalAgent] AS AdditionalAgent,
+        [AdditionalChannel] AS AdditionalChannel,
         2 AS PlanType
 FROM [dbo].[ChatPlans] WITH(NOLOCK)
 WHERE [Fee] > 0");
