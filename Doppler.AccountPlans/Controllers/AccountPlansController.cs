@@ -275,6 +275,31 @@ namespace Doppler.AccountPlans.Controllers
             return new OkObjectResult(contactInformation);
         }
 
+        [HttpGet("/{planType}/plans/{planId}")]
+        public async Task<IActionResult> GetPlanInformationByPlanIdAndType([FromRoute] int planId, [FromRoute] int planType)
+        {
+            PlanInformation planInformation = null;
+
+            if (planType == (int)PlanTypeEnum.Marketing)
+            {
+                planInformation = await _accountPlansRepository.GetPlanInformation(planId);
+            }
+            else
+            {
+                if (planType == (int)PlanTypeEnum.Chat)
+                {
+                    planInformation = await _accountPlansRepository.GetChatPlanInformation(planId);
+                }
+            }
+
+            if (planInformation == null)
+            {
+                return new NotFoundResult();
+            }
+
+            return new OkObjectResult(planInformation);
+        }
+
         [HttpGet("/plans/{planType}/{planId}")]
         public async Task<IActionResult> GetPlanInformationByTypeAndId([FromRoute] PlanTypeEnum planType, [FromRoute] int planId)
         {
