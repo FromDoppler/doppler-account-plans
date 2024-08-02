@@ -211,7 +211,7 @@ WHERE [IdChatPlan] = @conversationPlanId",
             using var _ = _timeCollector.StartScope();
             using var connection = _connectionFactory.GetConnection();
 
-            var currentPlan = await connection.QueryFirstOrDefaultAsync<UserPlanInformation>(@"
+            var currentPlan = await connection.QueryFirstOrDefaultAsync<UserPlanInformation>(@$"
 SELECT
     B.[PlanFee] AS Fee,
     B.[CurrentMonthPlan],
@@ -231,7 +231,9 @@ FROM
 INNER JOIN [UserTypesPlans] UTP WITH(NOLOCK) ON UTP.IdUserTypePlan = B.IdUserTypePlan
 INNER JOIN [User] U WITH(NOLOCK) ON U.IdUser = B.IdUser
 LEFT JOIN [Promotions] P WITH(NOLOCK) ON P.IdPromotion = B.IdPromotion
-LEFT JOIN [ChatPlanUsers] CUP WITH(NOLOCK) ON CUP.IdBillingCredit = B.IdBillingCredit
+LEFT JOIN [UserAddOn] UAO WITH(NOLOCK) ON UAO.IdUser = U.IdUser AND UAO.IdAddOnType = 2
+LEFT JOIN [BillingCredits] CPBC ON CPBC.IdBillingCredit = UAO.IdCurrentBillingCredit AND CPBC.IdBillingCreditType != {(int)BillingCreditTypeEnum.Conversation_Canceled}
+LEFT JOIN [ChatPlanUsers] CUP WITH(NOLOCK) ON CUP.IdBillingCredit = CPBC.IdBillingCredit
 LEFT JOIN [ChatPlans] CP WITH(NOLOCK) ON CP.IdChatPlan = CUP.IdChatPlan
 WHERE
     b.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email) AND U.IdCurrentBillingCredit IS NOT NULL
