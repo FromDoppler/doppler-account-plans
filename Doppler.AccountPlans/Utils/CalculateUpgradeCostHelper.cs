@@ -75,7 +75,7 @@ namespace Doppler.AccountPlans.Utils
             }
             else
             {
-                currentBaseMonth = currentMonthPlan > 0 && firstUpgrade != null ?
+                currentBaseMonth = currentMonthPlan > 0 ?
                     now.Day < 21 ? currentMonthPlan - 1 : currentMonthPlan :
                     currentMonthPlan;
             }
