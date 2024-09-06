@@ -60,17 +60,13 @@ namespace Doppler.AccountPlans.Helpers
                     0;
             }
 
-
-            var currentDiscountPlanFeePromotion = currentPlan.DiscountPlanFeePromotion ?? 0;
             var currentDiscountPlanFeeAdmin = currentPlan.DiscountPlanFeeAdmin ?? 0;
-
             var planAmount = Math.Round(amount, 2);
-            var discountAmountPromotion = Math.Round((currentPlan.ChatPlanFee ?? 0) * numberOfMonthsToDiscount * currentDiscountPlanFeePromotion / 100, 2);
             var discountAmountAdmin = Math.Round((amount * currentDiscountPlanFeeAdmin) / 100, 2);
 
             var result = new PlanAmountDetails
             {
-                DiscountPaymentAlreadyPaid = planAmount - discountAmountPromotion - discountAmountAdmin - currentDiscountPrepayment,
+                DiscountPaymentAlreadyPaid = planAmount - discountAmountAdmin - currentDiscountPrepayment,
                 DiscountPrepayment = new DiscountPrepayment
                 {
                     Amount = Math.Round(((newPlan.ChatPlanFee ?? 0) * differenceBetweenMonthPlans * newDiscount.DiscountPlanFee) / 100, 2),
