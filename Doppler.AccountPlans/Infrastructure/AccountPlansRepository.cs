@@ -271,7 +271,7 @@ SELECT  [IdChatPlan] AS PlanId,
         [AdditionalChannel] AS AdditionalChannel,
         2 AS PlanType
 FROM [dbo].[ChatPlans] WITH(NOLOCK)
-WHERE [Fee] > 0");
+WHERE [Active] = 1 AND [Fee] > 0");
 
             return result;
         }
