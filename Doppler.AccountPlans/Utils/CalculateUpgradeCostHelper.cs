@@ -60,25 +60,13 @@ namespace Doppler.AccountPlans.Utils
                 currentPlan.CurrentMonthPlan :
                 1;
 
-            int currentBaseMonth;
-
-            if (isMonthPlan)
-            {
-                currentBaseMonth = currentMonthPlan > 0 && firstUpgrade != null ?
-                    firstUpgrade != null && firstUpgrade.Date.Month == now.Month && firstUpgrade.Date.Year == now.Year && firstUpgrade.Date.Day >= 21 ?
-                    currentMonthPlan - 1 : 0 :
-                    0;
-
-                //currentBaseMonth = now.Day < 21 ? currentMonthPlan - 1 :
-                //    firstUpgrade != null && firstUpgrade.Date.Month == now.Month && firstUpgrade.Date.Year == now.Year && firstUpgrade.Date.Day >= 21 ?
-                //    currentMonthPlan - 1 : firstUpgrade != null ? currentMonthPlan : currentMonthPlan - 1;
-            }
-            else
-            {
-                currentBaseMonth = currentMonthPlan > 0 && firstUpgrade != null ?
-                    now.Day < 21 ? currentMonthPlan - 1 : currentMonthPlan :
-                    currentMonthPlan;
-            }
+            var currentBaseMonth = currentMonthPlan > 0 && currentPlan.IdUserType != UserTypesEnum.Free ?
+                isMonthPlan ?
+                (now.Day < 21 ? currentMonthPlan - 1 :
+                firstUpgrade != null && firstUpgrade.Date.Month == now.Month && firstUpgrade.Date.Year == now.Year && firstUpgrade.Date.Day >= 21 ?
+                currentMonthPlan - 1 : currentMonthPlan) :
+                now.Day < 21 ? currentMonthPlan - 1 : currentMonthPlan :
+                0;
 
             var differenceBetweenMonthPlans = discount.MonthPlan - currentBaseMonth;
 
