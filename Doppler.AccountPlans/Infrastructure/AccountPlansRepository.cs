@@ -271,7 +271,28 @@ SELECT  [IdChatPlan] AS PlanId,
         [AdditionalChannel] AS AdditionalChannel,
         2 AS PlanType
 FROM [dbo].[ChatPlans] WITH(NOLOCK)
-WHERE [Active] = 1 AND [Fee] > 0");
+WHERE [Active] = 1 AND [Fee] > 0
+ORDER BY ConversationsQty");
+
+            return result;
+        }
+
+        public async Task<IEnumerable<ConversationPlanInformation>> GetCustomConversationPlans()
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<ConversationPlanInformation>(@"
+SELECT  [IdChatPlan] AS PlanId,
+        [ConversationQty] AS ConversationsQty,
+        [Fee] AS Fee,
+        [Agents] AS Agents,
+        [Canales] AS Channels,
+        [AdditionalConversation] AS AdditionalConversation,
+        [AdditionalAgent] AS AdditionalAgent,
+        [AdditionalChannel] AS AdditionalChannel,
+        2 AS PlanType
+FROM [dbo].[ChatPlans] WITH(NOLOCK)
+WHERE [Active] = 0 AND [Fee] > 0
+ORDER BY ConversationsQty");
 
             return result;
         }
