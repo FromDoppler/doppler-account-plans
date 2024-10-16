@@ -307,7 +307,8 @@ SELECT  [IdLandingPlan] AS PlanId,
         [Fee] AS Fee,
         3 AS PlanType
 FROM [dbo].[LandingPlan] WITH(NOLOCK)
-WHERE [Active] = 1");
+WHERE [Active] = 1
+ORDER BY Fee");
 
             return result;
         }
