@@ -381,8 +381,8 @@ ORDER BY b.[Date] ASC;",
 
             int? idClientManager = await connection.QueryFirstOrDefaultAsync<int>(@"
             SELECT
-                [IdClientManager] 
-            FROM [dbo].[User] 
+                [IdClientManager]
+            FROM [dbo].[User]
             WHERE Email = @accountName",
                 new
                 {
@@ -392,8 +392,8 @@ ORDER BY b.[Date] ASC;",
             if (idClientManager is not null)
             {
                 var upgradeDate = await connection.QueryFirstOrDefaultAsync<DateTime>(@"
-                SELECT 
-                	[UTCUpgradeDate]
+                SELECT
+                    [UTCUpgradeDate]
                 FROM [dbo].[ClientManagerUpgrade]
                 WHERE [IdClientManager] = @idClientManager;",
                     new
