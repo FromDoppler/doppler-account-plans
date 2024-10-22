@@ -3,6 +3,7 @@ using Doppler.AccountPlans.Enums;
 using Doppler.AccountPlans.Model;
 using Doppler.AccountPlans.TimeCollector;
 using Microsoft.AspNetCore.Connections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -372,6 +373,52 @@ ORDER BY b.[Date] ASC;",
                 });
 
             return currentPlan;
+        }
+
+        public async Task<DateTime?> GetFirstUpgradeDate(string accountName)
+        {
+            using var connection = _connectionFactory.GetConnection();
+
+            int? idClientManager = await connection.QueryFirstOrDefaultAsync<int>(@"
+            SELECT
+                [IdClientManager] 
+            FROM [dbo].[User] 
+            WHERE Email = @accountName",
+                new
+                {
+                    @accountName = accountName
+                });
+
+            if (idClientManager is not null)
+            {
+                var upgradeDate = await connection.QueryFirstOrDefaultAsync<DateTime>(@"
+                SELECT 
+                	[UTCUpgradeDate]
+                FROM [dbo].[ClientManagerUpgrade]
+                WHERE [IdClientManager] = @idClientManager;",
+                    new
+                    {
+                        @idClientManager = idClientManager
+                    });
+
+                return upgradeDate;
+            }
+            else
+            {
+                var upgradeDate = await connection.QueryFirstOrDefaultAsync<DateTime>(@"
+                SELECT
+                    [Date]
+                FROM
+                    [BillingCredits]
+                WHERE
+                    IdUser = (SELECT IdUser FROM [User] WHERE Email = @accountName) AND IdBillingCreditType = 1",
+                    new
+                    {
+                        @accountName = accountName
+                    });
+
+                return upgradeDate;
+            }
         }
     }
 }
