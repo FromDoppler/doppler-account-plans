@@ -675,7 +675,7 @@ namespace Doppler.AccountPlans
                 landingPlansInformation,
                 discount: null,
                 lastLandingPlan,
-                lastLandingPlan);
+                firstUpgradeDate: null);
 
             Assert.Equal(100, result.Total);
             Assert.Equal(100, result.NextMonthTotal);
@@ -713,7 +713,7 @@ namespace Doppler.AccountPlans
                 landingPlansInformation,
                 discount,
                 lastLandingPlan,
-                lastLandingPlan);
+                firstUpgradeDate: null);
 
             Assert.Equal(95, result.Total);
             Assert.Equal(95, result.NextMonthTotal);
@@ -751,7 +751,7 @@ namespace Doppler.AccountPlans
                 landingPlansInformation,
                 discount,
                 lastLandingPlan,
-                lastLandingPlan);
+                firstUpgradeDate: null);
 
             Assert.Equal(90, result.Total);
             Assert.Equal(90, result.NextMonthTotal);
