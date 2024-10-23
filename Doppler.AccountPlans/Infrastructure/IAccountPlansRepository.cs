@@ -1,5 +1,6 @@
 using Doppler.AccountPlans.Enums;
 using Doppler.AccountPlans.Model;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -24,5 +25,7 @@ namespace Doppler.AccountPlans.Infrastructure
         Task<UserPlanInformation> GetFirstLandingUpgrade(string accountName);
 
         Task<IEnumerable<ConversationPlanInformation>> GetCustomConversationPlans();
+
+        Task<DateTime?> GetFirstUpgradeDate(string accountName);
     }
 }
