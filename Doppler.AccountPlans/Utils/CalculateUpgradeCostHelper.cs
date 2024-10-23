@@ -17,12 +17,12 @@ namespace Doppler.AccountPlans.Utils
             DateTime now, Promotion promotion,
             TimesApplyedPromocode timesAppliedPromocode,
             Promotion currentPromotion,
-            UserPlanInformation firstUpgrade,
+            DateTime? firstUpgradeDate,
             PlanDiscountInformation currentDiscountPlan,
             decimal creditsDiscount,
             PlanTypeEnum planType)
         {
-            return GetHelper(planType).CalculateAmountDetails(newPlan, ref newDiscount, ref currentPlan, now, promotion, timesAppliedPromocode, currentPromotion, firstUpgrade, currentDiscountPlan, creditsDiscount);
+            return GetHelper(planType).CalculateAmountDetails(newPlan, ref newDiscount, ref currentPlan, now, promotion, timesAppliedPromocode, currentPromotion, firstUpgradeDate, currentDiscountPlan, creditsDiscount);
         }
 
         public static PlanAmountDetails CalculateLandingPlanAmountDetails(

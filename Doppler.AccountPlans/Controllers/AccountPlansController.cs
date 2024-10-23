@@ -64,7 +64,7 @@ namespace Doppler.AccountPlans.Controllers
             var promotion = new Promotion();
             TimesApplyedPromocode timesAppliedPromocode = null;
             Promotion currentPromotion = null;
-            UserPlanInformation firstUpgrade = null;
+            DateTime? firstUpgradeDate = null;
             PlanDiscountInformation currentDiscountPlan = null;
             decimal totalCreditDiscount = 0;
 
@@ -96,11 +96,11 @@ namespace Doppler.AccountPlans.Controllers
                     }
                 }
 
-                firstUpgrade = await _accountPlansRepository.GetFirstUpgrade(accountName);
+                firstUpgradeDate = await _accountPlansRepository.GetFirstUpgradeDate(accountName);
                 currentDiscountPlan = await _accountPlansRepository.GetDiscountInformation(currentPlan.IdDiscountPlan);
             }
 
-            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgrade, currentDiscountPlan, totalCreditDiscount, PlanTypeEnum.Marketing);
+            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgradeDate, currentDiscountPlan, totalCreditDiscount, PlanTypeEnum.Marketing);
 
             return new OkObjectResult(upgradeCost);
         }
@@ -142,7 +142,7 @@ namespace Doppler.AccountPlans.Controllers
             var promotion = new Promotion();
             TimesApplyedPromocode timesAppliedPromocode = null;
             Promotion currentPromotion = null;
-            UserPlanInformation firstUpgrade = null;
+            DateTime? firstUpgradeDate = null;
             PlanDiscountInformation currentDiscountPlan = null;
             decimal totalCreditDiscount = 0;
 
@@ -174,12 +174,13 @@ namespace Doppler.AccountPlans.Controllers
                     }
                 }
 
-                firstUpgrade = await _accountPlansRepository.GetFirstUpgrade(accountName);
+                //firstUpgrade = await _accountPlansRepository.GetFirstUpgrade(accountName);
+                firstUpgradeDate = await _accountPlansRepository.GetFirstUpgradeDate(accountName);
                 currentDiscountPlan = await _accountPlansRepository.GetDiscountInformation(currentPlan.IdDiscountPlan);
             }
 
             /* Marketing plan */
-            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgrade, currentDiscountPlan, totalCreditDiscount, newPlanType);
+            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgradeDate, currentDiscountPlan, totalCreditDiscount, newPlanType);
 
             return new OkObjectResult(upgradeCost);
         }
