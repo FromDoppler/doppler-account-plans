@@ -395,7 +395,8 @@ ORDER BY b.[Date] ASC;",
                 SELECT
                     [UTCUpgradeDate]
                 FROM [dbo].[ClientManagerUpgrade]
-                WHERE [IdClientManager] = @idClientManager;",
+                WHERE [IdClientManager] = @idClientManager
+                ORDER BY [UTCUpgradeDate] DESC;",
                     new
                     {
                         @idClientManager = idClientManager
@@ -411,7 +412,8 @@ ORDER BY b.[Date] ASC;",
                 FROM
                     [BillingCredits]
                 WHERE
-                    IdUser = (SELECT IdUser FROM [User] WHERE Email = @accountName) AND IdBillingCreditType = 1",
+                    IdUser = (SELECT IdUser FROM [User] WHERE Email = @accountName) AND IdBillingCreditType = 1
+                ORDER BY [Date] DESC;",
                     new
                     {
                         @accountName = accountName
