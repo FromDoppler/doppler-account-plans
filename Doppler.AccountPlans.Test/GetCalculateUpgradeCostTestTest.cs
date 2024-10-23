@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Net;
@@ -33,7 +34,17 @@ namespace Doppler.AccountPlans
         [Fact]
         public async Task GET_calculateUpgradeCost_method_should_get_right_values_when_plan_and_are_valid()
         {
+            var userAccount = "test1@example.com";
             var mockConnection = new Mock<DbConnection>();
+            var acccountPlansRepository = new Mock<IAccountPlansRepository>();
+
+            acccountPlansRepository
+                .Setup(x => x.GetPlanInformation(It.IsAny<int>()))
+                .ReturnsAsync(new PlanInformation());
+
+            acccountPlansRepository
+                .Setup(x => x.GetFirstUpgradeDate(userAccount))
+                .ReturnsAsync(new DateTime(2024, 10, 1));
 
             mockConnection.SetupDapperAsync(x => x.QueryAsync<PlanInformation>(null, null, null, null, null))
                 .ReturnsAsync(new List<PlanInformation>
@@ -52,11 +63,15 @@ namespace Doppler.AccountPlans
                     MonthPlan = 1
                 });
 
+            mockConnection.SetupDapperAsync(c => c.QueryFirstOrDefaultAsync<int>(null, null, null, null, null))
+                .ReturnsAsync(1);
+
             var client = _factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureTestServices(services =>
                 {
                     services.SetupConnectionFactory(mockConnection.Object);
+                    services.AddSingleton(acccountPlansRepository.Object);
                     services.AddSingleton(Mock.Of<IEncryptionService>());
                     services.AddSingleton(Mock.Of<IPromotionRepository>());
                 });
@@ -82,6 +97,17 @@ namespace Doppler.AccountPlans
         [Fact]
         public async Task GET_calculateUpgradeCost_method_should_get_right_values_when_new_plan_isPrepaid()
         {
+            var userAccount = "test1@example.com";
+            var acccountPlansRepository = new Mock<IAccountPlansRepository>();
+
+            acccountPlansRepository
+                .Setup(x => x.GetPlanInformation(It.IsAny<int>()))
+                .ReturnsAsync(new PlanInformation());
+
+            acccountPlansRepository
+                .Setup(x => x.GetFirstUpgradeDate(userAccount))
+                .ReturnsAsync(new DateTime(2024, 10, 1));
+
             var mockConnection = new Mock<DbConnection>();
 
             mockConnection.SetupDapperAsync(x => x.QueryAsync<PlanInformation>(null, null, null, null, null))
@@ -107,6 +133,7 @@ namespace Doppler.AccountPlans
                 builder.ConfigureTestServices(services =>
                 {
                     services.SetupConnectionFactory(mockConnection.Object);
+                    services.AddSingleton(acccountPlansRepository.Object);
                     services.AddSingleton(Mock.Of<IEncryptionService>());
                     services.AddSingleton(Mock.Of<IPromotionRepository>());
                 });

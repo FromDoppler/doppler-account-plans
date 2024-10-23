@@ -6,7 +6,7 @@ namespace Doppler.AccountPlans.Helpers
 {
     public class ChatPlan : ICalculateAmountDetalisHelper
     {
-        public PlanAmountDetails CalculateAmountDetails(PlanInformation newPlan, ref PlanDiscountInformation newDiscount, ref UserPlanInformation currentPlan, DateTime now, Promotion promotion, TimesApplyedPromocode timesAppliedPromocode, Promotion currentPromotion, UserPlanInformation firstUpgrade, PlanDiscountInformation currentDiscountPlan, decimal creditsDiscount)
+        public PlanAmountDetails CalculateAmountDetails(PlanInformation newPlan, ref PlanDiscountInformation newDiscount, ref UserPlanInformation currentPlan, DateTime now, Promotion promotion, TimesApplyedPromocode timesAppliedPromocode, Promotion currentPromotion, DateTime? firstUpgradeDate, PlanDiscountInformation currentDiscountPlan, decimal creditsDiscount)
         {
             currentPlan ??= new UserPlanInformation
             {
@@ -31,7 +31,7 @@ namespace Doppler.AccountPlans.Helpers
             var currentBaseMonth = currentMonthPlan > 0 && currentPlan.IdUserType != UserTypesEnum.Free ?
                 isMonthPlan ?
                 (now.Day < 21 ? currentMonthPlan - 1 :
-                firstUpgrade != null && firstUpgrade.Date.Month == now.Month && firstUpgrade.Date.Year == now.Year && firstUpgrade.Date.Day >= 21 ?
+                firstUpgradeDate != null && firstUpgradeDate.Value.Month == now.Month && firstUpgradeDate.Value.Year == now.Year && firstUpgradeDate.Value.Day >= 21 ?
                 currentMonthPlan - 1 : currentMonthPlan) :
                 now.Day < 21 ? currentMonthPlan - 1 : currentMonthPlan :
                 0;
@@ -102,7 +102,7 @@ namespace Doppler.AccountPlans.Helpers
 
             result.CurrentMonthTotal = (now.Day >= 21 && currentPlan.IdUserType != UserTypesEnum.Free) ?
                 currentPlan.IdUserType != UserTypesEnum.Individual && result.DiscountPrepayment.MonthsToPay <= 1 ?
-                firstUpgrade != null && firstUpgrade.Date.Month == now.Month && firstUpgrade.Date.Year == now.Year && firstUpgrade.Date.Day >= 21 ?
+                firstUpgradeDate != null && firstUpgradeDate.Value.Month == now.Month && firstUpgradeDate.Value.Year == now.Year && firstUpgradeDate.Value.Day >= 21 ?
                 result.Total : (differenceBetweenMonthPlans > 0 ? result.Total : 0) :
                 result.Total :
                 result.Total;
