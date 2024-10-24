@@ -379,7 +379,7 @@ ORDER BY b.[Date] ASC;",
         {
             using var connection = _connectionFactory.GetConnection();
 
-            int? idClientManager = await connection.QueryFirstOrDefaultAsync<int>(@"
+            int? idClientManager = await connection.QueryFirstOrDefaultAsync<int?>(@"
             SELECT
                 [IdClientManager]
             FROM [dbo].[User]
