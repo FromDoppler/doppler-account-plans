@@ -422,5 +422,22 @@ ORDER BY b.[Date] ASC;",
                 return upgradeDate;
             }
         }
+
+        public async Task<IEnumerable<OnSitePlanInformation>> GetOnSitePlans()
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<OnSitePlanInformation>(@"
+SELECT  [IdOnSitePlan] AS PlanId,
+        [Description] AS [Description],
+        [PrintQty] AS PrintQty,
+        [Fee] AS Fee,
+        [AdditionalPrint] AS AdditionalPrint,
+        4 AS PlanType
+FROM [dbo].[OnSitePlan] WITH(NOLOCK)
+WHERE [Active] = 1 AND [Fee] > 0
+ORDER BY [PrintQty]");
+
+            return result;
+        }
     }
 }
