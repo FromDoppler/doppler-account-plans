@@ -27,5 +27,6 @@ namespace Doppler.AccountPlans.Infrastructure
         Task<IEnumerable<ConversationPlanInformation>> GetCustomConversationPlans();
 
         Task<DateTime?> GetFirstUpgradeDate(string accountName);
+        Task<IEnumerable<OnSitePlanInformation>> GetOnSitePlans();
     }
 }
