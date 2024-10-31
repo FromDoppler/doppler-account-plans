@@ -6,9 +6,9 @@ namespace Doppler.AccountPlans.Helpers
 {
     public class MarketingPlan : ICalculateAmountDetalisHelper
     {
-        public PlanAmountDetails CalculateAmountDetails(PlanInformation newPlan, ref PlanDiscountInformation newDiscount, ref UserPlanInformation currentPlan, DateTime now, Promotion promotion, TimesApplyedPromocode timesAppliedPromocode, Promotion currentPromotion, DateTime? firstUpgradeDate, PlanDiscountInformation currentDiscountPlan, decimal creditsDiscount)
+        public PlanAmountDetails CalculateAmountDetails(PlanInformation newPlan, ref PlanDiscountInformation newDiscount, ref UserPlan currentPlan, DateTime now, Promotion promotion, TimesApplyedPromocode timesAppliedPromocode, Promotion currentPromotion, DateTime? firstUpgradeDate, PlanDiscountInformation currentDiscountPlan, decimal creditsDiscount)
         {
-            currentPlan ??= new UserPlanInformation
+            currentPlan ??= new UserPlan
             {
                 Fee = 0,
                 CurrentMonthPlan = 0,
@@ -202,7 +202,7 @@ namespace Doppler.AccountPlans.Helpers
         private static PlanAmountDetails ChangeIndividualToContacsOrEmails(
             PlanInformation newPlan,
             PlanDiscountInformation newDiscount,
-            UserPlanInformation currentPlan,
+            UserPlan currentPlan,
             DateTime now, Promotion promotion,
             TimesApplyedPromocode timesAppliedPromocode,
             Promotion currentPromotion,

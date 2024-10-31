@@ -77,7 +77,7 @@ namespace Doppler.AccountPlans
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Get, "/accounts/1/newplan/1/calculate")
+            var request = new HttpRequestMessage(HttpMethod.Get, "/accounts/1/newplan/1/1/calculate-amount")
             {
                 Headers =
                 {
@@ -139,7 +139,7 @@ namespace Doppler.AccountPlans
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
-            var request = new HttpRequestMessage(HttpMethod.Get, "/accounts/1/newplan/1/calculate")
+            var request = new HttpRequestMessage(HttpMethod.Get, "/accounts/1/newplan/1/1/calculate-amount")
             {
                 Headers =
                 {

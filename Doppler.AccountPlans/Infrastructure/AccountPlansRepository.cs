@@ -1,5 +1,6 @@
 using Dapper;
 using Doppler.AccountPlans.Enums;
+using Doppler.AccountPlans.Helpers;
 using Doppler.AccountPlans.Model;
 using Doppler.AccountPlans.TimeCollector;
 using Microsoft.AspNetCore.Connections;
@@ -438,6 +439,118 @@ WHERE [Active] = 1 AND [Fee] > 0
 ORDER BY [PrintQty]");
 
             return result;
+        }
+
+        public async Task<PlanInformation> GetOnSitePlanInformation(int onSitePlanId)
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<PlanInformation>(@"
+SELECT
+    OSP.[PrintQty] AS PrintQty,
+    OSP.[Fee] AS ChatPlanFee
+FROM
+    [dbo].[OnSitePlan] OSP  WITH(NOLOCK)
+WHERE
+    OSP.[IdOnSitePlan] = @onSitePlanId",
+    new { onSitePlanId });
+
+            return result.FirstOrDefault();
+        }
+
+        public async Task<UserPlan> GetCurrentPlanWithAdditionalServices(string accountName)
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+
+            var currentPlan = await connection.QueryFirstOrDefaultAsync<UserPlan>(@$"
+SELECT
+    B.[PlanFee] AS Fee,
+    B.[CurrentMonthPlan],
+    UTP.[IdUserType],
+    B.[DiscountPlanFeeAdmin],
+    B.[DiscountPlanFeePromotion],
+    P.Code AS PromotionCode,
+    B.IdUserTypePlan,
+    B.TotalMonthPlan,
+    B.IdDiscountPlan,
+    B.CreditsQty AS EmailQty,
+    B.SubscribersQty,
+    B.IdUser
+FROM
+    [BillingCredits] B  WITH(NOLOCK)
+INNER JOIN [UserTypesPlans] UTP WITH(NOLOCK) ON UTP.IdUserTypePlan = B.IdUserTypePlan
+INNER JOIN [User] U WITH(NOLOCK) ON U.IdUser = B.IdUser
+LEFT JOIN [Promotions] P WITH(NOLOCK) ON P.IdPromotion = B.IdPromotion
+WHERE
+    b.IdUser = (SELECT IdUser FROM [User] WHERE Email = @email) AND U.IdCurrentBillingCredit IS NOT NULL
+ORDER BY b.[Date] DESC;",
+                new
+                {
+                    @email = accountName
+                });
+
+            if (currentPlan != null)
+            {
+                var additionalServices = await connection.QueryAsync<AdditionalService>(@$"
+SELECT
+    UAO.IdAddOnType,
+    CASE
+        WHEN UAO.IdAddOnType = 1
+            THEN LPBC.PlanFee
+        WHEN UAO.IdAddOnType = 2
+            THEN CPBC.PlanFee
+        WHEN UAO.IdAddOnType = 3
+            THEN  OSBC.PlanFee
+    ELSE 0
+    END AS Fee,
+    CASE
+        WHEN UAO.IdAddOnType = 1
+            THEN SUM(LP.LandingQty * LPU.PackQty)
+        WHEN UAO.IdAddOnType = 2
+            THEN SUM(CP.ConversationQty)
+        WHEN UAO.IdAddOnType = 3
+            THEN  SUM(OSP.PrintQty)
+        ELSE 0
+    END AS Qty
+FROM [UserAddOn] UAO
+/* Landings plans */
+LEFT JOIN [BillingCredits] LPBC ON LPBC.IdBillingCredit = UAO.IdCurrentBillingCredit AND UAO.IdAddOnType = 1 AND LPBC.IdBillingCreditType IN (23, 24, 26, 27)
+LEFT JOIN [LandingPlanUser] LPU ON LPU.IdBillingCredit = LPBC.IdBillingCredit
+LEFT JOIN [LandingPlan] LP ON LP.IdLandingPlan = LPU.IdLandingPlan
+
+/* Conversation plans */
+LEFT JOIN [BillingCredits] CPBC ON CPBC.IdBillingCredit = UAO.IdCurrentBillingCredit AND UAO.IdAddOnType = 2 AND CPBC.IdBillingCreditType IN (28, 29, 31, 32)
+LEFT JOIN [ChatPlanUsers] CPU ON CPU.IdBillingCredit = CPBC.IdBillingCredit
+LEFT JOIN [ChatPlans] CP ON CP.IdChatPlan = CPU.IdChatPlan
+
+/* OnSite plans */
+LEFT JOIN [BillingCredits] OSBC ON OSBC.IdBillingCredit = UAO.IdCurrentBillingCredit AND UAO.IdAddOnType = 3 AND OSBC.IdBillingCreditType IN (34, 35, 37, 38)
+LEFT JOIN [OnSitePlanUser] OSPU ON OSPU.IdBillingCredit = OSBC.IdBillingCredit
+LEFT JOIN [OnSitePlan] OSP ON OSP.IdOnSItePlan = OSPU.IdOnSItePlan
+WHERE UAO.IdUser = @userId
+GROUP BY UAO.IdAddOnType ,
+        CASE
+            WHEN UAO.IdAddOnType = 1
+                THEN LPBC.PlanFee
+            WHEN UAO.IdAddOnType = 2
+                THEN CPBC.PlanFee
+            WHEN UAO.IdAddOnType = 3
+                THEN OSBC.PlanFee
+            ELSE 0
+        END",
+                    new
+                    {
+                        @userId = currentPlan.IdUser
+                    });
+
+                currentPlan.AdditionalServices = additionalServices.ToList();
+
+
+                return currentPlan;
+            }
+
+            return null;
         }
 
         public async Task<IEnumerable<OnSitePlanInformation>> GetCustomOnSitePlans()

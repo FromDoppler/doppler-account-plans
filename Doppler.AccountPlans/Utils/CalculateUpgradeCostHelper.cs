@@ -13,7 +13,7 @@ namespace Doppler.AccountPlans.Utils
         public static PlanAmountDetails CalculatePlanAmountDetails(
             PlanInformation newPlan,
             PlanDiscountInformation newDiscount,
-            UserPlanInformation currentPlan,
+            UserPlan currentPlan,
             DateTime now, Promotion promotion,
             TimesApplyedPromocode timesAppliedPromocode,
             Promotion currentPromotion,
@@ -134,6 +134,8 @@ namespace Doppler.AccountPlans.Utils
                     return new MarketingPlan();
                 case PlanTypeEnum.Chat:
                     return new ChatPlan();
+                case PlanTypeEnum.OnSite:
+                    return new OnSitePlan();
                 default:
                     return null;
             }

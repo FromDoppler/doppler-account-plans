@@ -13,5 +13,6 @@ namespace Doppler.AccountPlans.Model
         public int? DiscountPlanFeeAdmin { get; set; }
         public decimal? ChatPlanFee { get; set; }
         public int? ChatPlanConversationQty { get; set; }
+        public int? PrintQty { get; set; }
     }
 }
