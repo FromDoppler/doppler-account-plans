@@ -365,5 +365,18 @@ namespace Doppler.AccountPlans.Controllers
 
             return new OkObjectResult(planInformation);
         }
+
+        [HttpGet("/custom-onsite-plans")]
+        public async Task<IActionResult> GetCustomOnSitePlans()
+        {
+            var planInformation = await _accountPlansRepository.GetCustomOnSitePlans();
+
+            if (planInformation == null)
+            {
+                return new NotFoundResult();
+            }
+
+            return new OkObjectResult(planInformation);
+        }
     }
 }

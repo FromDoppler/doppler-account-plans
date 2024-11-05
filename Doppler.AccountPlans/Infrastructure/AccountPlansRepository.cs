@@ -439,5 +439,22 @@ ORDER BY [PrintQty]");
 
             return result;
         }
+
+        public async Task<IEnumerable<OnSitePlanInformation>> GetCustomOnSitePlans()
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<OnSitePlanInformation>(@"
+SELECT  [IdOnSitePlan] AS PlanId,
+        [Description] AS [Description],
+        [PrintQty] AS PrintQty,
+        [Fee] AS Fee,
+        [AdditionalPrint] AS AdditionalPrint,
+        4 AS PlanType
+FROM [dbo].[OnSitePlan] WITH(NOLOCK)
+WHERE [Active] = 0 AND [Fee] > 0
+ORDER BY [PrintQty]");
+
+            return result;
+        }
     }
 }
