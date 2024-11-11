@@ -43,71 +43,8 @@ namespace Doppler.AccountPlans.Controllers
         }
 
         [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
-        [HttpGet("/accounts/{accountName}/newplan/{newPlanId}/calculate")]
-        public async Task<IActionResult> GetCalculateUpgradeCost(
-            [FromRoute] string accountName,
-            [FromRoute] int newPlanId,
-            [FromQuery] int discountId,
-            [FromQuery] string promocode = null)
-        {
-            using var _ = _timeCollector.StartScope();
-
-            _logger.LogInformation("Calculating plan amount details.");
-
-            var newPlan = await _accountPlansRepository.GetPlanInformation(newPlanId);
-            var currentPlan = await _accountPlansRepository.GetCurrentPlanInformation(accountName);
-            var discountPlan = await _accountPlansRepository.GetDiscountInformation(discountId);
-
-            if (newPlan == null)
-                return new NotFoundResult();
-
-            var promotion = new Promotion();
-            TimesApplyedPromocode timesAppliedPromocode = null;
-            Promotion currentPromotion = null;
-            DateTime? firstUpgradeDate = null;
-            PlanDiscountInformation currentDiscountPlan = null;
-            decimal totalCreditDiscount = 0;
-
-            if (!string.IsNullOrEmpty(promocode))
-            {
-                var encryptedCode = _encryptionService.EncryptAES256(promocode);
-                promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, newPlanId);
-            }
-
-            if (currentPlan != null)
-            {
-                if (currentPlan.IdUserType != Enums.UserTypesEnum.Individual)
-                {
-                    currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, newPlanId);
-                    timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName);
-                }
-                else
-                {
-                    if (currentPlan.IdUserType == UserTypesEnum.Individual && newPlan.IdUserType != UserTypesEnum.Individual)
-                    {
-                        var prepaidPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan);
-
-                        var availableCredits = await _accountPlansRepository.GetAvailableCredit(accountName);
-                        var credits = availableCredits > currentPlan.EmailQty ? currentPlan.EmailQty : availableCredits;
-                        var priceByCredit = currentPlan.EmailQty > 0 ? currentPlan.Fee / currentPlan.EmailQty : 0;
-
-                        decimal creditsDiscount = credits * priceByCredit;
-                        totalCreditDiscount = creditsDiscount - (prepaidPromotion != null && prepaidPromotion.DiscountPercentage != null ? Math.Round(creditsDiscount * prepaidPromotion.DiscountPercentage.Value / 100, 2) : 0);
-                    }
-                }
-
-                firstUpgradeDate = await _accountPlansRepository.GetFirstUpgradeDate(accountName);
-                currentDiscountPlan = await _accountPlansRepository.GetDiscountInformation(currentPlan.IdDiscountPlan);
-            }
-
-            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgradeDate, currentDiscountPlan, totalCreditDiscount, PlanTypeEnum.Marketing);
-
-            return new OkObjectResult(upgradeCost);
-        }
-
-        [Authorize(Policies.OWN_RESOURCE_OR_SUPERUSER)]
         [HttpGet("/accounts/{accountName}/newplan/{newPlanType}/{newPlanId}/calculate-amount")]
-        public async Task<IActionResult> GetCalculateUpgradeCostWithChatPlan(
+        public async Task<IActionResult> GetCalculateUpgradeCostWithAddOns(
             [FromRoute] string accountName,
             [FromRoute] int newPlanId,
             [FromRoute] PlanTypeEnum newPlanType,
@@ -128,6 +65,9 @@ namespace Doppler.AccountPlans.Controllers
                 case PlanTypeEnum.Chat:
                     newPlan = await _accountPlansRepository.GetChatPlanInformation(newPlanId);
                     break;
+                case PlanTypeEnum.OnSite:
+                    newPlan = await _accountPlansRepository.GetOnSitePlanInformation(newPlanId);
+                    break;
                 default:
                     newPlan = null;
                     break;
@@ -136,7 +76,7 @@ namespace Doppler.AccountPlans.Controllers
             if (newPlan == null)
                 return new NotFoundResult();
 
-            var currentPlan = await _accountPlansRepository.GetCurrentPlanInformationWithAdditionalServices(accountName);
+            var currentPlan = await _accountPlansRepository.GetCurrentPlanWithAdditionalServices(accountName);
             var discountPlan = await _accountPlansRepository.GetDiscountInformation(discountId);
 
             var promotion = new Promotion();
@@ -281,16 +221,20 @@ namespace Doppler.AccountPlans.Controllers
         {
             PlanInformation planInformation = null;
 
-            if (planType == (int)PlanTypeEnum.Marketing)
+            switch (planType)
             {
-                planInformation = await _accountPlansRepository.GetPlanInformation(planId);
-            }
-            else
-            {
-                if (planType == (int)PlanTypeEnum.Chat)
-                {
+                case (int)PlanTypeEnum.Marketing:
+                    planInformation = await _accountPlansRepository.GetPlanInformation(planId);
+                    break;
+                case (int)PlanTypeEnum.Chat:
                     planInformation = await _accountPlansRepository.GetChatPlanInformation(planId);
-                }
+                    break;
+                case (int)PlanTypeEnum.OnSite:
+                    planInformation = await _accountPlansRepository.GetOnSitePlanInformation(planId);
+                    break;
+                default:
+                    planInformation = null;
+                    break;
             }
 
             if (planInformation == null)

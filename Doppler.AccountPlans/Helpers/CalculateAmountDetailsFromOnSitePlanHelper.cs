@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Doppler.AccountPlans.Helpers
 {
-    public class ChatPlan : ICalculateAmountDetalisHelper
+    public class OnSitePlan : ICalculateAmountDetalisHelper
     {
         public PlanAmountDetails CalculateAmountDetails(PlanInformation newPlan, ref PlanDiscountInformation newDiscount, ref UserPlan currentPlan, DateTime now, Promotion promotion, TimesApplyedPromocode timesAppliedPromocode, Promotion currentPromotion, DateTime? firstUpgradeDate, PlanDiscountInformation currentDiscountPlan, decimal creditsDiscount)
         {
@@ -16,14 +16,14 @@ namespace Doppler.AccountPlans.Helpers
                 IdUserType = UserTypesEnum.Free
             };
 
-            var chatPlan = currentPlan.AdditionalServices.FirstOrDefault(ads => ads.IdAddOnType == (int)AddOnType.Chat);
-            var chatPlanFee = chatPlan != null ? chatPlan.Fee : 0;
+            var onSitePlan = currentPlan.AdditionalServices.FirstOrDefault(ads => ads.IdAddOnType == (int)AddOnType.OnSite);
+            var onSitePlanFee = onSitePlan != null ? onSitePlan.Fee : 0;
 
             newDiscount ??= new PlanDiscountInformation
             {
                 MonthPlan = currentDiscountPlan != null ? currentDiscountPlan.MonthPlan : 1,
                 DiscountPlanFee = currentDiscountPlan != null ? currentDiscountPlan.DiscountPlanFee : 0,
-                ApplyPromo = currentDiscountPlan != null ? currentDiscountPlan.ApplyPromo : true
+                ApplyPromo = currentDiscountPlan == null || currentDiscountPlan.ApplyPromo
             };
 
             var isMonthPlan = currentPlan.TotalMonthPlan <= 1;
@@ -49,16 +49,16 @@ namespace Doppler.AccountPlans.Helpers
             if (isMonthPlan)
             {
                 numberOfMonthsToDiscount = GetMonthsToDiscount(isMonthPlan, differenceBetweenMonthPlans, currentPlan.IdUserType);
-                amount = (chatPlanFee) * numberOfMonthsToDiscount;
+                amount = (onSitePlanFee) * numberOfMonthsToDiscount;
                 currentDiscountPrepayment = currentDiscountPlan != null ?
-                    Math.Round((chatPlanFee * numberOfMonthsToDiscount * currentDiscountPlan.DiscountPlanFee) / 100, 2) :
+                    Math.Round((onSitePlanFee * numberOfMonthsToDiscount * currentDiscountPlan.DiscountPlanFee) / 100, 2) :
                     0;
             }
             else
             {
                 numberOfMonthsToDiscount = GetMonthsToDiscount(isMonthPlan, currentBaseMonth, currentPlan.IdUserType);
-                decimal ammountToDiscount = (chatPlanFee * numberOfMonthsToDiscount);
-                amount = chatPlanFee * currentDiscountPlan.MonthPlan - ammountToDiscount;
+                decimal ammountToDiscount = (onSitePlanFee * numberOfMonthsToDiscount);
+                amount = onSitePlanFee * currentDiscountPlan.MonthPlan - ammountToDiscount;
                 currentDiscountPrepayment = currentDiscountPlan != null ?
                     Math.Round(amount * currentDiscountPlan.DiscountPlanFee / 100, 2) :
                     0;

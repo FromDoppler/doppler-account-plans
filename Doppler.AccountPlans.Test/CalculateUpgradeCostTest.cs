@@ -129,7 +129,7 @@ namespace Doppler.AccountPlans
                 Fee = 5,
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = 2,
                 CurrentMonthPlan = 0
@@ -160,7 +160,7 @@ namespace Doppler.AccountPlans
                 Fee = 5,
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = 2,
                 CurrentMonthPlan = 0
@@ -191,7 +191,7 @@ namespace Doppler.AccountPlans
                 Fee = 5,
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = 2,
                 CurrentMonthPlan = 0
@@ -223,7 +223,7 @@ namespace Doppler.AccountPlans
                 IdUserType = UserTypesEnum.Monthly
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = 2,
                 CurrentMonthPlan = 0,
@@ -255,7 +255,7 @@ namespace Doppler.AccountPlans
                 Fee = 5,
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = 2,
                 CurrentMonthPlan = 0
@@ -286,7 +286,7 @@ namespace Doppler.AccountPlans
                 Fee = 5,
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = 2,
                 CurrentMonthPlan = 0
@@ -317,7 +317,7 @@ namespace Doppler.AccountPlans
                 Fee = 5,
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = 2,
                 CurrentMonthPlan = 1
@@ -348,7 +348,7 @@ namespace Doppler.AccountPlans
                 Fee = 5,
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = 2,
                 CurrentMonthPlan = 1
@@ -379,7 +379,7 @@ namespace Doppler.AccountPlans
                 Fee = 5,
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = 2,
                 CurrentMonthPlan = 2
@@ -409,7 +409,7 @@ namespace Doppler.AccountPlans
                 Fee = 5,
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = 2,
                 CurrentMonthPlan = 2
@@ -440,7 +440,7 @@ namespace Doppler.AccountPlans
                 Fee = 5,
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = 2,
                 CurrentMonthPlan = 4
@@ -472,7 +472,7 @@ namespace Doppler.AccountPlans
                 IdUserType = UserTypesEnum.Subscribers
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = 2,
                 CurrentMonthPlan = 4,
@@ -499,7 +499,7 @@ namespace Doppler.AccountPlans
                 IdUserType = UserTypesEnum.Individual
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = 2,
                 CurrentMonthPlan = 4,
@@ -526,7 +526,7 @@ namespace Doppler.AccountPlans
                 IdUserType = UserTypesEnum.Monthly
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = 2,
                 IdUserType = UserTypesEnum.Individual
@@ -563,7 +563,7 @@ namespace Doppler.AccountPlans
                 IdUserType = UserTypesEnum.Monthly
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = 2,
                 IdUserType = UserTypesEnum.Individual,
@@ -612,7 +612,7 @@ namespace Doppler.AccountPlans
                 IdUserType = UserTypesEnum.Subscribers
             };
 
-            var currentPlan = new UserPlanInformation
+            var currentPlan = new UserPlan
             {
                 Fee = currentPlanAmount,
                 IdUserType = UserTypesEnum.Subscribers,
