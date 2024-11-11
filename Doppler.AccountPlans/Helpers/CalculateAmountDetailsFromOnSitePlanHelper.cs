@@ -1,6 +1,7 @@
 using Doppler.AccountPlans.Enums;
 using Doppler.AccountPlans.Model;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Doppler.AccountPlans.Helpers
@@ -13,7 +14,8 @@ namespace Doppler.AccountPlans.Helpers
             {
                 Fee = 0,
                 CurrentMonthPlan = 0,
-                IdUserType = UserTypesEnum.Free
+                IdUserType = UserTypesEnum.Free,
+                AdditionalServices = new List<AdditionalService>()
             };
 
             var onSitePlan = currentPlan.AdditionalServices.FirstOrDefault(ads => ads.IdAddOnType == (int)AddOnType.OnSite);
