@@ -12,6 +12,9 @@ using System;
 using System.Numerics;
 using Doppler.AccountPlans.TimeCollector;
 using System.Collections.Generic;
+using Doppler.AccountPlans.Mappers.OnSite;
+using Doppler.AccountPlans.Mappers.PushNotification;
+using Doppler.AccountPlans.Mappers;
 
 namespace Doppler.AccountPlans.Controllers
 {
@@ -364,5 +367,28 @@ namespace Doppler.AccountPlans.Controllers
             return new OkObjectResult(planInformation);
         }
 
+        [HttpGet("/addon/{addOnType}/plans/{planId}")]
+        public async Task<IActionResult> GetAddOnPlanByPlanIdAndAddOnType([FromRoute] int planId, [FromRoute] AddOnType addOnType)
+        {
+            var addOnMapper = GetAddOnMapper(addOnType);
+            var addOnPlan = await addOnMapper.GetAddOnPlan(planId);
+
+            if (addOnPlan == null)
+            {
+                return new NotFoundResult();
+            }
+
+            return new OkObjectResult(addOnPlan);
+        }
+
+        private IAddOnMapper GetAddOnMapper(AddOnType addOnType)
+        {
+            return addOnType switch
+            {
+                AddOnType.OnSite => new OnSiteMapper(_accountPlansRepository),
+                AddOnType.PushNotification => new PushNotificationMapper(_accountPlansRepository),
+                _ => null,
+            };
+        }
     }
 }
