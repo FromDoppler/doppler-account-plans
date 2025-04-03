@@ -642,8 +642,8 @@ SELECT [IdPushNotificationPlan] AS PlanId
         ,[Fee]
         ,[Additional]
         ,5 AS PlanType
- FROM [dbo].[PushNotificationPlan]
- WHERE [Active] = 1 AND [Fee] > 0");
+FROM [dbo].[PushNotificationPlan]
+WHERE [Active] = 1 AND [Fee] > 0");
 
             return result;
         }
@@ -658,8 +658,8 @@ SELECT [IdPushNotificationPlan] AS PlanId
         ,[Fee]
         ,[Additional]
         ,5 AS PlanType
- FROM [dbo].[PushNotificationPlan]
- WHERE [Custom] = 1 AND [Fee] > 0");
+FROM [dbo].[PushNotificationPlan]
+WHERE [Custom] = 1 AND [Fee] > 0");
 
             return result;
         }
