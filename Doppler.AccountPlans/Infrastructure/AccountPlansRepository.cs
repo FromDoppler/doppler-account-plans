@@ -575,13 +575,13 @@ ORDER BY [PrintQty]");
             using var connection = _connectionFactory.GetConnection();
             var result = await connection.QueryAsync<PushNotificationPlanInformation>(@"
 SELECT [IdPushNotificationPlan] AS PlanId
-      ,[Description]
-      ,[Quantity]
-      ,[Fee]
-      ,[Additional]
-      ,5 AS PlanType
-  FROM [dbo].[PushNotificationPlan]
-  WHERE [Active] = 1 AND [Fee] > 0");
+        ,[Description]
+        ,[Quantity]
+        ,[Fee]
+        ,[Additional]
+        ,5 AS PlanType
+ FROM [dbo].[PushNotificationPlan]
+ WHERE [Active] = 1 AND [Fee] > 0");
 
             return result;
         }
@@ -591,13 +591,13 @@ SELECT [IdPushNotificationPlan] AS PlanId
             using var connection = _connectionFactory.GetConnection();
             var result = await connection.QueryAsync<PushNotificationPlanInformation>(@"
 SELECT [IdPushNotificationPlan] AS PlanId
-      ,[Description]
-      ,[Quantity]
-      ,[Fee]
-      ,[Additional]
-      ,5 AS PlanType
-  FROM [dbo].[PushNotificationPlan]
-  WHERE [Custom] = 1 AND [Fee] > 0");
+        ,[Description]
+        ,[Quantity]
+        ,[Fee]
+        ,[Additional]
+        ,5 AS PlanType
+ FROM [dbo].[PushNotificationPlan]
+ WHERE [Custom] = 1 AND [Fee] > 0");
 
             return result;
         }
