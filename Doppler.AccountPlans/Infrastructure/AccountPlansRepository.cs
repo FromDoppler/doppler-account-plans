@@ -430,9 +430,9 @@ ORDER BY b.[Date] ASC;",
             var result = await connection.QueryAsync<OnSitePlanInformation>(@"
 SELECT  [IdOnSitePlan] AS PlanId,
         [Description] AS [Description],
-        [PrintQty] AS PrintQty,
+        [PrintQty] AS Quantity,
         [Fee] AS Fee,
-        [AdditionalPrint] AS AdditionalPrint,
+        [AdditionalPrint] AS Additional,
         4 AS PlanType
 FROM [dbo].[OnSitePlan] WITH(NOLOCK)
 WHERE [Active] = 1 AND [Fee] > 0
@@ -559,9 +559,9 @@ GROUP BY UAO.IdAddOnType ,
             var result = await connection.QueryAsync<OnSitePlanInformation>(@"
 SELECT  [IdOnSitePlan] AS PlanId,
         [Description] AS [Description],
-        [PrintQty] AS PrintQty,
+        [PrintQty] AS Quantity,
         [Fee] AS Fee,
-        [AdditionalPrint] AS AdditionalPrint,
+        [AdditionalPrint] AS Additional,
         4 AS PlanType
 FROM [dbo].[OnSitePlan] WITH(NOLOCK)
 WHERE [Active] = 0 AND [Fee] > 0
@@ -578,7 +578,6 @@ SELECT [IdPushNotificationPlan] AS PlanId
       ,[Description]
       ,[Quantity]
       ,[Fee]
-      ,[FreeDays]
       ,[Additional]
       ,5 AS PlanType
   FROM [dbo].[PushNotificationPlan]
@@ -595,7 +594,6 @@ SELECT [IdPushNotificationPlan] AS PlanId
       ,[Description]
       ,[Quantity]
       ,[Fee]
-      ,[FreeDays]
       ,[Additional]
       ,5 AS PlanType
   FROM [dbo].[PushNotificationPlan]

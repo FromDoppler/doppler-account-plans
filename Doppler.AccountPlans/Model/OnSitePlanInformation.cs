@@ -3,8 +3,8 @@ namespace Doppler.AccountPlans.Model
     public class OnSitePlanInformation : BasePlanInformation
     {
         public string Description { get; set; }
-        public int PrintQty { get; set; }
+        public int Quantity { get; set; }
         public decimal Fee { get; set; }
-        public decimal AdditionalPrint { get; set; }
+        public decimal Additional { get; set; }
     }
 }
