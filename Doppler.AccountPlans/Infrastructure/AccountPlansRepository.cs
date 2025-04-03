@@ -569,5 +569,41 @@ ORDER BY [PrintQty]");
 
             return result;
         }
+
+        public async Task<AddOnPlan> GetOnSitePlanById(int onSitePlanId)
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<AddOnPlan>(@"
+SELECT [IdOnSitePlan] AS PlanId
+        ,[Description]
+        ,[PrintQty] AS [Quantity]
+        ,[Fee]
+        ,[AdditionalPrint] AS [Additional]
+        ,3 AS AddOnType
+FROM [dbo].[OnSitePlan]
+WHERE [IdOnSitePlan] = @onSitePlanId",
+    new { onSitePlanId });
+
+            return result.FirstOrDefault();
+        }
+
+        public async Task<AddOnPlan> GetPushNotificationPlanById(int pushNotificationPlanId)
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<AddOnPlan>(@"
+SELECT [IdPushNotificationPlan] AS PlanId
+        ,[Description]
+        ,[Quantity]
+        ,[Fee]
+        ,[Additional]
+        ,4 AS AddOnType
+FROM [dbo].[PushNotificationPlan]
+WHERE [IdPushNotificationPlan] = @pushNotificationPlanId",
+    new { pushNotificationPlanId });
+
+            return result.FirstOrDefault();
+        }
     }
 }
