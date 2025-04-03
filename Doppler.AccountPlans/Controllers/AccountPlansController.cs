@@ -322,5 +322,47 @@ namespace Doppler.AccountPlans.Controllers
 
             return new OkObjectResult(planInformation);
         }
+
+        [HttpGet("/addon/{addOnType}/plans")]
+        public async Task<IActionResult> GetPlans([FromRoute] AddOnType addOnType, [FromQuery] bool custom = false)
+        {
+            IEnumerable<BasePlanInformation> planInformation = null;
+
+            switch (addOnType)
+            {
+                case AddOnType.Chat:
+                    planInformation = custom
+                        ? await _accountPlansRepository.GetCustomConversationPlans()
+                        : await _accountPlansRepository.GetConversationPlans();
+                    break;
+
+                case AddOnType.Landing:
+                    planInformation = await _accountPlansRepository.GetLandingPlans();
+                    break;
+
+                case AddOnType.OnSite:
+                    planInformation = custom
+                        ? await _accountPlansRepository.GetCustomOnSitePlans()
+                        : await _accountPlansRepository.GetOnSitePlans();
+                    break;
+
+                case AddOnType.PushNotification:
+                    planInformation = custom
+                        ? await _accountPlansRepository.GetCustomPushNotificationPlans()
+                        : await _accountPlansRepository.GetPushNotificationPlans();
+                    break;
+
+                default:
+                    return new BadRequestObjectResult("AddOn not supported");
+            }
+
+            if (planInformation == null)
+            {
+                return new NotFoundResult();
+            }
+
+            return new OkObjectResult(planInformation);
+        }
+
     }
 }
