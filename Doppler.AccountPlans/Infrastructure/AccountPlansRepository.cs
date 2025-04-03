@@ -441,6 +441,12 @@ FROM [dbo].[OnSitePlan] WITH(NOLOCK)
 WHERE [Active] = 1 AND [Fee] > 0
 ORDER BY [PrintQty]");
 
+            foreach (var item in result)
+            {
+                item.PrintQty = item.Quantity;
+                item.AdditionalPrint = item.Additional;
+            }
+
             return result;
         }
 
@@ -569,6 +575,12 @@ SELECT  [IdOnSitePlan] AS PlanId,
 FROM [dbo].[OnSitePlan] WITH(NOLOCK)
 WHERE [Active] = 0 AND [Fee] > 0
 ORDER BY [PrintQty]");
+
+            foreach (var item in result)
+            {
+                item.PrintQty = item.Quantity;
+                item.AdditionalPrint = item.Additional;
+            }
 
             return result;
         }
