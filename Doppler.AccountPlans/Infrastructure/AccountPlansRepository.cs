@@ -502,6 +502,8 @@ SELECT
             THEN CPBC.PlanFee
         WHEN UAO.IdAddOnType = 3
             THEN  OSBC.PlanFee
+        WHEN UAO.IdAddOnType = 4
+            THEN PNBC.PlanFee
     ELSE 0
     END AS Fee,
     CASE
@@ -511,6 +513,8 @@ SELECT
             THEN SUM(CP.ConversationQty)
         WHEN UAO.IdAddOnType = 3
             THEN  SUM(OSP.PrintQty)
+        WHEN UAO.IdAddOnType = 4
+            THEN  SUM(PNP.Quantity)
         ELSE 0
     END AS Qty
 FROM [UserAddOn] UAO
@@ -528,6 +532,11 @@ LEFT JOIN [ChatPlans] CP ON CP.IdChatPlan = CPU.IdChatPlan
 LEFT JOIN [BillingCredits] OSBC ON OSBC.IdBillingCredit = UAO.IdCurrentBillingCredit AND UAO.IdAddOnType = 3 AND OSBC.IdBillingCreditType IN (34, 35, 37, 38)
 LEFT JOIN [OnSitePlanUser] OSPU ON OSPU.IdBillingCredit = OSBC.IdBillingCredit
 LEFT JOIN [OnSitePlan] OSP ON OSP.IdOnSItePlan = OSPU.IdOnSItePlan
+
+/* Push Notification plans */
+LEFT JOIN [BillingCredits] PNBC ON PNBC.IdBillingCredit = UAO.IdCurrentBillingCredit AND UAO.IdAddOnType = 4 AND PNBC.IdBillingCreditType IN (40, 41, 43, 44)
+LEFT JOIN [PushNotificationPlanUser] PNPU ON PNBC.IdBillingCredit = PNBC.IdBillingCredit
+LEFT JOIN [PushNotificationPlan] PNP ON PNP.IdPushNotificationPlan = PNPU.IdPushNotificationPlan
 WHERE UAO.IdUser = @userId
 GROUP BY UAO.IdAddOnType ,
         CASE
@@ -537,6 +546,8 @@ GROUP BY UAO.IdAddOnType ,
                 THEN CPBC.PlanFee
             WHEN UAO.IdAddOnType = 3
                 THEN OSBC.PlanFee
+            WHEN UAO.IdAddOnType = 4
+                THEN PNBC.PlanFee
             ELSE 0
         END",
                     new
@@ -599,6 +610,21 @@ SELECT [IdPushNotificationPlan] AS PlanId
         ,[Fee]
         ,[Additional]
         ,4 AS AddOnType
+FROM [dbo].[PushNotificationPlan]
+WHERE [IdPushNotificationPlan] = @pushNotificationPlanId",
+    new { pushNotificationPlanId });
+
+            return result.FirstOrDefault();
+        }
+
+        public async Task<PlanInformation> GetPushNotificationPlanInformation(int pushNotificationPlanId)
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<PlanInformation>(@"
+SELECT
+    [Quantity] AS PrintQty,
+    [Fee] AS ChatPlanFee
 FROM [dbo].[PushNotificationPlan]
 WHERE [IdPushNotificationPlan] = @pushNotificationPlanId",
     new { pushNotificationPlanId });

@@ -69,6 +69,9 @@ namespace Doppler.AccountPlans.Controllers
                 case PlanTypeEnum.OnSite:
                     newPlan = await _accountPlansRepository.GetOnSitePlanInformation(newPlanId);
                     break;
+                case PlanTypeEnum.PushNotification:
+                    newPlan = await _accountPlansRepository.GetPushNotificationPlanInformation(newPlanId);
+                    break;
                 default:
                     newPlan = null;
                     break;
