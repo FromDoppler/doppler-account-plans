@@ -136,6 +136,8 @@ namespace Doppler.AccountPlans.Utils
                     return new ChatPlan();
                 case PlanTypeEnum.OnSite:
                     return new OnSitePlan();
+                case PlanTypeEnum.PushNotification:
+                    return new PushNotificationPlan();
                 default:
                     return null;
             }
