@@ -12,6 +12,7 @@ using System;
 using System.Numerics;
 using Doppler.AccountPlans.TimeCollector;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Doppler.AccountPlans.Controllers
 {
@@ -344,6 +345,13 @@ namespace Doppler.AccountPlans.Controllers
                     planInformation = custom
                         ? await _accountPlansRepository.GetCustomOnSitePlans()
                         : await _accountPlansRepository.GetOnSitePlans();
+
+                    foreach (var plan in planInformation.Cast<OnSitePlanInformation>())
+                    {
+                        plan.Quantity = plan.PrintQty;
+                        plan.Additional = plan.AdditionalPrint;
+                    }
+
                     break;
 
                 case AddOnType.PushNotification:

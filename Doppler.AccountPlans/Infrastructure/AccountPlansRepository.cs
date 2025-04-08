@@ -433,19 +433,13 @@ ORDER BY b.[Date] ASC;",
             var result = await connection.QueryAsync<OnSitePlanInformation>(@"
 SELECT  [IdOnSitePlan] AS PlanId,
         [Description] AS [Description],
-        [PrintQty] AS Quantity,
+        [PrintQty] AS PrintQty,
         [Fee] AS Fee,
-        [AdditionalPrint] AS Additional,
+        [AdditionalPrint] AS AdditionalPrint,
         4 AS PlanType
 FROM [dbo].[OnSitePlan] WITH(NOLOCK)
 WHERE [Active] = 1 AND [Fee] > 0
 ORDER BY [PrintQty]");
-
-            foreach (var item in result)
-            {
-                item.PrintQty = item.Quantity;
-                item.AdditionalPrint = item.Additional;
-            }
 
             return result;
         }
@@ -568,19 +562,13 @@ GROUP BY UAO.IdAddOnType ,
             var result = await connection.QueryAsync<OnSitePlanInformation>(@"
 SELECT  [IdOnSitePlan] AS PlanId,
         [Description] AS [Description],
-        [PrintQty] AS Quantity,
+        [PrintQty] AS PrintQty,
         [Fee] AS Fee,
-        [AdditionalPrint] AS Additional,
+        [AdditionalPrint] AS AdditionalPrint,
         4 AS PlanType
 FROM [dbo].[OnSitePlan] WITH(NOLOCK)
 WHERE [Active] = 0 AND [Fee] > 0
 ORDER BY [PrintQty]");
-
-            foreach (var item in result)
-            {
-                item.PrintQty = item.Quantity;
-                item.AdditionalPrint = item.Additional;
-            }
 
             return result;
         }
