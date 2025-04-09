@@ -436,6 +436,8 @@ SELECT  [IdOnSitePlan] AS PlanId,
         [PrintQty] AS PrintQty,
         [Fee] AS Fee,
         [AdditionalPrint] AS AdditionalPrint,
+        [AdditionalPrint] AS Additional,
+        [PrintQty] AS Quantity,
         4 AS PlanType
 FROM [dbo].[OnSitePlan] WITH(NOLOCK)
 WHERE [Active] = 1 AND [Fee] > 0
@@ -576,6 +578,8 @@ SELECT  [IdOnSitePlan] AS PlanId,
         [PrintQty] AS PrintQty,
         [Fee] AS Fee,
         [AdditionalPrint] AS AdditionalPrint,
+        [AdditionalPrint] AS Additional,
+        [PrintQty] AS Quantity,
         4 AS PlanType
 FROM [dbo].[OnSitePlan] WITH(NOLOCK)
 WHERE [Active] = 0 AND [Fee] > 0
