@@ -341,6 +341,20 @@ namespace Doppler.AccountPlans.Controllers
             return new OkObjectResult(addOnPlan);
         }
 
+        [HttpGet("/addon/{addOnType}/plans")]
+        public async Task<IActionResult> GetPlans([FromRoute] AddOnType addOnType, [FromQuery] bool custom = false)
+        {
+            var addOnMapper = GetAddOnMapper(addOnType);
+            var planInformation = await addOnMapper.GetAddOnPlans(custom);
+
+            if (planInformation == null)
+            {
+                return new NotFoundResult();
+            }
+
+            return new OkObjectResult(planInformation);
+        }
+
         private IAddOnMapper GetAddOnMapper(AddOnType addOnType)
         {
             return addOnType switch

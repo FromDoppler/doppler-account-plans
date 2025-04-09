@@ -196,6 +196,7 @@ WHERE
             using var connection = _connectionFactory.GetConnection();
             var result = await connection.QueryAsync<ConversationPlanInformation>(@"
 SELECT  [IdChatPlan] AS PlanId,
+        [Description] as Description,
         [ConversationQty] AS ConversationsQty,
         [Fee] AS Fee,
         [Agents] AS Agents,
@@ -264,6 +265,7 @@ ORDER BY b.[Date] DESC;",
             using var connection = _connectionFactory.GetConnection();
             var result = await connection.QueryAsync<ConversationPlanInformation>(@"
 SELECT  [IdChatPlan] AS PlanId,
+        [Description] as Description,
         [ConversationQty] AS ConversationsQty,
         [Fee] AS Fee,
         [Agents] AS Agents,
@@ -284,6 +286,7 @@ ORDER BY ConversationsQty");
             using var connection = _connectionFactory.GetConnection();
             var result = await connection.QueryAsync<ConversationPlanInformation>(@"
 SELECT  [IdChatPlan] AS PlanId,
+        [Description] as Description,
         [ConversationQty] AS ConversationsQty,
         [Fee] AS Fee,
         [Agents] AS Agents,
@@ -433,6 +436,8 @@ SELECT  [IdOnSitePlan] AS PlanId,
         [PrintQty] AS PrintQty,
         [Fee] AS Fee,
         [AdditionalPrint] AS AdditionalPrint,
+        [AdditionalPrint] AS Additional,
+        [PrintQty] AS Quantity,
         4 AS PlanType
 FROM [dbo].[OnSitePlan] WITH(NOLOCK)
 WHERE [Active] = 1 AND [Fee] > 0
@@ -573,6 +578,8 @@ SELECT  [IdOnSitePlan] AS PlanId,
         [PrintQty] AS PrintQty,
         [Fee] AS Fee,
         [AdditionalPrint] AS AdditionalPrint,
+        [AdditionalPrint] AS Additional,
+        [PrintQty] AS Quantity,
         4 AS PlanType
 FROM [dbo].[OnSitePlan] WITH(NOLOCK)
 WHERE [Active] = 0 AND [Fee] > 0
@@ -630,6 +637,38 @@ WHERE [IdPushNotificationPlan] = @pushNotificationPlanId",
     new { pushNotificationPlanId });
 
             return result.FirstOrDefault();
+        }
+
+        public async Task<IEnumerable<PushNotificationPlanInformation>> GetPushNotificationPlans()
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<PushNotificationPlanInformation>(@"
+SELECT [IdPushNotificationPlan] AS PlanId
+        ,[Description]
+        ,[Quantity]
+        ,[Fee]
+        ,[Additional]
+        ,5 AS PlanType
+FROM [dbo].[PushNotificationPlan]
+WHERE [Active] = 1 AND [Fee] > 0");
+
+            return result;
+        }
+
+        public async Task<IEnumerable<PushNotificationPlanInformation>> GetCustomPushNotificationPlans()
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<PushNotificationPlanInformation>(@"
+SELECT [IdPushNotificationPlan] AS PlanId
+        ,[Description]
+        ,[Quantity]
+        ,[Fee]
+        ,[Additional]
+        ,5 AS PlanType
+FROM [dbo].[PushNotificationPlan]
+WHERE [Custom] = 1 AND [Fee] > 0");
+
+            return result;
         }
     }
 }
