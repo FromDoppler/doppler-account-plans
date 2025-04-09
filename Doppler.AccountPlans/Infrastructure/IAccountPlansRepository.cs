@@ -33,5 +33,8 @@ namespace Doppler.AccountPlans.Infrastructure
         Task<AddOnPlan> GetOnSitePlanById(int onSitePlanId);
         Task<AddOnPlan> GetPushNotificationPlanById(int pushNotificationPlanId);
         Task<PlanInformation> GetPushNotificationPlanInformation(int pushNotificationPlanId);
+
+        Task<IEnumerable<PushNotificationPlanInformation>> GetPushNotificationPlans();
+        Task<IEnumerable<PushNotificationPlanInformation>> GetCustomPushNotificationPlans();
     }
 }

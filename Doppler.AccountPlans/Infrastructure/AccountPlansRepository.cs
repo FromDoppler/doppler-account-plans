@@ -634,5 +634,37 @@ WHERE [IdPushNotificationPlan] = @pushNotificationPlanId",
 
             return result.FirstOrDefault();
         }
+
+        public async Task<IEnumerable<PushNotificationPlanInformation>> GetPushNotificationPlans()
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<PushNotificationPlanInformation>(@"
+SELECT [IdPushNotificationPlan] AS PlanId
+        ,[Description]
+        ,[Quantity]
+        ,[Fee]
+        ,[Additional]
+        ,5 AS PlanType
+FROM [dbo].[PushNotificationPlan]
+WHERE [Active] = 1 AND [Fee] > 0");
+
+            return result;
+        }
+
+        public async Task<IEnumerable<PushNotificationPlanInformation>> GetCustomPushNotificationPlans()
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<PushNotificationPlanInformation>(@"
+SELECT [IdPushNotificationPlan] AS PlanId
+        ,[Description]
+        ,[Quantity]
+        ,[Fee]
+        ,[Additional]
+        ,5 AS PlanType
+FROM [dbo].[PushNotificationPlan]
+WHERE [Custom] = 1 AND [Fee] > 0");
+
+            return result;
+        }
     }
 }
