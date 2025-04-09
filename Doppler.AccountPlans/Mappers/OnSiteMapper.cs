@@ -1,5 +1,6 @@
 using Doppler.AccountPlans.Infrastructure;
 using Doppler.AccountPlans.Model;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Doppler.AccountPlans.Mappers
@@ -16,6 +17,13 @@ namespace Doppler.AccountPlans.Mappers
         public async Task<AddOnPlan> GetAddOnPlan(int planId)
         {
             return await accountPlansRepository.GetOnSitePlanById(planId);
+        }
+
+        public async Task<IEnumerable<BasePlanInformation>> GetAddOnPlans(bool onlyCustomPlans = false)
+        {
+            return onlyCustomPlans
+                ? await accountPlansRepository.GetCustomOnSitePlans()
+                : await accountPlansRepository.GetOnSitePlans();
         }
     }
 }
