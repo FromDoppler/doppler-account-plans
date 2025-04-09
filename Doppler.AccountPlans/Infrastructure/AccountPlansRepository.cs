@@ -196,6 +196,7 @@ WHERE
             using var connection = _connectionFactory.GetConnection();
             var result = await connection.QueryAsync<ConversationPlanInformation>(@"
 SELECT  [IdChatPlan] AS PlanId,
+        [Description] as Description,
         [ConversationQty] AS ConversationsQty,
         [Fee] AS Fee,
         [Agents] AS Agents,
@@ -264,6 +265,7 @@ ORDER BY b.[Date] DESC;",
             using var connection = _connectionFactory.GetConnection();
             var result = await connection.QueryAsync<ConversationPlanInformation>(@"
 SELECT  [IdChatPlan] AS PlanId,
+        [Description] as Description,
         [ConversationQty] AS ConversationsQty,
         [Fee] AS Fee,
         [Agents] AS Agents,
@@ -284,6 +286,7 @@ ORDER BY ConversationsQty");
             using var connection = _connectionFactory.GetConnection();
             var result = await connection.QueryAsync<ConversationPlanInformation>(@"
 SELECT  [IdChatPlan] AS PlanId,
+        [Description] as Description,
         [ConversationQty] AS ConversationsQty,
         [Fee] AS Fee,
         [Agents] AS Agents,
