@@ -128,13 +128,13 @@ SELECT
     [ExtraCredits],
     [Active],
     [DiscountPlanFee] as DiscountPercentage,
-    B.PromotionDuration AS [Duration],
+    B.PromotionDuration AS [Duration]
 FROM [User] U  WITH(NOLOCK)
 INNER JOIN [BillingCredits] B  WITH(NOLOCK) ON B.IdBillingCredit = U.IdCurrentBillingCredit
 INNER JOIN [Promotions] P  WITH(NOLOCK) ON  P.IdPromotion = B.IdPromotion
 WHERE
     U.Email = @email AND
-    B.DiscountPlanFeePromotion IS NOT NULL)",
+    B.DiscountPlanFeePromotion IS NOT NULL",
                 new
                 {
                     email = accountName
