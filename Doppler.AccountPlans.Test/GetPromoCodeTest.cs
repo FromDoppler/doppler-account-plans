@@ -28,7 +28,7 @@ namespace Doppler.AccountPlans
             // Arrange
             const string expectedContent = "{\"idPromotion\":3,\"extraCredits\":1,\"discountPercentage\":2,\"duration\":null}";
             var promoCodeRepositoryMock = new Mock<IPromotionRepository>();
-            promoCodeRepositoryMock.Setup(x => x.GetPromotionByCode(It.IsAny<string>(), It.IsAny<int>()))
+            promoCodeRepositoryMock.Setup(x => x.GetPromotionByCode(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>()))
                 .ReturnsAsync(new Promotion
                 {
                     ExtraCredits = 1,
@@ -70,7 +70,7 @@ namespace Doppler.AccountPlans
         {
             // Arrange
             var promoCodeRepositoryMock = new Mock<IPromotionRepository>();
-            promoCodeRepositoryMock.Setup(x => x.GetPromotionByCode(It.IsAny<string>(), It.IsAny<int>()))
+            promoCodeRepositoryMock.Setup(x => x.GetPromotionByCode(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>()))
                 .ReturnsAsync(null as Promotion);
 
             var client = _factory.WithWebHostBuilder(builder =>

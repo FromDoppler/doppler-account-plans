@@ -124,7 +124,7 @@ namespace Doppler.AccountPlans
                     Fee = 1
                 });
             var promotionRepositoryMock = new Mock<IPromotionRepository>();
-            promotionRepositoryMock.Setup(x => x.GetPromotionByCode(It.IsAny<string>(), It.IsAny<int>()))
+            promotionRepositoryMock.Setup(x => x.GetPromotionByCode(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>()))
                 .ReturnsAsync(new Promotion
                 {
                     DiscountPercentage = 0
