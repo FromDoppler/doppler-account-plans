@@ -19,7 +19,7 @@ namespace Doppler.AccountPlans.Infrastructure
             _timeCollector = timeCollector;
         }
 
-        public async Task<Promotion> GetPromotionByCode(string code, int planId)
+        public async Task<Promotion> GetPromotionByCode(string code, int planId, bool wasApplied)
         {
             using var _ = _timeCollector.StartScope();
             using var connection = _connectionFactory.GetConnection();
@@ -47,7 +47,7 @@ FROM
     [Promotions]  WITH(NOLOCK)
 WHERE
     [Code] = @code AND
-    [Active] = 1 AND
+    ([Active] = 1 OR @wasApplied = 1) AND
     ([TimesToUse] is null OR [TimesToUse] > [TimesUsed]) AND
     ([ExpiringDate] is null OR [ExpiringDate] >= @now) AND
     ([IdUserTypePlan] = @planId OR
@@ -63,7 +63,8 @@ WHERE
                     @individual = (int)UserTypesEnum.Individual,
                     @subscribers = (int)UserTypesEnum.Subscribers,
                     @monthly = (int)UserTypesEnum.Monthly,
-                    @now = DateTime.Now
+                    @now = DateTime.Now,
+                    wasApplied
                 });
 
             return promotion;
@@ -113,6 +114,33 @@ WHERE
                 });
 
             return times;
+        }
+
+        public async Task<Promotion> GetCurrentPromotionByAccountName(string accountName)
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+
+            var promotion = await connection.QueryFirstOrDefaultAsync<Promotion>(@"
+SELECT
+    P.[IdPromotion],
+    [Code],
+    [ExtraCredits],
+    [Active],
+    [DiscountPlanFee] as DiscountPercentage,
+    B.PromotionDuration AS [Duration]
+FROM [User] U  WITH(NOLOCK)
+INNER JOIN [BillingCredits] B  WITH(NOLOCK) ON B.IdBillingCredit = U.IdCurrentBillingCredit
+INNER JOIN [Promotions] P  WITH(NOLOCK) ON  P.IdPromotion = B.IdPromotion
+WHERE
+    U.Email = @email AND
+    B.DiscountPlanFeePromotion IS NOT NULL",
+                new
+                {
+                    email = accountName
+                });
+
+            return promotion;
         }
     }
 }

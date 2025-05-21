@@ -93,21 +93,32 @@ namespace Doppler.AccountPlans.Controllers
             if (!string.IsNullOrEmpty(promocode))
             {
                 var encryptedCode = _encryptionService.EncryptAES256(promocode);
-                promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, newPlanId);
+                promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, newPlanId, false);
             }
 
             if (currentPlan != null)
             {
                 if (currentPlan.IdUserType != Enums.UserTypesEnum.Individual)
                 {
-                    currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, newPlanId);
+                    currentPromotion = await _promotionRepository.GetCurrentPromotionByAccountName(accountName);
+
+                    if (currentPromotion != null && currentPromotion.Duration >= 1)
+                    {
+                        currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, newPlanId, true);
+                    }
+                    else
+                    {
+                        currentPromotion = null;
+                    }
+
+                    //currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, newPlanId);
                     timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName);
                 }
                 else
                 {
                     if (currentPlan.IdUserType == UserTypesEnum.Individual && newPlan.IdUserType != UserTypesEnum.Individual)
                     {
-                        var prepaidPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan);
+                        var prepaidPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan, true);
 
                         var availableCredits = await _accountPlansRepository.GetAvailableCredit(accountName);
                         var credits = availableCredits > currentPlan.EmailQty ? currentPlan.EmailQty : availableCredits;
@@ -186,7 +197,7 @@ namespace Doppler.AccountPlans.Controllers
             using var _ = _timeCollector.StartScope();
 
             var encryptedCode = _encryptionService.EncryptAES256(promocode);
-            var promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, planId);
+            var promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, planId, false);
 
             if (promotion == null)
                 return new NotFoundResult();
