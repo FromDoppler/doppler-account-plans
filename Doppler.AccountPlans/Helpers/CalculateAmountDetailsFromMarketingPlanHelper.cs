@@ -181,7 +181,13 @@ namespace Doppler.AccountPlans.Helpers
                     }
                 }
 
-                result.NextMonthTotal = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPlanFeeAdmin.NextAmount - nextDiscountPromocodeAmmount - result.DiscountPrepayment.NextAmount;
+                decimal nextMonthTotal = 0;
+                if (newPlan.IdUserType != UserTypesEnum.Individual)
+                {
+                    nextMonthTotal = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPlanFeeAdmin.NextAmount - nextDiscountPromocodeAmmount - result.DiscountPrepayment.NextAmount;
+                }
+
+                result.NextMonthTotal = nextMonthTotal;
                 result.MajorThat21st = now.Day > 21;
 
                 var nexMonnthInvoiceDate = !isMonthPlan ? now.AddMonths(differenceBetweenMonthPlans) : now.AddMonths(1);
