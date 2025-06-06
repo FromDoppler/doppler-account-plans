@@ -128,7 +128,7 @@ SELECT
     [ExtraCredits],
     [Active],
     [DiscountPlanFee] as DiscountPercentage,
-    B.PromotionDuration AS [Duration]
+    ISNULL(B.PromotionDuration, P.Duration) AS [Duration]
 FROM [User] U  WITH(NOLOCK)
 INNER JOIN [BillingCredits] B  WITH(NOLOCK) ON B.IdBillingCredit = U.IdCurrentBillingCredit
 INNER JOIN [Promotions] P  WITH(NOLOCK) ON  P.IdPromotion = B.IdPromotion
