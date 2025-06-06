@@ -124,8 +124,11 @@ namespace Doppler.AccountPlans.Helpers
 
         private static int GetMonthsToDiscount(bool isMonthPlan, int differenceBetweenMonthPlans, UserTypesEnum idUserType)
         {
-            if (idUserType == UserTypesEnum.Individual || idUserType == UserTypesEnum.Free)
+            if (idUserType == UserTypesEnum.Free)
                 return 0;
+
+            if (idUserType == UserTypesEnum.Individual)
+                return 1;
 
             return (!isMonthPlan || differenceBetweenMonthPlans == 0) ? differenceBetweenMonthPlans : 1;
         }
