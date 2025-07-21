@@ -8,5 +8,6 @@ namespace Doppler.AccountPlans.Mappers
     {
         Task<AddOnPlan> GetAddOnPlan(int planId);
         Task<IEnumerable<BasePlanInformation>> GetAddOnPlans(bool onlyCustomPlans);
+        Task<AddOnPlan> GetFreePlan();
     }
 }

@@ -670,5 +670,60 @@ WHERE [Custom] = 1 AND [Fee] > 0");
 
             return result;
         }
+
+        public async Task<ConversationPlan> GetFreeConversationPlan()
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<ConversationPlan>(@"
+SELECT  [IdChatPlan] AS PlanId,
+        [Description] as Description,
+        [ConversationQty] AS Quantity,
+        [Fee] AS Fee,
+        [Agents] AS Agents,
+        [Canales] AS Channels,
+        [AdditionalConversation] AS AdditionalConversation,
+        [AdditionalAgent] AS AdditionalAgent,
+        [AdditionalChannel] AS AdditionalChannel,
+        2 AS PlanType
+FROM [dbo].[ChatPlans] WITH(NOLOCK)
+WHERE [Fee] = 0
+ORDER BY ConversationQty");
+
+            return result.FirstOrDefault();
+        }
+
+        public async Task<AddOnPlan> GetFreeOnSitePlan()
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<AddOnPlan>(@"
+SELECT [IdOnSitePlan] AS PlanId
+        ,[Description]
+        ,[PrintQty] AS [Quantity]
+        ,[Fee]
+        ,[AdditionalPrint] AS [Additional]
+        ,3 AS AddOnType
+FROM [dbo].[OnSitePlan]
+WHERE [Fee] = 0");
+
+            return result.FirstOrDefault();
+        }
+
+        public async Task<AddOnPlan> GetFreePushNotificationPlan()
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<AddOnPlan>(@"
+SELECT [IdPushNotificationPlan] AS PlanId
+        ,[Description]
+        ,[Quantity]
+        ,[Fee]
+        ,[Additional]
+        ,4 AS AddOnType
+FROM [dbo].[PushNotificationPlan]
+WHERE [Fee] = 0");
+
+            return result.FirstOrDefault();
+        }
     }
 }

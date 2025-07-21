@@ -366,10 +366,25 @@ namespace Doppler.AccountPlans.Controllers
             return new OkObjectResult(planInformation);
         }
 
+        [HttpGet("/addon/{addOnType}/free-plan")]
+        public async Task<IActionResult> GetFreePlan([FromRoute] AddOnType addOnType)
+        {
+            var addOnMapper = GetAddOnMapper(addOnType);
+            var freePlan = await addOnMapper.GetFreePlan();
+
+            if (freePlan == null)
+            {
+                return new NotFoundResult();
+            }
+
+            return new OkObjectResult(freePlan);
+        }
+
         private IAddOnMapper GetAddOnMapper(AddOnType addOnType)
         {
             return addOnType switch
             {
+                AddOnType.Chat => new ConversationMapper(_accountPlansRepository),
                 AddOnType.OnSite => new OnSiteMapper(_accountPlansRepository),
                 AddOnType.PushNotification => new PushNotificationMapper(_accountPlansRepository),
                 _ => null,

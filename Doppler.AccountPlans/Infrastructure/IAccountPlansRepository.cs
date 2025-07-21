@@ -36,5 +36,8 @@ namespace Doppler.AccountPlans.Infrastructure
 
         Task<IEnumerable<PushNotificationPlanInformation>> GetPushNotificationPlans();
         Task<IEnumerable<PushNotificationPlanInformation>> GetCustomPushNotificationPlans();
+        Task<ConversationPlan> GetFreeConversationPlan();
+        Task<AddOnPlan> GetFreeOnSitePlan();
+        Task<AddOnPlan> GetFreePushNotificationPlan();
     }
 }

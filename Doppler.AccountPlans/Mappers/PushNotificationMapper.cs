@@ -25,5 +25,10 @@ namespace Doppler.AccountPlans.Mappers
                 ? await accountPlansRepository.GetCustomPushNotificationPlans()
                 : await accountPlansRepository.GetPushNotificationPlans();
         }
+
+        public Task<AddOnPlan> GetFreePlan()
+        {
+            return accountPlansRepository.GetFreePushNotificationPlan();
+        }
     }
 }
