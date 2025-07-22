@@ -25,5 +25,10 @@ namespace Doppler.AccountPlans.Mappers
                 ? await accountPlansRepository.GetCustomOnSitePlans()
                 : await accountPlansRepository.GetOnSitePlans();
         }
+
+        public async Task<AddOnPlan> GetFreePlan()
+        {
+            return await accountPlansRepository.GetFreeOnSitePlan();
+        }
     }
 }
