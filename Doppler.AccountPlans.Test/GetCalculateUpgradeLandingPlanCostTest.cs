@@ -30,10 +30,15 @@ namespace Doppler.AccountPlans
             var userAccount = "test1@example.com";
             var idDiscountPlan = 1;
             var acccountPlansRepository = new Mock<IAccountPlansRepository>();
+            var promotionRepository = new Mock<IPromotionRepository>();
 
             acccountPlansRepository
-                .Setup(x => x.GetCurrentPlanInformation(userAccount))
-                .ReturnsAsync(new UserPlanInformation() { IdDiscountPlan = idDiscountPlan });
+                .Setup(x => x.GetCurrentPlanWithAdditionalServices(userAccount))
+                .ReturnsAsync(new UserPlan()
+                {
+                    IdDiscountPlan = idDiscountPlan,
+                    AdditionalServices = [new AdditionalService { IdAddOnType = 1 }]
+                });
 
             acccountPlansRepository
                 .Setup(x => x.GetLandingPlans())
@@ -43,11 +48,16 @@ namespace Doppler.AccountPlans
                 .Setup(x => x.GetDiscountInformation(idDiscountPlan))
                 .ReturnsAsync(new PlanDiscountInformation());
 
+            promotionRepository
+                .Setup(x => x.GetCurrentPromotionByAccountName(userAccount))
+                .ReturnsAsync((Promotion)null);
+
             var client = _factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureTestServices(services =>
                 {
                     services.AddSingleton(acccountPlansRepository.Object);
+                    services.AddSingleton(promotionRepository.Object);
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 
