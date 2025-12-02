@@ -664,7 +664,7 @@ namespace Doppler.AccountPlans
                 new LandingPlanInformation() { PlanId = 3, PlanType = PlanTypeEnum.Landing, LandingsQty = 50, Fee = 80 },
             };
 
-            var currentPlan = new UserPlanInformation() { TotalMonthPlan = 1, CurrentMonthPlan = 0 };
+            var currentPlan = new UserPlan() { TotalMonthPlan = 1, CurrentMonthPlan = 0 };
 
             UserPlanInformation lastLandingPlan = null;
 
@@ -675,7 +675,10 @@ namespace Doppler.AccountPlans
                 landingPlansInformation,
                 discount: null,
                 lastLandingPlan,
-                firstUpgradeDate: null);
+                firstUpgradeDate: null,
+                promotion: null,
+                currentPromotion: null,
+                timesAppliedPromocode: null);
 
             Assert.Equal(100, result.Total);
             Assert.Equal(100, result.NextMonthTotal);
@@ -700,7 +703,7 @@ namespace Doppler.AccountPlans
                 new LandingPlanInformation() { PlanId = 3, PlanType = PlanTypeEnum.Landing, LandingsQty = 50, Fee = 80 },
             };
 
-            var currentPlan = new UserPlanInformation() { TotalMonthPlan = 1, CurrentMonthPlan = 0 };
+            var currentPlan = new UserPlan() { TotalMonthPlan = 1, CurrentMonthPlan = 0 };
 
             var discount = new PlanDiscountInformation() { DiscountPlanFee = 5, MonthPlan = 1 };
 
@@ -713,7 +716,10 @@ namespace Doppler.AccountPlans
                 landingPlansInformation,
                 discount,
                 lastLandingPlan,
-                firstUpgradeDate: null);
+                firstUpgradeDate: null,
+                promotion: null,
+                currentPromotion: null,
+                timesAppliedPromocode: null);
 
             Assert.Equal(95, result.Total);
             Assert.Equal(95, result.NextMonthTotal);
@@ -738,7 +744,7 @@ namespace Doppler.AccountPlans
                 new() { PlanId = 3, PlanType = PlanTypeEnum.Landing, LandingsQty = 50, Fee = 80 },
             };
 
-            var currentPlan = new UserPlanInformation() { TotalMonthPlan = 3, CurrentMonthPlan = 0 };
+            var currentPlan = new UserPlan() { TotalMonthPlan = 3, CurrentMonthPlan = 0 };
 
             var discount = new PlanDiscountInformation() { DiscountPlanFee = 10, MonthPlan = 1 };
 
@@ -751,7 +757,10 @@ namespace Doppler.AccountPlans
                 landingPlansInformation,
                 discount,
                 lastLandingPlan,
-                firstUpgradeDate: null);
+                firstUpgradeDate: null,
+                promotion: null,
+                currentPromotion: null,
+                timesAppliedPromocode: null);
 
             Assert.Equal(90, result.Total);
             Assert.Equal(90, result.NextMonthTotal);

@@ -22,17 +22,20 @@ namespace Doppler.AccountPlans.Utils
             decimal creditsDiscount,
             PlanTypeEnum planType)
         {
-            return GetHelper(planType).CalculateAmountDetails(newPlan, ref newDiscount, ref currentPlan, now, promotion, timesAppliedPromocode, currentPromotion, firstUpgradeDate, currentDiscountPlan, creditsDiscount);
+            return GetHelper(planType).CalculateAmountDetails(planType, newPlan, ref newDiscount, ref currentPlan, now, promotion, timesAppliedPromocode, currentPromotion, firstUpgradeDate, currentDiscountPlan, creditsDiscount);
         }
 
         public static PlanAmountDetails CalculateLandingPlanAmountDetails(
-            UserPlanInformation currentPlan,
+            UserPlan currentPlan,
             DateTime now,
             List<LandingPlanSummary> landingPlansSummary,
             IEnumerable<LandingPlanInformation> landingsPlanInformation,
             PlanDiscountInformation discount,
             UserPlanInformation lastLandingPlan,
-            DateTime? firstUpgradeDate)
+            DateTime? firstUpgradeDate,
+            Promotion promotion,
+            Promotion currentPromotion,
+            TimesApplyedPromocode timesAppliedPromocode)
         {
             var result = new PlanAmountDetails { DiscountPromocode = null };
             decimal baseLandingPlansFee = 0;
@@ -82,6 +85,8 @@ namespace Doppler.AccountPlans.Utils
                 NextAmount = Math.Round((nextTotalFee * discount.DiscountPlanFee) / 100, 2),
             };
 
+            result.Total = totalFee;
+
             //Discount already paid plans
             if (lastLandingPlan is not null)
             {
@@ -111,11 +116,135 @@ namespace Doppler.AccountPlans.Utils
                 result.DiscountPaymentAlreadyPaid = Math.Round(amount, 2);
             }
 
-            totalFee = totalFee - result.DiscountPrepayment.Amount - result.DiscountPaymentAlreadyPaid;
-            nextTotalFee -= result.DiscountPrepayment.NextAmount;
+            if (promotion != null && promotion.DiscountPercentage > 0)
+            {
+                var discountPromotion = Math.Round(totalFee * promotion.DiscountPercentage.Value / 100, 2);
 
-            result.Total = totalFee;
+                if (promotion.IdAddOnPlan.HasValue)
+                {
+                    var landingWithDiscount = landingPlansSummary.FirstOrDefault(l => l.IdLandingPlan == promotion.IdAddOnPlan);
+
+                    if (landingWithDiscount != null)
+                    {
+                        var landingPlan = landingsPlanInformation.FirstOrDefault(x => x.PlanId == landingWithDiscount.IdLandingPlan);
+                        discountPromotion = Math.Round((landingPlan.Fee * landingWithDiscount.NumberOfPlans) * promotion.DiscountPercentage.Value / 100, 2);
+                    }
+                    else
+                    {
+                        discountPromotion = 0;
+                    }
+                }
+
+                result.Total -= discountPromotion;
+                result.DiscountPromocode = new DiscountPromocode
+                {
+                    Amount = discountPromotion,
+                    DiscountPercentage = discountPromotion > 0 ? promotion.DiscountPercentage ?? 0 : 0,
+                    Duration = discountPromotion > 0 ? promotion.Duration ?? 0 : 0
+                };
+
+                result.DiscountPrepayment.Amount = 0;
+                result.DiscountPrepayment.DiscountPercentage = 0;
+            }
+            else
+            {
+                if (currentPromotion != null && (!currentPromotion.Duration.HasValue || currentPromotion.Duration.Value > 0))
+                {
+                    var discountPercentage = currentPromotion.DiscountPercentage ?? 0;
+                    var discountPromotion = Math.Round(totalFee * discountPercentage / 100, 2);
+
+                    if (currentPromotion.IdAddOnPlan.HasValue)
+                    {
+                        var landingWithDiscount = landingPlansSummary.FirstOrDefault(l => l.IdLandingPlan == currentPromotion.IdAddOnPlan);
+
+                        if (landingWithDiscount != null)
+                        {
+                            var landingPlan = landingsPlanInformation.FirstOrDefault(x => x.PlanId == landingWithDiscount.IdLandingPlan);
+                            discountPromotion = Math.Round((landingPlan.Fee * landingWithDiscount.NumberOfPlans) * currentPromotion.DiscountPercentage.Value / 100, 2);
+                        }
+                        else
+                        {
+                            discountPromotion = 0;
+                        }
+                    }
+
+                    result.Total -= discountPromotion;
+
+                    int promocodeDuration = 0;
+                    if (currentPromotion.Duration.HasValue)
+                    {
+                        promocodeDuration = currentPromotion.Duration.Value - 1;
+                    }
+
+                    result.DiscountPromocode = new DiscountPromocode
+                    {
+                        Amount = discountPromotion,
+                        DiscountPercentage = discountPromotion > 0 ? currentPromotion.DiscountPercentage ?? 0 : 0,
+                        Duration = discountPromotion > 0 ? promocodeDuration : 0
+                    };
+
+                    result.DiscountPrepayment.Amount = 0;
+                    result.DiscountPrepayment.DiscountPercentage = 0;
+                }
+            }
+
+            result.Total = result.Total - result.DiscountPrepayment.Amount - result.DiscountPaymentAlreadyPaid;
             result.CurrentMonthTotal = result.Total > 0 ? result.Total : 0;
+
+            //Check if for the next month apply the current promocode
+            decimal nextDiscountPromocodeAmmount = 0;
+
+            if (promotion != null && promotion.DiscountPercentage > 0 &&
+                    (!promotion.Duration.HasValue || promotion.Duration.Value > 1))
+            {
+                nextDiscountPromocodeAmmount = Math.Round(totalFee * promotion.DiscountPercentage.Value / 100, 2);
+
+                if (promotion.IdAddOnPlan.HasValue)
+                {
+                    var landingWithDiscount = landingPlansSummary.FirstOrDefault(l => l.IdLandingPlan == promotion.IdAddOnPlan);
+
+                    if (landingWithDiscount != null)
+                    {
+                        var landingPlan = landingsPlanInformation.FirstOrDefault(x => x.PlanId == landingWithDiscount.IdLandingPlan);
+                        nextDiscountPromocodeAmmount = Math.Round((landingPlan.Fee * landingWithDiscount.NumberOfPlans) * promotion.DiscountPercentage.Value / 100, 2);
+                    }
+                    else
+                    {
+                        nextDiscountPromocodeAmmount = 0;
+                    }
+                }
+            }
+            else
+            {
+                if (currentPromotion != null)
+                {
+                    var count = (now.Month == timesAppliedPromocode.LastMonthApplied && now.Year == timesAppliedPromocode.LastYearApplied) ? timesAppliedPromocode.CountApplied : timesAppliedPromocode.CountApplied + 1;
+                    if (!currentPromotion.Duration.HasValue || currentPromotion.Duration.Value > count)
+                    {
+                        var discountPercentage = currentPromotion.DiscountPercentage ?? 0;
+                        nextDiscountPromocodeAmmount = Math.Round(totalFee * discountPercentage / 100, 2);
+
+                        if (currentPromotion.IdAddOnPlan.HasValue)
+                        {
+                            var landingWithDiscount = landingPlansSummary.FirstOrDefault(l => l.IdLandingPlan == currentPromotion.IdAddOnPlan);
+
+                            if (landingWithDiscount != null)
+                            {
+                                var landingPlan = landingsPlanInformation.FirstOrDefault(x => x.PlanId == landingWithDiscount.IdLandingPlan);
+                                nextDiscountPromocodeAmmount = Math.Round((landingPlan.Fee * landingWithDiscount.NumberOfPlans) * currentPromotion.DiscountPercentage.Value / 100, 2);
+                            }
+                            else
+                            {
+                                nextDiscountPromocodeAmmount = 0;
+                            }
+                        }
+                    }
+                }
+            }
+
+            //nextTotalFee -= result.DiscountPrepayment.NextAmount;
+            nextTotalFee = nextTotalFee - nextDiscountPromocodeAmmount - result.DiscountPrepayment.NextAmount;
+
             result.NextMonthTotal = nextTotalFee;
             result.MajorThat21st = now.Day > 21;
             result.PositiveBalance = result.CurrentMonthTotal > 0 ? 0 : result.Total;
@@ -128,19 +257,12 @@ namespace Doppler.AccountPlans.Utils
 
         private static ICalculateAmountDetalisHelper GetHelper(PlanTypeEnum planType)
         {
-            switch (planType)
+            return planType switch
             {
-                case PlanTypeEnum.Marketing:
-                    return new MarketingPlan();
-                case PlanTypeEnum.Chat:
-                    return new ChatPlan();
-                case PlanTypeEnum.OnSite:
-                    return new OnSitePlan();
-                case PlanTypeEnum.PushNotification:
-                    return new PushNotificationPlan();
-                default:
-                    return null;
-            }
+                PlanTypeEnum.Marketing => new MarketingPlan(),
+                PlanTypeEnum.Chat or PlanTypeEnum.OnSite or PlanTypeEnum.PushNotification => new AddOnPlanHelper(),
+                _ => null,
+            };
         }
     }
 }

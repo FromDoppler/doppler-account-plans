@@ -13,6 +13,7 @@ using System.Numerics;
 using Doppler.AccountPlans.TimeCollector;
 using System.Collections.Generic;
 using Doppler.AccountPlans.Mappers;
+using System.Linq;
 
 namespace Doppler.AccountPlans.Controllers
 {
@@ -57,6 +58,7 @@ namespace Doppler.AccountPlans.Controllers
             _logger.LogInformation("Calculating plan amount details.");
 
             PlanInformation newPlan = null;
+            var addOnType = AddOnType.Chat;
 
             switch (newPlanType)
             {
@@ -65,12 +67,15 @@ namespace Doppler.AccountPlans.Controllers
                     break;
                 case PlanTypeEnum.Chat:
                     newPlan = await _accountPlansRepository.GetChatPlanInformation(newPlanId);
+                    addOnType = AddOnType.Chat;
                     break;
                 case PlanTypeEnum.OnSite:
                     newPlan = await _accountPlansRepository.GetOnSitePlanInformation(newPlanId);
+                    addOnType = AddOnType.OnSite;
                     break;
                 case PlanTypeEnum.PushNotification:
                     newPlan = await _accountPlansRepository.GetPushNotificationPlanInformation(newPlanId);
+                    addOnType = AddOnType.PushNotification;
                     break;
                 default:
                     newPlan = null;
@@ -93,43 +98,87 @@ namespace Doppler.AccountPlans.Controllers
             if (!string.IsNullOrEmpty(promocode))
             {
                 var encryptedCode = _encryptionService.EncryptAES256(promocode);
-                promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, newPlanId, false);
+
+                if (newPlanType == PlanTypeEnum.Marketing)
+                {
+                    promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, newPlanId, false);
+                }
+                else
+                {
+                    promotion = await _promotionRepository.GetAddOnPromotionByCodeAndAddOnType(encryptedCode, (int)addOnType, false);
+                    if (promotion != null && promotion.IdAddOnPlan.HasValue && promotion.IdAddOnPlan.Value != newPlanId)
+                    {
+                        promotion = null;
+                    }
+                }
             }
 
             if (currentPlan != null)
             {
-                if (currentPlan.IdUserType != Enums.UserTypesEnum.Individual)
+                if (newPlanType == PlanTypeEnum.Marketing)
                 {
-                    currentPromotion = await _promotionRepository.GetCurrentPromotionByAccountName(accountName);
-
-                    if (currentPromotion != null && currentPromotion.Duration >= 1)
+                    if (currentPlan.IdUserType != Enums.UserTypesEnum.Individual)
                     {
-                        currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, newPlanId, true);
+                        currentPromotion = await _promotionRepository.GetCurrentPromotionByAccountName(accountName);
+
+                        if (currentPromotion != null && (!currentPromotion.Duration.HasValue || currentPromotion.Duration >= 1))
+                        {
+                            currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, newPlanId, true);
+                        }
+                        else
+                        {
+                            currentPromotion = null;
+                        }
+
+                        timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName, (int)newPlanType);
                     }
                     else
                     {
-                        currentPromotion = null;
-                    }
+                        if (currentPlan.IdUserType == UserTypesEnum.Individual && newPlan.IdUserType != UserTypesEnum.Individual)
+                        {
+                            var prepaidPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan, true);
 
-                    //currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, newPlanId);
-                    timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName);
+                            var availableCredits = await _accountPlansRepository.GetAvailableCredit(accountName);
+                            var credits = availableCredits > currentPlan.EmailQty ? currentPlan.EmailQty : availableCredits;
+                            var priceByCredit = currentPlan.EmailQty > 0 ? currentPlan.Fee / currentPlan.EmailQty : 0;
+
+                            decimal creditsDiscount = credits * priceByCredit;
+                            totalCreditDiscount = creditsDiscount - (prepaidPromotion != null && prepaidPromotion.DiscountPercentage != null ? Math.Round(creditsDiscount * prepaidPromotion.DiscountPercentage.Value / 100, 2) : 0);
+                        }
+                    }
                 }
                 else
                 {
-                    if (currentPlan.IdUserType == UserTypesEnum.Individual && newPlan.IdUserType != UserTypesEnum.Individual)
+                    var currentAddOnPlan = currentPlan.AdditionalServices.FirstOrDefault(ads => ads.IdAddOnType == (int)addOnType);
+                    if (currentAddOnPlan != null && currentAddOnPlan.PromotionId != null && currentAddOnPlan.AddOnPromotionDuration >= 1)
                     {
-                        var prepaidPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan, true);
+                        currentPromotion = await _promotionRepository.GetAddOnPromotionByCodeAndAddOnType(currentPlan.PromotionCode, (int)addOnType, true);
+                        if (currentPromotion != null && currentPromotion.IdAddOnPlan.HasValue && currentPromotion.IdAddOnPlan.Value != newPlanId)
+                        {
+                            currentPromotion = null;
+                        }
+                        else
+                        {
+                            timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName, (int)newPlanType);
+                        }
+                    }
+                    else
+                    {
+                        var currentPromotionForEmailMarketing = await _promotionRepository.GetCurrentPromotionByAccountName(accountName);
+                        if (currentPromotionForEmailMarketing != null)
+                        {
+                            promotion = await _promotionRepository.GetAddOnPromotionByCodeAndAddOnType(currentPromotionForEmailMarketing.Code, (int)addOnType, false);
 
-                        var availableCredits = await _accountPlansRepository.GetAvailableCredit(accountName);
-                        var credits = availableCredits > currentPlan.EmailQty ? currentPlan.EmailQty : availableCredits;
-                        var priceByCredit = currentPlan.EmailQty > 0 ? currentPlan.Fee / currentPlan.EmailQty : 0;
+                            if (promotion != null && promotion.IdAddOnPlan.HasValue && promotion.IdAddOnPlan.Value != newPlanId)
+                            {
+                                promotion = null;
+                            }
+                        }
 
-                        decimal creditsDiscount = credits * priceByCredit;
-                        totalCreditDiscount = creditsDiscount - (prepaidPromotion != null && prepaidPromotion.DiscountPercentage != null ? Math.Round(creditsDiscount * prepaidPromotion.DiscountPercentage.Value / 100, 2) : 0);
+                        currentPromotion = null;
                     }
                 }
 
-                //firstUpgrade = await _accountPlansRepository.GetFirstUpgrade(accountName);
                 firstUpgradeDate = await _accountPlansRepository.GetFirstUpgradeDate(accountName);
                 currentDiscountPlan = await _accountPlansRepository.GetDiscountInformation(currentPlan.IdDiscountPlan);
             }
@@ -157,11 +206,32 @@ namespace Doppler.AccountPlans.Controllers
                 return new BadRequestObjectResult(new { message = "The 'landingPacks' query parameter is required" });
             }
 
-            var currentPlan = await _accountPlansRepository.GetCurrentPlanInformation(accountName);
+            var currentPlan = await _accountPlansRepository.GetCurrentPlanWithAdditionalServices(accountName);
 
             if (currentPlan is null)
             {
                 return new BadRequestObjectResult(new { message = "The given user has no billing credit" });
+            }
+
+            Promotion currentPromotion = null;
+            Promotion promotion = null;
+            TimesApplyedPromocode timesAppliedPromocode = null;
+
+            var currentAddOnPlan = currentPlan.AdditionalServices.FirstOrDefault(ads => ads.IdAddOnType == (int)AddOnType.Landing);
+            if (currentAddOnPlan != null && currentAddOnPlan.PromotionId != null && currentAddOnPlan.AddOnPromotionDuration >= 1)
+            {
+                currentPromotion = new Promotion { DiscountPercentage = currentAddOnPlan.AddOnPromotionDiscount, Duration = currentAddOnPlan.AddOnPromotionDuration };
+                timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName, (int)PlanTypeEnum.Landing);
+            }
+            else
+            {
+                var currentPromotionForEmailMarketing = await _promotionRepository.GetCurrentPromotionByAccountName(accountName);
+                if (currentPromotionForEmailMarketing != null)
+                {
+                    promotion = await _promotionRepository.GetAddOnPromotionByCodeAndAddOnType(currentPromotionForEmailMarketing.Code, (int)AddOnType.Landing, false);
+                }
+
+                currentPromotion = null;
             }
 
             var landingPlans = await _accountPlansRepository.GetLandingPlans();
@@ -186,7 +256,7 @@ namespace Doppler.AccountPlans.Controllers
 
             var lastLandingPlan = await _accountPlansRepository.GetLastLandingPlanBillingInformation(accountName);
             var firstUpgradeDate = await _accountPlansRepository.GetFirstUpgradeDate(accountName);
-            var upgradeCost = CalculateUpgradeCostHelper.CalculateLandingPlanAmountDetails(currentPlan, _dateTimeProvider.Now, landingPlansSummary, landingPlans, discountPlan, lastLandingPlan, firstUpgradeDate);
+            var upgradeCost = CalculateUpgradeCostHelper.CalculateLandingPlanAmountDetails(currentPlan, _dateTimeProvider.Now, landingPlansSummary, landingPlans, discountPlan, lastLandingPlan, firstUpgradeDate, promotion, currentPromotion, timesAppliedPromocode);
 
             return new OkObjectResult(upgradeCost);
         }

@@ -521,7 +521,40 @@ SELECT
         WHEN UAO.IdAddOnType = 4
             THEN  SUM(PNP.Quantity)
         ELSE 0
-    END AS Qty
+    END AS Qty,
+    CASE
+        WHEN UAO.IdAddOnType = 1
+            THEN LPBC.IdPromotion
+        WHEN UAO.IdAddOnType = 2
+            THEN CPBC.IdPromotion
+        WHEN UAO.IdAddOnType = 3
+            THEN  OSBC.IdPromotion
+        WHEN UAO.IdAddOnType = 4
+            THEN PNBC.IdPromotion
+    ELSE NULL
+    END AS PromotionId,
+    CASE
+        WHEN UAO.IdAddOnType = 1
+            THEN LPBC.DiscountPlanFeePromotion
+        WHEN UAO.IdAddOnType = 2
+            THEN CPBC.DiscountPlanFeePromotion
+        WHEN UAO.IdAddOnType = 3
+            THEN  OSBC.DiscountPlanFeePromotion
+        WHEN UAO.IdAddOnType = 4
+            THEN PNBC.DiscountPlanFeePromotion
+    ELSE NULL
+    END AS AddOnPromotionDiscount,
+    CASE
+        WHEN UAO.IdAddOnType = 1
+            THEN LPBC.PromotionDuration
+        WHEN UAO.IdAddOnType = 2
+            THEN CPBC.PromotionDuration
+        WHEN UAO.IdAddOnType = 3
+            THEN  OSBC.PromotionDuration
+        WHEN UAO.IdAddOnType = 4
+            THEN PNBC.PromotionDuration
+    ELSE NULL
+    END AS AddOnPromotionDuration
 FROM [UserAddOn] UAO
 /* Landings plans */
 LEFT JOIN [BillingCredits] LPBC ON LPBC.IdBillingCredit = UAO.IdCurrentBillingCredit AND UAO.IdAddOnType = 1 AND LPBC.IdBillingCreditType IN (23, 24, 26, 27)
@@ -545,15 +578,32 @@ LEFT JOIN [PushNotificationPlan] PNP ON PNP.IdPushNotificationPlan = PNPU.IdPush
 WHERE UAO.IdUser = @userId
 GROUP BY UAO.IdAddOnType ,
         CASE
-            WHEN UAO.IdAddOnType = 1
-                THEN LPBC.PlanFee
-            WHEN UAO.IdAddOnType = 2
-                THEN CPBC.PlanFee
-            WHEN UAO.IdAddOnType = 3
-                THEN OSBC.PlanFee
-            WHEN UAO.IdAddOnType = 4
-                THEN PNBC.PlanFee
+            WHEN UAO.IdAddOnType = 1 THEN LPBC.PlanFee
+            WHEN UAO.IdAddOnType = 2 THEN CPBC.PlanFee
+            WHEN UAO.IdAddOnType = 3 THEN OSBC.PlanFee
+            WHEN UAO.IdAddOnType = 4 THEN PNBC.PlanFee
             ELSE 0
+        END,
+        CASE
+            WHEN UAO.IdAddOnType = 1 THEN LPBC.IdPromotion
+            WHEN UAO.IdAddOnType = 2 THEN CPBC.IdPromotion
+            WHEN UAO.IdAddOnType = 3 THEN  OSBC.IdPromotion
+            WHEN UAO.IdAddOnType = 4 THEN PNBC.IdPromotion
+            ELSE NULL
+        END,
+        CASE
+            WHEN UAO.IdAddOnType = 1 THEN LPBC.DiscountPlanFeePromotion
+            WHEN UAO.IdAddOnType = 2 THEN CPBC.DiscountPlanFeePromotion
+            WHEN UAO.IdAddOnType = 3 THEN  OSBC.DiscountPlanFeePromotion
+            WHEN UAO.IdAddOnType = 4 THEN PNBC.DiscountPlanFeePromotion
+            ELSE NULL
+        END,
+        CASE
+            WHEN UAO.IdAddOnType = 1 THEN LPBC.PromotionDuration
+            WHEN UAO.IdAddOnType = 2 THEN CPBC.PromotionDuration
+            WHEN UAO.IdAddOnType = 3 THEN  OSBC.PromotionDuration
+            WHEN UAO.IdAddOnType = 4 THEN PNBC.PromotionDuration
+            ELSE NULL
         END",
                     new
                     {
