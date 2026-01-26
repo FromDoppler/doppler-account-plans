@@ -9,5 +9,7 @@ namespace Doppler.AccountPlans.Model
         public string Code { get; set; }
         public bool Active { get; set; }
         public int? IdAddOnPlan { get; set; }
+        public int? IdAddOnType { get; set; }
+        public string Quantity { get; set; }
     }
 }
