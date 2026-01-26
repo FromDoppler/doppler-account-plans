@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Doppler.AccountPlans.Enums;
@@ -183,6 +185,48 @@ WHERE
                 });
 
             return promotion;
+        }
+
+
+        public async Task<IList<Promotion>> GetAddOnPromotionsByCode(string code, int planId, bool wasApplied)
+        {
+            IEnumerable<Promotion> addOnpromotions = [];
+            var promotion = await GetPromotionByCode(code, planId, wasApplied);
+
+            if (promotion != null)
+            {
+                using var _ = _timeCollector.StartScope();
+                using var connection = _connectionFactory.GetConnection();
+
+                addOnpromotions = await connection.QueryAsync<Promotion>(@"
+SELECT
+    AP.[IdPromotion],
+    AP.[CreationDate],
+    [ExpiringDate],
+    [TimesUsed],
+    [TimesToUse],
+    AP.[Code],
+    AP.[Active],
+    AP.Discount as DiscountPercentage,
+    AP.[Duration],
+    AP.IdAddOnPlan,
+    AP.IdAddOnType
+FROM [AddOnPromotion] AP  WITH(NOLOCK)
+INNER JOIN [Promotions] P WITH(NOLOCK) ON P.IdPromotion = AP.IdPromotion
+WHERE
+    P.IdPromotion = @idPromotion AND
+    (AP.[Active] = 1 OR @wasApplied = 1) AND
+    ([TimesToUse] is null OR [TimesToUse] > [TimesUsed]) AND
+    ([ExpiringDate] is null OR [ExpiringDate] >= @now)",
+                    new
+                    {
+                        idPromotion = promotion.IdPromotion,
+                        @now = DateTime.Now,
+                        wasApplied
+                    });
+            }
+
+            return [.. addOnpromotions];
         }
     }
 }

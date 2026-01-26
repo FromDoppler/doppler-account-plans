@@ -450,6 +450,47 @@ namespace Doppler.AccountPlans.Controllers
             return new OkObjectResult(freePlan);
         }
 
+        [HttpGet("/plans/{planId}/promotion/{promocode}/addonpromotions")]
+        public async Task<IActionResult> GetAddOnPromotionsInformation([FromRoute] int planId, [FromRoute] string promocode)
+        {
+            using var _ = _timeCollector.StartScope();
+
+            var encryptedCode = _encryptionService.EncryptAES256(promocode);
+            var addOnPromotions = await _promotionRepository.GetAddOnPromotionsByCode(encryptedCode, planId, true);
+
+            if (addOnPromotions == null)
+                return new NotFoundResult();
+
+            foreach (var addOnPromotion in addOnPromotions)
+            {
+                var addOnPlanQuantity = string.Empty;
+
+                switch ((AddOnType)addOnPromotion.IdAddOnType)
+                {
+                    case AddOnType.Landing:
+                        var landingPlan = (await _accountPlansRepository.GetLandingPlans()).Where(lp => lp.PlanId == (addOnPromotion.IdAddOnPlan ?? 0)).FirstOrDefault();
+                        addOnPlanQuantity = landingPlan != null ? landingPlan.Description : string.Empty;
+                        break;
+                    case AddOnType.Chat:
+                        var conversationPlan = await _accountPlansRepository.GetChatPlanInformation(addOnPromotion.IdAddOnPlan ?? 0);
+                        addOnPlanQuantity = conversationPlan != null ? conversationPlan.ChatPlanConversationQty.ToString() : string.Empty;
+                        break;
+                    case AddOnType.OnSite:
+                        var onSitePlan = await _accountPlansRepository.GetOnSitePlanInformation(addOnPromotion.IdAddOnPlan ?? 0);
+                        addOnPlanQuantity = onSitePlan != null ? onSitePlan.PrintQty.ToString() : string.Empty;
+                        break;
+                    case AddOnType.PushNotification:
+                        var pushNotificationPlan = await _accountPlansRepository.GetPushNotificationPlanInformation(addOnPromotion.IdAddOnPlan ?? 0);
+                        addOnPlanQuantity = pushNotificationPlan != null ? pushNotificationPlan.PrintQty.ToString() : string.Empty;
+                        break;
+                }
+
+                addOnPromotion.Quantity = addOnPlanQuantity;
+            }
+
+            return new OkObjectResult(addOnPromotions);
+        }
+
         private IAddOnMapper GetAddOnMapper(AddOnType addOnType)
         {
             return addOnType switch
