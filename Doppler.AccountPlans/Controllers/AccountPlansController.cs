@@ -14,6 +14,7 @@ using Doppler.AccountPlans.TimeCollector;
 using System.Collections.Generic;
 using Doppler.AccountPlans.Mappers;
 using System.Linq;
+using Doppler.AccountPlans.Dtos;
 
 namespace Doppler.AccountPlans.Controllers
 {
@@ -88,7 +89,7 @@ namespace Doppler.AccountPlans.Controllers
             var currentPlan = await _accountPlansRepository.GetCurrentPlanWithAdditionalServices(accountName);
             var discountPlan = await _accountPlansRepository.GetDiscountInformation(discountId);
 
-            var promotion = new Promotion();
+            Promotion promotion = null;
             TimesApplyedPromocode timesAppliedPromocode = null;
             Promotion currentPromotion = null;
             DateTime? firstUpgradeDate = null;
@@ -101,7 +102,7 @@ namespace Doppler.AccountPlans.Controllers
 
                 if (newPlanType == PlanTypeEnum.Marketing)
                 {
-                    promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, newPlanId, false);
+                    promotion = await _promotionRepository.GetPromotionByCodeAndPlanId(encryptedCode, newPlanId, false);
                 }
                 else
                 {
@@ -123,7 +124,7 @@ namespace Doppler.AccountPlans.Controllers
 
                         if (currentPromotion != null && (!currentPromotion.Duration.HasValue || currentPromotion.Duration >= 1))
                         {
-                            currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, newPlanId, true);
+                            currentPromotion = await _promotionRepository.GetPromotionByCodeAndPlanId(currentPlan.PromotionCode, newPlanId, true);
                         }
                         else
                         {
@@ -136,7 +137,7 @@ namespace Doppler.AccountPlans.Controllers
                     {
                         if (currentPlan.IdUserType == UserTypesEnum.Individual && newPlan.IdUserType != UserTypesEnum.Individual)
                         {
-                            var prepaidPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan, true);
+                            var prepaidPromotion = await _promotionRepository.GetPromotionByCodeAndPlanId(currentPlan.PromotionCode, currentPlan.IdUserTypePlan, true);
 
                             var availableCredits = await _accountPlansRepository.GetAvailableCredit(accountName);
                             var credits = availableCredits > currentPlan.EmailQty ? currentPlan.EmailQty : availableCredits;
@@ -161,18 +162,25 @@ namespace Doppler.AccountPlans.Controllers
                         {
                             timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName, (int)newPlanType);
                         }
+
+                        if (currentPromotion != null)
+                        {
+                            currentPromotion.Duration = currentAddOnPlan.AddOnPromotionDuration;
+                        }
                     }
                     else
                     {
                         var currentPromotionForEmailMarketing = await _promotionRepository.GetCurrentPromotionByAccountName(accountName);
                         if (currentPromotionForEmailMarketing != null)
                         {
-                            promotion = await _promotionRepository.GetAddOnPromotionByCodeAndAddOnType(currentPromotionForEmailMarketing.Code, (int)addOnType, false);
+                            promotion = await _promotionRepository.GetAddOnPromotionByIdAndAddOnType(currentPromotionForEmailMarketing.IdPromotion, (int)addOnType, false);
 
                             if (promotion != null && promotion.IdAddOnPlan.HasValue && promotion.IdAddOnPlan.Value != newPlanId)
                             {
                                 promotion = null;
                             }
+
+                            timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName, (int)PlanTypeEnum.Marketing);
                         }
 
                         currentPromotion = null;
@@ -267,12 +275,81 @@ namespace Doppler.AccountPlans.Controllers
             using var _ = _timeCollector.StartScope();
 
             var encryptedCode = _encryptionService.EncryptAES256(promocode);
-            var promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, planId, false);
 
-            if (promotion == null)
+            IList<Promotion> existsPromotions = await _promotionRepository.GetPromotionsByCode(encryptedCode);
+
+            if (existsPromotions.Count == 0)
+            {
                 return new NotFoundResult();
+            }
 
-            return new OkObjectResult(promotion);
+            var activePromocode = existsPromotions.Any(ep => ep.ExpirationDate == null || ep.ExpirationDate >= DateTime.Now);
+
+            if (!activePromocode)
+            {
+                return new BadRequestObjectResult(new PromotionDto()
+                {
+                    ExpiredPromocode = true,
+                    CanApply = false,
+                    Code = promocode,
+                    PlanPromotions = []
+                });
+            }
+
+            var promotionByCodeAndPlan = await _promotionRepository.GetPromotionByCodeAndPlanId(encryptedCode, planId, false);
+
+            PromotionDto result = new()
+            {
+                PromotionApplied = promotionByCodeAndPlan,
+                CanApply = promotionByCodeAndPlan != null,
+                Code = promocode,
+                PlanPromotions = []
+            };
+
+            if (result.CanApply)
+            {
+                return new OkObjectResult(result);
+            }
+            else
+            {
+                foreach (var existsPromotion in existsPromotions)
+                {
+                    var userTypePlan = await _accountPlansRepository.GetPlanInformation(existsPromotion.IdUserTypePlan ?? 0);
+
+                    var existsPlanPromotion = result.PlanPromotions.FirstOrDefault(pp => pp.PlanType == userTypePlan.IdUserType);
+
+                    if (existsPlanPromotion != null)
+                    {
+                        existsPlanPromotion.Quantity = existsPlanPromotion.Quantity + ", " + (userTypePlan != null ?
+                                userTypePlan.IdUserType == UserTypesEnum.Subscribers ?
+                                userTypePlan.SubscribersQty.ToString() :
+                                userTypePlan.EmailQty.ToString() :
+                                string.Empty);
+                    }
+                    else
+                    {
+                        var planType = existsPromotion.IdUserTypePlan != null ?
+                            userTypePlan.IdUserType :
+                            existsPromotion.AllMonthlyPlans ? UserTypesEnum.Monthly :
+                            existsPromotion.AllSubscriberPlans ? UserTypesEnum.Subscribers :
+                            UserTypesEnum.Individual;
+
+                        var planPromotion = new PlanPromotionDto
+                        {
+                            PlanType = planType,
+                            Quantity = userTypePlan != null ?
+                                planType == UserTypesEnum.Subscribers ?
+                                userTypePlan.SubscribersQty.ToString() :
+                                userTypePlan.EmailQty.ToString() :
+                                null
+                        };
+
+                        result.PlanPromotions.Add(planPromotion);
+                    }
+                }
+            }
+
+            return new OkObjectResult(result);
         }
 
         [HttpGet("/plans/{planId}/{paymentMethod}/discounts")]

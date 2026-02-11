@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -23,17 +25,87 @@ namespace Doppler.AccountPlans
         }
 
         [Fact]
+        public async Task GET_PromoCode_Information_should_get_right_values_when_promoCode_is_expired()
+        {
+            // Arrange
+            const string expectedContent = "{\"code\":\"test\",\"canApply\":false,\"expiredPromocode\":true,\"promotionApplied\":null,\"planPromotions\":[]}";
+            IList<Promotion> promotions =
+            [
+                new Promotion {
+                    ExtraCredits = 1,
+                    DiscountPercentage = 2,
+                    IdPromotion = 3,
+                    ExpirationDate = new System.DateTime(2026,2,24)
+                }
+            ];
+
+            var promoCodeRepositoryMock = new Mock<IPromotionRepository>();
+            promoCodeRepositoryMock.Setup(x => x.GetPromotionsByCode(It.IsAny<string>()))
+                .ReturnsAsync(promotions);
+
+            var client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.AddSingleton(promoCodeRepositoryMock.Object);
+                    services.AddSingleton(Mock.Of<IAccountPlansRepository>());
+                    services.AddSingleton(Mock.Of<IEncryptionService>());
+                });
+
+            }).CreateClient(new WebApplicationFactoryClientOptions());
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "/plans/1/validate/test")
+            {
+                Headers =
+                {
+                    {
+                        "Authorization", $"Bearer {TokenExpire20330518}"
+                    }
+                }
+            };
+
+            // Act
+            var response = await client.SendAsync(request);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(expectedContent, responseContent);
+        }
+
+        [Fact]
         public async Task GET_PromoCode_Information_should_get_right_values_when_promoCode_is_valid()
         {
             // Arrange
-            const string expectedContent = "{\"idPromotion\":3,\"extraCredits\":1,\"discountPercentage\":2,\"duration\":null,\"code\":null,\"active\":false,\"idAddOnPlan\":null,\"idAddOnType\":null,\"quantity\":null}";
+            const string expectedContent = "{\"code\":\"test\",\"canApply\":true,\"expiredPromocode\":false,\"promotionApplied\":{\"idPromotion\":3,\"idUserTypePlan\":null,\"idUserType\":null,\"extraCredits\":1,\"discountPercentage\":2,\"duration\":null,\"code\":null,\"allPlans\":false,\"allSubscriberPlans\":false,\"allPrepaidPlans\":false,\"allMonthlyPlans\":false,\"active\":false,\"idAddOnPlan\":null,\"idAddOnType\":null,\"quantity\":null,\"canApply\":false,\"expirationDate\":null},\"planPromotions\":[]}";
+            IList<Promotion> promotions =
+            [
+                new Promotion {
+                    ExtraCredits = 1,
+                    DiscountPercentage = 2,
+                    IdPromotion = 3,
+                    ExpirationDate = null
+                }
+            ];
+
             var promoCodeRepositoryMock = new Mock<IPromotionRepository>();
-            promoCodeRepositoryMock.Setup(x => x.GetPromotionByCode(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>()))
+            promoCodeRepositoryMock.Setup(x => x.GetPromotionByCodeAndPlanId(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>()))
                 .ReturnsAsync(new Promotion
                 {
                     ExtraCredits = 1,
                     DiscountPercentage = 2,
                     IdPromotion = 3
+                });
+            promoCodeRepositoryMock.Setup(x => x.GetPromotionsByCode(It.IsAny<string>()))
+                .ReturnsAsync(promotions);
+
+            var accountPlansRepositoryMock = new Mock<IAccountPlansRepository>();
+            accountPlansRepositoryMock.Setup(x => x.GetPlanInformation(It.IsAny<int>()))
+                .ReturnsAsync(new PlanInformation
+                {
+                    IdUserType = Enums.UserTypesEnum.Subscribers,
+                    SubscribersQty = 500
+
                 });
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -41,6 +113,7 @@ namespace Doppler.AccountPlans
                 builder.ConfigureTestServices(services =>
                 {
                     services.AddSingleton(promoCodeRepositoryMock.Object);
+                    services.AddSingleton(accountPlansRepositoryMock.Object);
                     services.AddSingleton(Mock.Of<IEncryptionService>());
                 });
 
@@ -70,7 +143,9 @@ namespace Doppler.AccountPlans
         {
             // Arrange
             var promoCodeRepositoryMock = new Mock<IPromotionRepository>();
-            promoCodeRepositoryMock.Setup(x => x.GetPromotionByCode(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>()))
+            promoCodeRepositoryMock.Setup(x => x.GetPromotionsByCode(It.IsAny<string>()))
+                .ReturnsAsync(new List<Promotion>());
+            promoCodeRepositoryMock.Setup(x => x.GetPromotionByCodeAndPlanId(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>()))
                 .ReturnsAsync(null as Promotion);
 
             var client = _factory.WithWebHostBuilder(builder =>

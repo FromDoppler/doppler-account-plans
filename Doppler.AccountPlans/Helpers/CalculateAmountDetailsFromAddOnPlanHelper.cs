@@ -95,18 +95,29 @@ namespace Doppler.AccountPlans.Helpers
 
             result.Total = ((newPlan.ChatPlanFee ?? 0) * differenceBetweenMonthPlans) - result.DiscountPaymentAlreadyPaid - result.DiscountPrepayment.Amount;
 
+            var count = 0;
+            if (timesAppliedPromocode != null)
+            {
+                count = (now.Month == timesAppliedPromocode.LastMonthApplied && now.Year == timesAppliedPromocode.LastYearApplied) ? timesAppliedPromocode.CountApplied : timesAppliedPromocode.CountApplied + 1;
+            }
 
             if (promotion != null && promotion.DiscountPercentage > 0)
             {
-                var discount = Math.Round(newPlan.ChatPlanFee.Value * promotion.DiscountPercentage.Value / 100, 2);
+                var applyCurrentMonth = (now.Month == timesAppliedPromocode.LastMonthApplied && now.Year == timesAppliedPromocode.LastYearApplied);
+                var duration = promotion.Duration.Value - (applyCurrentMonth ? timesAppliedPromocode.CountApplied - 1 : timesAppliedPromocode.CountApplied);
 
-                result.Total -= discount;
-                result.DiscountPromocode = new DiscountPromocode
+                if (duration >= 0)
                 {
-                    Amount = discount,
-                    DiscountPercentage = promotion.DiscountPercentage ?? 0,
-                    Duration = promotion.Duration ?? 0
-                };
+                    var discount = Math.Round(newPlan.ChatPlanFee.Value * promotion.DiscountPercentage.Value / 100, 2);
+
+                    result.Total -= discount;
+                    result.DiscountPromocode = new DiscountPromocode
+                    {
+                        Amount = discount,
+                        DiscountPercentage = promotion.DiscountPercentage ?? 0,
+                        Duration = duration
+                    };
+                }
 
                 result.DiscountPrepayment.Amount = 0;
                 result.DiscountPrepayment.DiscountPercentage = 0;
@@ -161,7 +172,7 @@ namespace Doppler.AccountPlans.Helpers
             decimal nextDiscountPromocodeAmmount = 0;
 
             if (promotion != null && promotion.DiscountPercentage > 0 &&
-                (!promotion.Duration.HasValue || (now.Day > 21 ? promotion.Duration.Value >= 1 : promotion.Duration.Value > 1)))
+                (!promotion.Duration.HasValue || (now.Day > 21 ? promotion.Duration.Value >= count : promotion.Duration.Value > count)))
             {
                 nextDiscountPromocodeAmmount = Math.Round(newPlan.ChatPlanFee.Value * promotion.DiscountPercentage.Value / 100, 2);
             }
@@ -169,7 +180,6 @@ namespace Doppler.AccountPlans.Helpers
             {
                 if (currentPromotion != null)
                 {
-                    var count = (now.Month == timesAppliedPromocode.LastMonthApplied && now.Year == timesAppliedPromocode.LastYearApplied) ? timesAppliedPromocode.CountApplied : timesAppliedPromocode.CountApplied + 1;
                     if (!currentPromotion.Duration.HasValue || currentPromotion.Duration.Value > count)
                     {
                         var discountPercentage = currentPromotion.DiscountPercentage ?? 0;

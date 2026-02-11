@@ -21,7 +21,7 @@ namespace Doppler.AccountPlans.Infrastructure
             _timeCollector = timeCollector;
         }
 
-        public async Task<Promotion> GetPromotionByCode(string code, int planId, bool wasApplied)
+        public async Task<Promotion> GetPromotionByCodeAndPlanId(string code, int planId, bool wasApplied)
         {
             using var _ = _timeCollector.StartScope();
             using var connection = _connectionFactory.GetConnection();
@@ -70,6 +70,76 @@ WHERE
                 });
 
             return promotion;
+        }
+
+        public async Task<Promotion> GetPromotionByCode(string code)
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+
+            var promotion = await connection.QueryFirstOrDefaultAsync<Promotion>(@"
+SELECT
+    [IdPromotion],
+    [IdUserTypePlan],
+    [CreationDate],
+    [ExpiringDate],
+    [TimesUsed],
+    [TimesToUse],
+    [Code],
+    [ExtraCredits],
+    [Active],
+    [DiscountPlanFee] as DiscountPercentage,
+    [AllPlans],
+    [AllSubscriberPlans],
+    [AllPrepaidPlans],
+    [AllMonthlyPlans],
+    [Duration]
+FROM
+    [Promotions]  WITH(NOLOCK)
+WHERE
+    [Code] = @code AND
+    [Active] = 1",
+                new
+                {
+                    code
+                });
+
+            return promotion;
+        }
+
+        public async Task<IList<Promotion>> GetPromotionsByCode(string code)
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+
+            var promotion = await connection.QueryAsync<Promotion>(@"
+SELECT
+    [IdPromotion],
+    [IdUserTypePlan],
+    [CreationDate],
+    [ExpiringDate] AS ExpirationDate,
+    [TimesUsed],
+    [TimesToUse],
+    [Code],
+    [ExtraCredits],
+    [Active],
+    [DiscountPlanFee] as DiscountPercentage,
+    [AllPlans],
+    [AllSubscriberPlans],
+    [AllPrepaidPlans],
+    [AllMonthlyPlans],
+    [Duration]
+FROM
+    [Promotions]  WITH(NOLOCK)
+WHERE
+    [Code] = @code AND
+    [Active] = 1",
+                new
+                {
+                    code,
+                });
+
+            return promotion.ToList();
         }
 
         private async Task<int> GetUserTypeByPlan(int planId)
@@ -191,7 +261,7 @@ WHERE
         public async Task<IList<Promotion>> GetAddOnPromotionsByCode(string code, int planId, bool wasApplied)
         {
             IEnumerable<Promotion> addOnpromotions = [];
-            var promotion = await GetPromotionByCode(code, planId, wasApplied);
+            var promotion = await GetPromotionByCodeAndPlanId(code, planId, wasApplied);
 
             if (promotion != null)
             {
@@ -227,6 +297,42 @@ WHERE
             }
 
             return [.. addOnpromotions];
+        }
+
+        public async Task<Promotion> GetAddOnPromotionByIdAndAddOnType(int promotionId, int addOnTypeId, bool wasApplied)
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+
+            var promotion = await connection.QueryFirstOrDefaultAsync<Promotion>(@"
+SELECT
+    AP.[IdPromotion],
+    AP.[CreationDate],
+    [ExpiringDate],
+    [TimesUsed],
+    [TimesToUse],
+    AP.[Code],
+    AP.[Active],
+    AP.Discount as DiscountPercentage,
+    AP.[Duration],
+    AP.[IdAddOnPlan]
+FROM [AddOnPromotion] AP  WITH(NOLOCK)
+INNER JOIN [Promotions] P WITH(NOLOCK) ON P.IdPromotion = AP.IdPromotion
+WHERE
+    AP.[IdPromotion] = @promotionId AND
+    AP.[IdAddOnType] = @addOnTypeId AND
+    (AP.[Active] = 1 OR @wasApplied = 1) AND
+    ([TimesToUse] is null OR [TimesToUse] > [TimesUsed]) AND
+    ([ExpiringDate] is null OR [ExpiringDate] >= @now)",
+                new
+                {
+                    promotionId,
+                    addOnTypeId,
+                    wasApplied,
+                    @now = DateTime.Now
+                });
+
+            return promotion;
         }
     }
 }
