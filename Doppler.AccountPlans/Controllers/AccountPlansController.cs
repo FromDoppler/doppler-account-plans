@@ -101,7 +101,7 @@ namespace Doppler.AccountPlans.Controllers
 
                 if (newPlanType == PlanTypeEnum.Marketing)
                 {
-                    promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, newPlanId, false);
+                    promotion = await _promotionRepository.GetPromotionByCodeAndPlanId(encryptedCode, newPlanId, false);
                 }
                 else
                 {
@@ -123,7 +123,7 @@ namespace Doppler.AccountPlans.Controllers
 
                         if (currentPromotion != null && (!currentPromotion.Duration.HasValue || currentPromotion.Duration >= 1))
                         {
-                            currentPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, newPlanId, true);
+                            currentPromotion = await _promotionRepository.GetPromotionByCodeAndPlanId(currentPlan.PromotionCode, newPlanId, true);
                         }
                         else
                         {
@@ -136,7 +136,7 @@ namespace Doppler.AccountPlans.Controllers
                     {
                         if (currentPlan.IdUserType == UserTypesEnum.Individual && newPlan.IdUserType != UserTypesEnum.Individual)
                         {
-                            var prepaidPromotion = await _promotionRepository.GetPromotionByCode(currentPlan.PromotionCode, currentPlan.IdUserTypePlan, true);
+                            var prepaidPromotion = await _promotionRepository.GetPromotionByCodeAndPlanId(currentPlan.PromotionCode, currentPlan.IdUserTypePlan, true);
 
                             var availableCredits = await _accountPlansRepository.GetAvailableCredit(accountName);
                             var credits = availableCredits > currentPlan.EmailQty ? currentPlan.EmailQty : availableCredits;
@@ -161,6 +161,11 @@ namespace Doppler.AccountPlans.Controllers
                         {
                             timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName, (int)newPlanType);
                         }
+
+                        if (currentPromotion != null)
+                        {
+                            currentPromotion.Duration = currentAddOnPlan.AddOnPromotionDuration;
+                        }
                     }
                     else
                     {
@@ -173,6 +178,8 @@ namespace Doppler.AccountPlans.Controllers
                             {
                                 promotion = null;
                             }
+
+                            timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName, (int)PlanTypeEnum.Marketing);
                         }
 
                         currentPromotion = null;
@@ -267,12 +274,27 @@ namespace Doppler.AccountPlans.Controllers
             using var _ = _timeCollector.StartScope();
 
             var encryptedCode = _encryptionService.EncryptAES256(promocode);
-            var promotion = await _promotionRepository.GetPromotionByCode(encryptedCode, planId, false);
 
-            if (promotion == null)
+            Promotion existsPromotion = await _promotionRepository.GetPromotionByCode(encryptedCode);
+
+            if (existsPromotion == null)
+            {
                 return new NotFoundResult();
+            }
 
-            return new OkObjectResult(promotion);
+            var promotionByCodeAndPlan = await _promotionRepository.GetPromotionByCodeAndPlanId(encryptedCode, planId, false);
+            var userTypePlan = await _accountPlansRepository.GetPlanInformation(existsPromotion.IdUserTypePlan ?? 0);
+
+            var result = existsPromotion;
+            result.CanApply = promotionByCodeAndPlan != null;
+            result.IdUserType = userTypePlan?.IdUserType;
+            result.Quantity = userTypePlan != null ?
+                userTypePlan.IdUserType == UserTypesEnum.Subscribers ?
+                userTypePlan.SubscribersQty.ToString() :
+                userTypePlan.EmailQty.ToString() :
+                null;
+
+            return new OkObjectResult(result);
         }
 
         [HttpGet("/plans/{planId}/{paymentMethod}/discounts")]

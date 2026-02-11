@@ -26,9 +26,17 @@ namespace Doppler.AccountPlans
         public async Task GET_PromoCode_Information_should_get_right_values_when_promoCode_is_valid()
         {
             // Arrange
-            const string expectedContent = "{\"idPromotion\":3,\"extraCredits\":1,\"discountPercentage\":2,\"duration\":null,\"code\":null,\"active\":false,\"idAddOnPlan\":null,\"idAddOnType\":null,\"quantity\":null}";
+            const string expectedContent = "{\"idPromotion\":3,\"idUserTypePlan\":null,\"idUserType\":4,\"extraCredits\":1,\"discountPercentage\":2,\"duration\":null,\"code\":null,\"allPlans\":false,\"allSubscriberPlans\":false,\"allPrepaidPlans\":false,\"allMonthlyPlans\":false,\"active\":false,\"idAddOnPlan\":null,\"idAddOnType\":null,\"quantity\":\"500\",\"canApply\":true}";
+
             var promoCodeRepositoryMock = new Mock<IPromotionRepository>();
-            promoCodeRepositoryMock.Setup(x => x.GetPromotionByCode(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>()))
+            promoCodeRepositoryMock.Setup(x => x.GetPromotionByCodeAndPlanId(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>()))
+                .ReturnsAsync(new Promotion
+                {
+                    ExtraCredits = 1,
+                    DiscountPercentage = 2,
+                    IdPromotion = 3
+                });
+            promoCodeRepositoryMock.Setup(x => x.GetPromotionByCode(It.IsAny<string>()))
                 .ReturnsAsync(new Promotion
                 {
                     ExtraCredits = 1,
@@ -36,11 +44,21 @@ namespace Doppler.AccountPlans
                     IdPromotion = 3
                 });
 
+            var accountPlansRepositoryMock = new Mock<IAccountPlansRepository>();
+            accountPlansRepositoryMock.Setup(x => x.GetPlanInformation(It.IsAny<int>()))
+                .ReturnsAsync(new PlanInformation
+                {
+                    IdUserType = Enums.UserTypesEnum.Subscribers,
+                    SubscribersQty = 500
+
+                });
+
             var client = _factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureTestServices(services =>
                 {
                     services.AddSingleton(promoCodeRepositoryMock.Object);
+                    services.AddSingleton(accountPlansRepositoryMock.Object);
                     services.AddSingleton(Mock.Of<IEncryptionService>());
                 });
 
@@ -70,7 +88,7 @@ namespace Doppler.AccountPlans
         {
             // Arrange
             var promoCodeRepositoryMock = new Mock<IPromotionRepository>();
-            promoCodeRepositoryMock.Setup(x => x.GetPromotionByCode(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>()))
+            promoCodeRepositoryMock.Setup(x => x.GetPromotionByCodeAndPlanId(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>()))
                 .ReturnsAsync(null as Promotion);
 
             var client = _factory.WithWebHostBuilder(builder =>
