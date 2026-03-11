@@ -116,6 +116,13 @@ namespace Doppler.AccountPlans.Utils
                 result.DiscountPaymentAlreadyPaid = Math.Round(amount, 2);
             }
 
+            DateTime? firstApplied = null;
+            var differencMonths = 0;
+            if (timesAppliedPromocode != null)
+            {
+                firstApplied = timesAppliedPromocode.FirstApplied;
+            }
+
             if (promotion != null && promotion.DiscountPercentage > 0)
             {
                 var discountPromotion = Math.Round(totalFee * promotion.DiscountPercentage.Value / 100, 2);
@@ -135,12 +142,17 @@ namespace Doppler.AccountPlans.Utils
                     }
                 }
 
+                var applyCurrentMonth = (now.Month == timesAppliedPromocode.LastMonthApplied && now.Year == timesAppliedPromocode.LastYearApplied);
+                var currentDate = DateTime.Now;
+                differencMonths = ((currentDate.Year - firstApplied.Value.Year) * 12) + currentDate.Month - firstApplied.Value.Month;
+                var duration = promotion.Duration.Value - differencMonths;
+
                 result.Total -= discountPromotion;
                 result.DiscountPromocode = new DiscountPromocode
                 {
                     Amount = discountPromotion,
                     DiscountPercentage = discountPromotion > 0 ? promotion.DiscountPercentage ?? 0 : 0,
-                    Duration = discountPromotion > 0 ? promotion.Duration ?? 0 : 0
+                    Duration = discountPromotion > 0 ? duration : 0
                 };
 
                 result.DiscountPrepayment.Amount = 0;
@@ -194,8 +206,7 @@ namespace Doppler.AccountPlans.Utils
             //Check if for the next month apply the current promocode
             decimal nextDiscountPromocodeAmmount = 0;
 
-            if (promotion != null && promotion.DiscountPercentage > 0 &&
-                    (!promotion.Duration.HasValue || promotion.Duration.Value > 1))
+            if (promotion != null && (promotion.Duration.Value - differencMonths) > 1)
             {
                 nextDiscountPromocodeAmmount = Math.Round(totalFee * promotion.DiscountPercentage.Value / 100, 2);
 

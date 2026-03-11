@@ -1,3 +1,5 @@
+using System;
+
 namespace Doppler.AccountPlans.Model
 {
     public class TimesApplyedPromocode
@@ -5,5 +7,6 @@ namespace Doppler.AccountPlans.Model
         public int? LastMonthApplied { get; set; }
         public int? LastYearApplied { get; set; }
         public int CountApplied { get; set; }
+        public DateTime? FirstApplied { get; set; }
     }
 }
