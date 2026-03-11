@@ -153,7 +153,7 @@ namespace Doppler.AccountPlans.Controllers
                     var currentAddOnPlan = currentPlan.AdditionalServices.FirstOrDefault(ads => ads.IdAddOnType == (int)addOnType);
                     if (currentAddOnPlan != null && currentAddOnPlan.PromotionId != null && currentAddOnPlan.AddOnPromotionDuration >= 1)
                     {
-                        currentPromotion = await _promotionRepository.GetAddOnPromotionByCodeAndAddOnType(currentPlan.PromotionCode, (int)addOnType, true);
+                        currentPromotion = await _promotionRepository.GetAddOnPromotionByIdAndAddOnType(currentAddOnPlan.PromotionId.Value, (int)addOnType, true);
                         if (currentPromotion != null && currentPromotion.IdAddOnPlan.HasValue && currentPromotion.IdAddOnPlan.Value != newPlanId)
                         {
                             currentPromotion = null;
