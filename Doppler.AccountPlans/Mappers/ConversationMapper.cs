@@ -6,23 +6,20 @@ using System.Threading.Tasks;
 
 namespace Doppler.AccountPlans.Mappers
 {
-    public class ConversationMapper : IAddOnMapper
+    public class ConversationMapper(IAccountPlansRepository accountPlansRepository) : IAddOnMapper
     {
-        private readonly IAccountPlansRepository accountPlansRepository;
+        private readonly IAccountPlansRepository accountPlansRepository = accountPlansRepository;
 
-        public ConversationMapper(IAccountPlansRepository accountPlansRepository)
+        public async Task<AddOnPlan> GetAddOnPlan(int planId)
         {
-            this.accountPlansRepository = accountPlansRepository;
+            return await accountPlansRepository.GetConversationPlanById(planId);
         }
 
-        public Task<AddOnPlan> GetAddOnPlan(int planId)
+        public async Task<IEnumerable<BasePlanInformation>> GetAddOnPlans(bool onlyCustomPlans = false)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<IEnumerable<BasePlanInformation>> GetAddOnPlans(bool onlyCustomPlans = false)
-        {
-            throw new NotImplementedException();
+            return onlyCustomPlans
+                ? await accountPlansRepository.GetCustomConversationPlans()
+                : await accountPlansRepository.GetConversationPlans();
         }
 
         public async Task<AddOnPlan> GetFreePlan()

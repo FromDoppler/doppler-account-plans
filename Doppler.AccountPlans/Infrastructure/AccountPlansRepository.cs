@@ -273,6 +273,8 @@ SELECT  [IdChatPlan] AS PlanId,
         [AdditionalConversation] AS AdditionalConversation,
         [AdditionalAgent] AS AdditionalAgent,
         [AdditionalChannel] AS AdditionalChannel,
+        [AdditionalConversation] AS Additional,
+        [ConversationQty] AS Quantity,
         2 AS PlanType
 FROM [dbo].[ChatPlans] WITH(NOLOCK)
 WHERE [Active] = 1 AND [Fee] > 0
@@ -294,6 +296,8 @@ SELECT  [IdChatPlan] AS PlanId,
         [AdditionalConversation] AS AdditionalConversation,
         [AdditionalAgent] AS AdditionalAgent,
         [AdditionalChannel] AS AdditionalChannel,
+        [AdditionalConversation] AS Additional,
+        [ConversationQty] AS Quantity,
         2 AS PlanType
 FROM [dbo].[ChatPlans] WITH(NOLOCK)
 WHERE [Active] = 0 AND [Fee] > 0
@@ -772,6 +776,24 @@ SELECT [IdPushNotificationPlan] AS PlanId
         ,4 AS AddOnType
 FROM [dbo].[PushNotificationPlan]
 WHERE [Fee] = 0");
+
+            return result.FirstOrDefault();
+        }
+
+        public async Task<AddOnPlan> GetConversationPlanById(int conversationPlanId)
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<AddOnPlan>(@"
+SELECT [IdChatPlan] AS PlanId
+        ,[Description]
+        ,[ConversationQty] AS [Quantity]
+        ,[Fee]
+        ,[AdditionalConversation] AS [Additional]
+        ,2 AS AddOnType
+FROM [dbo].[ChatPlans]
+WHERE [IdChatPlan] = @conversationPlanId",
+    new { conversationPlanId });
 
             return result.FirstOrDefault();
         }
