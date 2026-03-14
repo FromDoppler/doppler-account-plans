@@ -31,7 +31,7 @@ RUN dotnet test
 FROM build AS publish
 RUN dotnet publish "./Doppler.AccountPlans/Doppler.AccountPlans.csproj" -c Release -o /app/publish
 
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 EXPOSE 80
 COPY --from=publish /app/publish .
