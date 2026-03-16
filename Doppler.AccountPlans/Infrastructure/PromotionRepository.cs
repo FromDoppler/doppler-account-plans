@@ -300,7 +300,7 @@ WHERE
             return [.. addOnpromotions];
         }
 
-        public async Task<Promotion> GetAddOnPromotionByIdAndAddOnType(int promotionId, int addOnTypeId, bool wasApplied)
+        public async Task<Promotion> GetAddOnPromotionByIdAndAddOnType(int promotionId, int addOnTypeId, bool wasApplied, int addOnPlanId)
         {
             using var _ = _timeCollector.StartScope();
             using var connection = _connectionFactory.GetConnection();
@@ -323,6 +323,7 @@ WHERE
     AP.[IdPromotion] = @promotionId AND
     AP.[IdAddOnType] = @addOnTypeId AND
     (AP.[Active] = 1 OR @wasApplied = 1) AND
+    (AP.[IdAddOnPlan] is null OR AP.[IdAddOnPlan] = @addOnPlanId) AND
     ([TimesToUse] is null OR [TimesToUse] > [TimesUsed]) AND
     ([ExpiringDate] is null OR [ExpiringDate] >= @now)",
                 new
@@ -330,6 +331,7 @@ WHERE
                     promotionId,
                     addOnTypeId,
                     wasApplied,
+                    addOnPlanId,
                     @now = DateTime.Now
                 });
 
