@@ -153,15 +153,8 @@ namespace Doppler.AccountPlans.Controllers
                     var currentAddOnPlan = currentPlan.AdditionalServices.FirstOrDefault(ads => ads.IdAddOnType == (int)addOnType);
                     if (currentAddOnPlan != null && currentAddOnPlan.PromotionId != null && currentAddOnPlan.AddOnPromotionDuration >= 1)
                     {
-                        currentPromotion = await _promotionRepository.GetAddOnPromotionByIdAndAddOnType(currentAddOnPlan.PromotionId.Value, (int)addOnType, true);
-                        if (currentPromotion != null && currentPromotion.IdAddOnPlan.HasValue && currentPromotion.IdAddOnPlan.Value != newPlanId)
-                        {
-                            currentPromotion = null;
-                        }
-                        else
-                        {
-                            timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName, (int)newPlanType);
-                        }
+                        currentPromotion = await _promotionRepository.GetAddOnPromotionByIdAndAddOnType(currentAddOnPlan.PromotionId.Value, (int)addOnType, true, newPlanId);
+                        timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName, (int)newPlanType);
 
                         if (currentPromotion != null)
                         {
@@ -175,13 +168,7 @@ namespace Doppler.AccountPlans.Controllers
                             var currentPromotionForEmailMarketing = await _promotionRepository.GetCurrentPromotionByAccountName(accountName);
                             if (currentPromotionForEmailMarketing != null)
                             {
-                                promotion = await _promotionRepository.GetAddOnPromotionByIdAndAddOnType(currentPromotionForEmailMarketing.IdPromotion, (int)addOnType, false);
-
-                                if (promotion != null && promotion.IdAddOnPlan.HasValue && promotion.IdAddOnPlan.Value != newPlanId)
-                                {
-                                    promotion = null;
-                                }
-
+                                promotion = await _promotionRepository.GetAddOnPromotionByIdAndAddOnType(currentPromotionForEmailMarketing.IdPromotion, (int)addOnType, false, newPlanId);
                                 timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName, (int)PlanTypeEnum.Marketing);
                             }
                         }
@@ -239,7 +226,15 @@ namespace Doppler.AccountPlans.Controllers
                 var currentPromotionForEmailMarketing = await _promotionRepository.GetCurrentPromotionByAccountName(accountName);
                 if (currentPromotionForEmailMarketing != null)
                 {
-                    promotion = await _promotionRepository.GetAddOnPromotionByIdAndAddOnType(currentPromotionForEmailMarketing.IdPromotion, (int)AddOnType.Landing, false);
+                    foreach (var id in landingIds.Split(','))
+                    {
+                        promotion = await _promotionRepository.GetAddOnPromotionByIdAndAddOnType(currentPromotionForEmailMarketing.IdPromotion, (int)AddOnType.Landing, false, int.Parse(id));
+                        if (promotion != null)
+                        {
+                            break;
+                        }
+                    }
+
                     timesAppliedPromocode = await _promotionRepository.GetHowManyTimesApplyedPromocode(currentPlan.PromotionCode, accountName, (int)PlanTypeEnum.Marketing);
                 }
 

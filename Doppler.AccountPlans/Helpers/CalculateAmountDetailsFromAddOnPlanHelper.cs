@@ -180,8 +180,7 @@ namespace Doppler.AccountPlans.Helpers
             //Check if for the next month apply the current promocode
             decimal nextDiscountPromocodeAmmount = 0;
 
-            if (promotion != null &&
-                (promotion.Duration.Value - differencMonths) > 1)
+            if (promotion != null && (promotion.Duration.Value == 0 || (promotion.Duration.Value - differencMonths) > 1))
             {
                 nextDiscountPromocodeAmmount = Math.Round(newPlan.ChatPlanFee.Value * promotion.DiscountPercentage.Value / 100, 2);
             }

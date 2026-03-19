@@ -13,6 +13,6 @@ namespace Doppler.AccountPlans.Infrastructure
         Task<Promotion> GetCurrentPromotionByAccountName(string accountName);
         Task<Promotion> GetAddOnPromotionByCodeAndAddOnType(string code, int addOnTypeId, bool wasApplied);
         Task<IList<Promotion>> GetAddOnPromotionsByCode(string code, int planId, bool wasApplied);
-        Task<Promotion> GetAddOnPromotionByIdAndAddOnType(int promotionId, int addOnTypeId, bool wasApplied);
+        Task<Promotion> GetAddOnPromotionByIdAndAddOnType(int promotionId, int addOnTypeId, bool wasApplied, int addOnPlanId);
     }
 }
