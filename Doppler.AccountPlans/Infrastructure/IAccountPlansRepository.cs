@@ -39,5 +39,6 @@ namespace Doppler.AccountPlans.Infrastructure
         Task<ConversationPlan> GetFreeConversationPlan();
         Task<AddOnPlan> GetFreeOnSitePlan();
         Task<AddOnPlan> GetFreePushNotificationPlan();
+        Task<AddOnPlan> GetConversationPlanById(int conversationPlanId);
     }
 }
