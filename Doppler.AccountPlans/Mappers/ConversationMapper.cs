@@ -15,14 +15,16 @@ namespace Doppler.AccountPlans.Mappers
             this.accountPlansRepository = accountPlansRepository;
         }
 
-        public Task<AddOnPlan> GetAddOnPlan(int planId)
+        public async Task<AddOnPlan> GetAddOnPlan(int planId)
         {
-            throw new NotImplementedException();
+            return await accountPlansRepository.GetConversationPlanById(planId);
         }
 
-        public Task<IEnumerable<BasePlanInformation>> GetAddOnPlans(bool onlyCustomPlans = false)
+        public async Task<IEnumerable<BasePlanInformation>> GetAddOnPlans(bool onlyCustomPlans = false)
         {
-            throw new NotImplementedException();
+            return onlyCustomPlans
+                ? await accountPlansRepository.GetCustomConversationPlans()
+                : await accountPlansRepository.GetConversationPlans();
         }
 
         public async Task<AddOnPlan> GetFreePlan()
