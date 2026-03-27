@@ -40,5 +40,11 @@ namespace Doppler.AccountPlans.Infrastructure
         Task<AddOnPlan> GetFreeOnSitePlan();
         Task<AddOnPlan> GetFreePushNotificationPlan();
         Task<AddOnPlan> GetConversationPlanById(int conversationPlanId);
+
+        Task<AddOnPlan> GetAddOnPlanByAddOnTypeAndAddOnPlanId(int addOnType, int addOnPlanId);
+        Task<BasePlanInformation> GetAddOnPlanInformation(int addOnType, int addOnPlanId);
+        Task<IEnumerable<BasePlanInformation>> GetAddOnPlans(int addOnType);
+        Task<IEnumerable<BasePlanInformation>> GetCustomAddOnPlans(int addOnType);
+        Task<AddOnPlan> GetFreeAddOnPlan(int addOnType);
     }
 }

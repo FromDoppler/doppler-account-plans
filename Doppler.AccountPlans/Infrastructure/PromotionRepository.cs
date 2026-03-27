@@ -212,8 +212,7 @@ FROM [User] U  WITH(NOLOCK)
 INNER JOIN [BillingCredits] B  WITH(NOLOCK) ON B.IdBillingCredit = U.IdCurrentBillingCredit
 INNER JOIN [Promotions] P  WITH(NOLOCK) ON  P.IdPromotion = B.IdPromotion
 WHERE
-    U.Email = @email AND
-    (B.DiscountPlanFeePromotion IS NOT NULL OR B.ExtraCreditsPromotion IS NOT NULL)",
+    U.Email = @email",
                 new
                 {
                     email = accountName
