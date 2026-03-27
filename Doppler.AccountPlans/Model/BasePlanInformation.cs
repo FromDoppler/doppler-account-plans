@@ -10,5 +10,6 @@ namespace Doppler.AccountPlans.Model
         public decimal Fee { get; set; }
         public decimal Additional { get; set; }
         public PlanTypeEnum PlanType { get; set; }
+        public AddOnType AddOnType { get; set; }
     }
 }
