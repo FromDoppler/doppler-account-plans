@@ -271,7 +271,7 @@ namespace Doppler.AccountPlans.Utils
             return planType switch
             {
                 PlanTypeEnum.Marketing => new MarketingPlan(),
-                PlanTypeEnum.Chat or PlanTypeEnum.OnSite or PlanTypeEnum.PushNotification => new AddOnPlanHelper(),
+                PlanTypeEnum.Chat or PlanTypeEnum.OnSite or PlanTypeEnum.PushNotification or PlanTypeEnum.EcoAI => new AddOnPlanHelper(),
                 _ => null,
             };
         }

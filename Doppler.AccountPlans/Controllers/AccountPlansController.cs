@@ -78,6 +78,11 @@ namespace Doppler.AccountPlans.Controllers
                     newPlan = await _accountPlansRepository.GetPushNotificationPlanInformation(newPlanId);
                     addOnType = AddOnType.PushNotification;
                     break;
+                case PlanTypeEnum.EcoAI:
+                    var newAddOnPlan = await _accountPlansRepository.GetAddOnPlanInformation((int)AddOnType.EcoAI, newPlanId);
+                    newPlan = new PlanInformation { PrintQty = newAddOnPlan.Quantity, ChatPlanFee = newAddOnPlan.Fee };
+                    addOnType = AddOnType.EcoAI;
+                    break;
                 default:
                     newPlan = null;
                     break;
@@ -493,7 +498,7 @@ namespace Doppler.AccountPlans.Controllers
         public async Task<IActionResult> GetAddOnPlanByPlanIdAndAddOnType([FromRoute] int planId, [FromRoute] AddOnType addOnType)
         {
             var addOnMapper = GetAddOnMapper(addOnType);
-            var addOnPlan = await addOnMapper.GetAddOnPlan(planId);
+            var addOnPlan = await addOnMapper.GetAddOnPlan((int)addOnType, planId);
 
             if (addOnPlan == null)
             {
@@ -507,7 +512,7 @@ namespace Doppler.AccountPlans.Controllers
         public async Task<IActionResult> GetPlans([FromRoute] AddOnType addOnType, [FromQuery] bool custom = false)
         {
             var addOnMapper = GetAddOnMapper(addOnType);
-            var planInformation = await addOnMapper.GetAddOnPlans(custom);
+            var planInformation = await addOnMapper.GetAddOnPlans((int)addOnType, custom);
 
             if (planInformation == null)
             {
@@ -521,7 +526,7 @@ namespace Doppler.AccountPlans.Controllers
         public async Task<IActionResult> GetFreePlan([FromRoute] AddOnType addOnType)
         {
             var addOnMapper = GetAddOnMapper(addOnType);
-            var freePlan = await addOnMapper.GetFreePlan();
+            var freePlan = await addOnMapper.GetFreePlan((int)addOnType);
 
             if (freePlan == null)
             {
@@ -564,6 +569,10 @@ namespace Doppler.AccountPlans.Controllers
                         var pushNotificationPlan = await _accountPlansRepository.GetPushNotificationPlanInformation(addOnPromotion.IdAddOnPlan ?? 0);
                         addOnPlanQuantity = pushNotificationPlan != null ? pushNotificationPlan.PrintQty.ToString() : string.Empty;
                         break;
+                    case AddOnType.EcoAI:
+                        var ecoAIPlan = await _accountPlansRepository.GetAddOnPlanInformation((int)AddOnType.EcoAI, addOnPromotion.IdAddOnPlan ?? 0);
+                        addOnPlanQuantity = ecoAIPlan != null ? ecoAIPlan.Quantity.ToString() : string.Empty;
+                        break;
                 }
 
                 addOnPromotion.Quantity = addOnPlanQuantity;
@@ -579,6 +588,7 @@ namespace Doppler.AccountPlans.Controllers
                 AddOnType.Chat => new ConversationMapper(_accountPlansRepository),
                 AddOnType.OnSite => new OnSiteMapper(_accountPlansRepository),
                 AddOnType.PushNotification => new PushNotificationMapper(_accountPlansRepository),
+                AddOnType.EcoAI => new AddOnMapper(_accountPlansRepository),
                 _ => null,
             };
         }

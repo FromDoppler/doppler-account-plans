@@ -14,19 +14,19 @@ namespace Doppler.AccountPlans.Mappers
             this.accountPlansRepository = accountPlansRepository;
         }
 
-        public async Task<AddOnPlan> GetAddOnPlan(int planId)
+        public async Task<AddOnPlan> GetAddOnPlan(int addOnType, int planId)
         {
             return await accountPlansRepository.GetOnSitePlanById(planId);
         }
 
-        public async Task<IEnumerable<BasePlanInformation>> GetAddOnPlans(bool onlyCustomPlans = false)
+        public async Task<IEnumerable<BasePlanInformation>> GetAddOnPlans(int addOnType, bool onlyCustomPlans = false)
         {
             return onlyCustomPlans
                 ? await accountPlansRepository.GetCustomOnSitePlans()
                 : await accountPlansRepository.GetOnSitePlans();
         }
 
-        public async Task<AddOnPlan> GetFreePlan()
+        public async Task<AddOnPlan> GetFreePlan(int addOnType)
         {
             return await accountPlansRepository.GetFreeOnSitePlan();
         }

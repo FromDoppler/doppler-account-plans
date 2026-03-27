@@ -513,6 +513,8 @@ SELECT
             THEN  OSBC.PlanFee
         WHEN UAO.IdAddOnType = 4
             THEN PNBC.PlanFee
+        WHEN UAO.IdAddOnType = 5
+            THEN EAIBC.PlanFee
     ELSE 0
     END AS Fee,
     CASE
@@ -524,6 +526,8 @@ SELECT
             THEN  SUM(OSP.PrintQty)
         WHEN UAO.IdAddOnType = 4
             THEN  SUM(PNP.Quantity)
+        WHEN UAO.IdAddOnType = 5
+            THEN SUM(AOP.Quantity)
         ELSE 0
     END AS Qty,
     CASE
@@ -535,6 +539,8 @@ SELECT
             THEN  OSBC.IdPromotion
         WHEN UAO.IdAddOnType = 4
             THEN PNBC.IdPromotion
+        WHEN UAO.IdAddOnType = 5
+            THEN EAIBC.IdPromotion
     ELSE NULL
     END AS PromotionId,
     CASE
@@ -546,6 +552,8 @@ SELECT
             THEN  OSBC.DiscountPlanFeePromotion
         WHEN UAO.IdAddOnType = 4
             THEN PNBC.DiscountPlanFeePromotion
+        WHEN UAO.IdAddOnType = 5
+            THEN EAIBC.DiscountPlanFeePromotion
     ELSE NULL
     END AS AddOnPromotionDiscount,
     CASE
@@ -557,6 +565,8 @@ SELECT
             THEN  OSBC.PromotionDuration
         WHEN UAO.IdAddOnType = 4
             THEN PNBC.PromotionDuration
+        WHEN UAO.IdAddOnType = 5
+            THEN EAIBC.PromotionDuration
     ELSE NULL
     END AS AddOnPromotionDuration
 FROM [UserAddOn] UAO
@@ -577,8 +587,14 @@ LEFT JOIN [OnSitePlan] OSP ON OSP.IdOnSItePlan = OSPU.IdOnSItePlan
 
 /* Push Notification plans */
 LEFT JOIN [BillingCredits] PNBC ON PNBC.IdBillingCredit = UAO.IdCurrentBillingCredit AND UAO.IdAddOnType = 4 AND PNBC.IdBillingCreditType IN (40, 41, 43, 44)
-LEFT JOIN [PushNotificationPlanUser] PNPU ON PNBC.IdBillingCredit = PNBC.IdBillingCredit
+LEFT JOIN [PushNotificationPlanUser] PNPU ON PNPU.IdBillingCredit = PNBC.IdBillingCredit
 LEFT JOIN [PushNotificationPlan] PNP ON PNP.IdPushNotificationPlan = PNPU.IdPushNotificationPlan
+
+/* ECO AI */
+LEFT JOIN [BillingCredits] EAIBC ON EAIBC.IdBillingCredit = UAO.IdCurrentBillingCredit AND UAO.IdAddOnType = 5 AND EAIBC.IdBillingCreditType IN (46, 47, 49, 50)
+LEFT JOIN [AddOnPlanUser] ADOPU ON ADOPU.IdBillingCredit = EAIBC.IdBillingCredit
+LEFT JOIN [AddOnPlan] AOP ON AOP.IdAddOnPlan = ADOPU.IdAddOnPlan
+
 WHERE UAO.IdUser = @userId
 GROUP BY UAO.IdAddOnType ,
         CASE
@@ -586,13 +602,15 @@ GROUP BY UAO.IdAddOnType ,
             WHEN UAO.IdAddOnType = 2 THEN CPBC.PlanFee
             WHEN UAO.IdAddOnType = 3 THEN OSBC.PlanFee
             WHEN UAO.IdAddOnType = 4 THEN PNBC.PlanFee
+            WHEN UAO.IdAddOnType = 5 THEN EAIBC.PlanFee
             ELSE 0
         END,
         CASE
             WHEN UAO.IdAddOnType = 1 THEN LPBC.IdPromotion
             WHEN UAO.IdAddOnType = 2 THEN CPBC.IdPromotion
-            WHEN UAO.IdAddOnType = 3 THEN  OSBC.IdPromotion
+            WHEN UAO.IdAddOnType = 3 THEN OSBC.IdPromotion
             WHEN UAO.IdAddOnType = 4 THEN PNBC.IdPromotion
+            WHEN UAO.IdAddOnType = 5 THEN EAIBC.IdPromotion
             ELSE NULL
         END,
         CASE
@@ -600,6 +618,7 @@ GROUP BY UAO.IdAddOnType ,
             WHEN UAO.IdAddOnType = 2 THEN CPBC.DiscountPlanFeePromotion
             WHEN UAO.IdAddOnType = 3 THEN  OSBC.DiscountPlanFeePromotion
             WHEN UAO.IdAddOnType = 4 THEN PNBC.DiscountPlanFeePromotion
+            WHEN UAO.IdAddOnType = 5 THEN EAIBC.DiscountPlanFeePromotion
             ELSE NULL
         END,
         CASE
@@ -607,6 +626,7 @@ GROUP BY UAO.IdAddOnType ,
             WHEN UAO.IdAddOnType = 2 THEN CPBC.PromotionDuration
             WHEN UAO.IdAddOnType = 3 THEN  OSBC.PromotionDuration
             WHEN UAO.IdAddOnType = 4 THEN PNBC.PromotionDuration
+            WHEN UAO.IdAddOnType = 5 THEN EAIBC.PromotionDuration
             ELSE NULL
         END",
                     new
@@ -795,6 +815,94 @@ SELECT [IdChatPlan] AS PlanId
 FROM [dbo].[ChatPlans]
 WHERE [IdChatPlan] = @conversationPlanId",
     new { conversationPlanId });
+
+            return result.FirstOrDefault();
+        }
+
+        public async Task<AddOnPlan> GetAddOnPlanByAddOnTypeAndAddOnPlanId(int addOnType, int addOnPlanId)
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<AddOnPlan>(@"
+SELECT [IdAddOnPlan] AS PlanId
+        ,[Description]
+        ,[Quantity]
+        ,[Fee]
+        ,[Additional]
+        ,[IdAddOnType] AS AddOnType
+FROM [dbo].[AddOnPlan]
+WHERE [IdAddOnPlan] = @addOnPlanId AND [IdAddOnType] = @addOnType",
+    new { addOnType, addOnPlanId });
+
+            return result.FirstOrDefault();
+        }
+
+        public async Task<BasePlanInformation> GetAddOnPlanInformation(int addOnType, int addOnPlanId)
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<BasePlanInformation>(@"
+SELECT [IdAddOnPlan] AS PlanId
+        ,[Description]
+        ,[Quantity]
+        ,[Fee]
+        ,[Additional]
+        ,[IdAddOnType] AS AddOnType
+FROM [dbo].[AddOnPlan]
+WHERE [IdAddOnPlan] = @addOnPlanId AND [IdAddOnType] = @addOnType",
+    new { addOnType, addOnPlanId });
+
+            return result.FirstOrDefault();
+        }
+
+        public async Task<IEnumerable<BasePlanInformation>> GetAddOnPlans(int addOnType)
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<BasePlanInformation>(@"
+SELECT [IdAddOnPlan] AS PlanId
+        ,[Description]
+        ,[Quantity]
+        ,[Fee]
+        ,[Additional]
+        ,[IdAddOnType] AS AddOnType
+FROM [dbo].[AddOnPlan]
+WHERE [Active] = 1 AND [Fee] > 0 AND [IdAddOnType] = @addOnType",
+    new { addOnType });
+
+            return result;
+        }
+
+        public async Task<IEnumerable<BasePlanInformation>> GetCustomAddOnPlans(int addOnType)
+        {
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<BasePlanInformation>(@"
+SELECT [IdAddOnPlan] AS PlanId
+        ,[Description]
+        ,[Quantity]
+        ,[Fee]
+        ,[Additional]
+        ,[IdAddOnType] AS AddOnType
+FROM [dbo].[AddOnPlan]
+WHERE [Custom] = 1 AND [Fee] > 0 AND [IdAddOnType] = @addOnType",
+    new { addOnType });
+
+            return result;
+        }
+
+        public async Task<AddOnPlan> GetFreeAddOnPlan(int addOnType)
+        {
+            using var _ = _timeCollector.StartScope();
+            using var connection = _connectionFactory.GetConnection();
+            var result = await connection.QueryAsync<AddOnPlan>(@"
+SELECT [IdAddOnPlan] AS PlanId
+        ,[Description]
+        ,[Quantity]
+        ,[Fee]
+        ,[Additional]
+        ,[IdAddOnType] AS AddOnType
+FROM [dbo].[AddOnPlan]
+WHERE [Fee] = 0 AND [IdAddOnType] = @addOnType",
+    new { addOnType });
 
             return result.FirstOrDefault();
         }
