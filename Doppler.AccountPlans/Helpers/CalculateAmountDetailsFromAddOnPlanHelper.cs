@@ -113,7 +113,7 @@ namespace Doppler.AccountPlans.Helpers
                     differencMonths = ((currentDate.Year - firstApplied.Value.Year) * 12) + currentDate.Month - firstApplied.Value.Month;
                 }
 
-                var duration = promotion.Duration.Value - differencMonths;
+                var duration = promotion.Duration.Value - differencMonths >= 0 ? promotion.Duration.Value - differencMonths : 0;
 
                 if (duration >= 0)
                 {
