@@ -485,7 +485,8 @@ SELECT
     B.IdDiscountPlan,
     B.CreditsQty AS EmailQty,
     B.SubscribersQty,
-    B.IdUser
+    B.IdUser,
+    B.Date
 FROM
     [BillingCredits] B  WITH(NOLOCK)
 INNER JOIN [UserTypesPlans] UTP WITH(NOLOCK) ON UTP.IdUserTypePlan = B.IdUserTypePlan

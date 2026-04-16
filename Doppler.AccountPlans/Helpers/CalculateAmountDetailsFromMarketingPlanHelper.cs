@@ -229,7 +229,7 @@ namespace Doppler.AccountPlans.Helpers
 
             var result = new PlanAmountDetails
             {
-                DiscountPaymentAlreadyPaid = now.Day < 21 ? planAmount - discountAmountAdmin : 0,
+                DiscountPaymentAlreadyPaid = now.Day < 21 && currentPlan.Date.Month == now.Month ? planAmount - discountAmountAdmin : 0,
                 DiscountPrepayment = new DiscountPrepayment
                 {
                     Amount = Math.Round((newPlan.Fee * differenceBetweenMonthPlans * newDiscount.DiscountPlanFee) / 100, 2),
