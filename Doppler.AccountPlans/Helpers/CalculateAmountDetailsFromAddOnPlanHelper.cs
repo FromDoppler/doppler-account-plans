@@ -224,6 +224,7 @@ namespace Doppler.AccountPlans.Helpers
                 PlanTypeEnum.OnSite => (AddOnType?)AddOnType.OnSite,
                 PlanTypeEnum.PushNotification => (AddOnType?)AddOnType.PushNotification,
                 PlanTypeEnum.Landing => (AddOnType?)AddOnType.Landing,
+                PlanTypeEnum.EcoAI => (AddOnType?)AddOnType.EcoAI,
                 _ => null,
             };
         }
