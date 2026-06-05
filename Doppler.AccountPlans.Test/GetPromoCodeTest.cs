@@ -84,7 +84,9 @@ namespace Doppler.AccountPlans
                     ExtraCredits = 1,
                     DiscountPercentage = 2,
                     IdPromotion = 3,
-                    ExpirationDate = null
+                    ExpirationDate = null,
+                    TimesUsed = 1,
+                    TimesToUse = 2
                 }
             ];
 
