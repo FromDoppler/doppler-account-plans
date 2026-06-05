@@ -22,5 +22,7 @@ namespace Doppler.AccountPlans.Model
         public string Quantity { get; set; }
         public bool CanApply { get; set; }
         public DateTime? ExpirationDate { get; set; }
+        public int? TimesUsed { get; set; }
+        public int? TimesToUse { get; set; }
     }
 }
