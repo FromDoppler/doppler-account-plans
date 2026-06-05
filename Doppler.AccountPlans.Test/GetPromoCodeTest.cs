@@ -77,7 +77,7 @@ namespace Doppler.AccountPlans
         public async Task GET_PromoCode_Information_should_get_right_values_when_promoCode_is_valid()
         {
             // Arrange
-            const string expectedContent = "{\"code\":\"test\",\"canApply\":true,\"expiredPromocode\":false,\"promotionApplied\":{\"idPromotion\":3,\"idUserTypePlan\":null,\"idUserType\":null,\"extraCredits\":1,\"discountPercentage\":2,\"duration\":null,\"code\":null,\"allPlans\":false,\"allSubscriberPlans\":false,\"allPrepaidPlans\":false,\"allMonthlyPlans\":false,\"active\":false,\"idAddOnPlan\":null,\"idAddOnType\":null,\"quantity\":null,\"canApply\":false,\"expirationDate\":null},\"planPromotions\":[]}";
+            const string expectedContent = "{\"code\":\"test\",\"canApply\":true,\"expiredPromocode\":false,\"promotionApplied\":{\"idPromotion\":3,\"idUserTypePlan\":null,\"idUserType\":null,\"extraCredits\":1,\"discountPercentage\":2,\"duration\":null,\"code\":null,\"allPlans\":false,\"allSubscriberPlans\":false,\"allPrepaidPlans\":false,\"allMonthlyPlans\":false,\"active\":false,\"idAddOnPlan\":null,\"idAddOnType\":null,\"quantity\":null,\"canApply\":false,\"expirationDate\":null,\"timesUsed\":null,\"timesToUse\":null},\"planPromotions\":[]}";
             IList<Promotion> promotions =
             [
                 new Promotion {
