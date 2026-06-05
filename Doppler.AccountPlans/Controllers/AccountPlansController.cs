@@ -287,7 +287,7 @@ namespace Doppler.AccountPlans.Controllers
                 return new NotFoundResult();
             }
 
-            var activePromocode = existsPromotions.Any(ep => ep.ExpirationDate == null || ep.ExpirationDate >= DateTime.Now);
+            var activePromocode = existsPromotions.Any(ep => ep.ExpirationDate == null || ep.ExpirationDate >= DateTime.Now || ep.TimesToUse > ep.TimesUsed);
 
             if (!activePromocode)
             {
