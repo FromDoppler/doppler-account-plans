@@ -1,3 +1,4 @@
+using Doppler.AccountPlans.Encryption;
 using Doppler.AccountPlans.Infrastructure;
 using Doppler.AccountPlans.Model;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -58,6 +59,8 @@ namespace Doppler.AccountPlans
                 {
                     services.AddSingleton(acccountPlansRepository.Object);
                     services.AddSingleton(promotionRepository.Object);
+                    services.AddSingleton(Mock.Of<IUserRepository>());
+                    services.AddSingleton(Mock.Of<ICurrencyRepository>());
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 

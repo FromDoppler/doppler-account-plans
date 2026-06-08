@@ -21,5 +21,7 @@ namespace Doppler.AccountPlans.Model
         public int TotalMonthPlan { get; set; }
         public int IdDiscountPlan { get; set; }
         public IList<AdditionalService> AdditionalServices { get; set; }
+        public decimal? CurrencyRate { get; set; }
+        public decimal? Taxes { get; set; }
     }
 }

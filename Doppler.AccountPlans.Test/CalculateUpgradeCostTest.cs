@@ -29,7 +29,7 @@ namespace Doppler.AccountPlans
                 Fee = 5,
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, null, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, null, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(5, result.Total);
@@ -54,7 +54,7 @@ namespace Doppler.AccountPlans
                 Fee = 5,
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, null, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, null, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(14.25m, result.Total);
@@ -79,7 +79,7 @@ namespace Doppler.AccountPlans
                 Fee = 5,
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, null, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, null, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(25.5m, result.Total);
@@ -104,7 +104,7 @@ namespace Doppler.AccountPlans
                 Fee = 5,
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, null, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, null, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(45, result.Total);
@@ -135,7 +135,7 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 0
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(3, result.Total);
@@ -166,7 +166,7 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 0
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(0, result.Total);
@@ -197,7 +197,7 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 0
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(0, result.Total);
@@ -230,7 +230,7 @@ namespace Doppler.AccountPlans
                 IdUserType = UserTypesEnum.Monthly
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(7.5m, result.Total);
@@ -261,7 +261,7 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 0
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(19.25m, result.Total);
@@ -292,7 +292,7 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 0
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(39.25m, result.Total);
@@ -323,7 +323,7 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 1
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(12.25m, result.Total);
@@ -354,7 +354,7 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 1
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(7.5m, result.Total);
@@ -385,7 +385,7 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 2
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
             // Assert
             Assert.Equal(23.5m, result.Total);
             Assert.Equal(2, result.DiscountPaymentAlreadyPaid);
@@ -415,7 +415,7 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 2
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(19.25m, result.Total);
@@ -446,7 +446,7 @@ namespace Doppler.AccountPlans
                 CurrentMonthPlan = 4
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(43, result.Total);
@@ -479,7 +479,7 @@ namespace Doppler.AccountPlans
                 IdUserType = UserTypesEnum.Subscribers
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, currentDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(39.25m, result.Total);
@@ -506,7 +506,7 @@ namespace Doppler.AccountPlans
                 IdUserType = UserTypesEnum.Individual
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, null, currentPlan, dateTimeProviderMock.Object.Now, new Promotion(), null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, null, currentPlan, dateTimeProviderMock.Object.Now, new Promotion(), null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(5, result.Total);
@@ -532,7 +532,7 @@ namespace Doppler.AccountPlans
                 IdUserType = UserTypesEnum.Individual
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, null, currentPlan, dateTimeProviderMock.Object.Now, new Promotion(), null, null, null, null, 2, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, null, currentPlan, dateTimeProviderMock.Object.Now, new Promotion(), null, null, null, null, 2, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(15, result.Total);
@@ -575,7 +575,7 @@ namespace Doppler.AccountPlans
                 DiscountPercentage = discountPercentage
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, null, currentPlan, dateTimeProviderMock.Object.Now, promotion, null, null, null, null, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, null, currentPlan, dateTimeProviderMock.Object.Now, promotion, null, null, null, null, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(total, result.Total);
@@ -632,7 +632,7 @@ namespace Doppler.AccountPlans
                 DiscountPlanFee = discountPlanFee
             };
 
-            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, newDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, currentDiscountPlan, 0, PlanTypeEnum.Marketing);
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, newDiscountPlan, currentPlan, dateTimeProviderMock.Object.Now, null, null, null, null, currentDiscountPlan, 0, PlanTypeEnum.Marketing, null, null);
 
             // Assert
             Assert.Equal(total, result.Total);
@@ -664,7 +664,7 @@ namespace Doppler.AccountPlans
                 new LandingPlanInformation() { PlanId = 3, PlanType = PlanTypeEnum.Landing, LandingsQty = 50, Fee = 80 },
             };
 
-            var currentPlan = new UserPlan() { TotalMonthPlan = 1, CurrentMonthPlan = 0 };
+            var currentPlan = new UserPlan() { TotalMonthPlan = 1, CurrentMonthPlan = 0, AdditionalServices = [] };
 
             UserPlanInformation lastLandingPlan = null;
 
@@ -678,7 +678,9 @@ namespace Doppler.AccountPlans
                 firstUpgradeDate: null,
                 promotion: null,
                 currentPromotion: null,
-                timesAppliedPromocode: null);
+                timesAppliedPromocode: null,
+                billingInformation: new BillingInformation { PaymentMethod = (int)PaymentMethodEnum.CC },
+                currencyRate: null);
 
             Assert.Equal(100, result.Total);
             Assert.Equal(100, result.NextMonthTotal);
@@ -703,7 +705,7 @@ namespace Doppler.AccountPlans
                 new LandingPlanInformation() { PlanId = 3, PlanType = PlanTypeEnum.Landing, LandingsQty = 50, Fee = 80 },
             };
 
-            var currentPlan = new UserPlan() { TotalMonthPlan = 1, CurrentMonthPlan = 0 };
+            var currentPlan = new UserPlan() { TotalMonthPlan = 1, CurrentMonthPlan = 0, AdditionalServices = [] };
 
             var discount = new PlanDiscountInformation() { DiscountPlanFee = 5, MonthPlan = 1 };
 
@@ -719,7 +721,9 @@ namespace Doppler.AccountPlans
                 firstUpgradeDate: null,
                 promotion: null,
                 currentPromotion: null,
-                timesAppliedPromocode: null);
+                timesAppliedPromocode: null,
+                billingInformation: new BillingInformation { PaymentMethod = (int)PaymentMethodEnum.CC },
+                currencyRate: null);
 
             Assert.Equal(95, result.Total);
             Assert.Equal(95, result.NextMonthTotal);
@@ -744,7 +748,7 @@ namespace Doppler.AccountPlans
                 new() { PlanId = 3, PlanType = PlanTypeEnum.Landing, LandingsQty = 50, Fee = 80 },
             };
 
-            var currentPlan = new UserPlan() { TotalMonthPlan = 3, CurrentMonthPlan = 0 };
+            var currentPlan = new UserPlan() { TotalMonthPlan = 3, CurrentMonthPlan = 0, AdditionalServices = [] };
 
             var discount = new PlanDiscountInformation() { DiscountPlanFee = 10, MonthPlan = 1 };
 
@@ -760,7 +764,9 @@ namespace Doppler.AccountPlans
                 firstUpgradeDate: null,
                 promotion: null,
                 currentPromotion: null,
-                timesAppliedPromocode: null);
+                timesAppliedPromocode: null,
+                billingInformation: new BillingInformation { PaymentMethod = (int)PaymentMethodEnum.CC },
+                currencyRate: null);
 
             Assert.Equal(90, result.Total);
             Assert.Equal(90, result.NextMonthTotal);

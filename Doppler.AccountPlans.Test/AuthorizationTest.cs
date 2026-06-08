@@ -137,6 +137,8 @@ namespace Doppler.AccountPlans
                     services.AddSingleton(accountPlanRepositoryMock.Object);
                     services.AddSingleton(promotionRepositoryMock.Object);
                     services.AddSingleton(Mock.Of<IEncryptionService>());
+                    services.AddSingleton(Mock.Of<ICurrencyRepository>());
+                    services.AddSingleton(Mock.Of<IUserRepository>());
                 });
             }).CreateClient(new WebApplicationFactoryClientOptions());
 

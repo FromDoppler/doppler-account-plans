@@ -6,8 +6,26 @@ namespace Doppler.AccountPlans.Helpers
 {
     public class MarketingPlan : ICalculateAmountDetalisHelper
     {
-        public PlanAmountDetails CalculateAmountDetails(PlanTypeEnum newPlanType, PlanInformation newPlan, ref PlanDiscountInformation newDiscount, ref UserPlan currentPlan, DateTime now, Promotion promotion, TimesApplyedPromocode timesAppliedPromocode, Promotion currentPromotion, DateTime? firstUpgradeDate, PlanDiscountInformation currentDiscountPlan, decimal creditsDiscount)
+        public PlanAmountDetails CalculateAmountDetails(
+            PlanTypeEnum newPlanType,
+            PlanInformation newPlan,
+            ref PlanDiscountInformation newDiscount,
+            ref UserPlan currentPlan,
+            DateTime now,
+            Promotion promotion,
+            TimesApplyedPromocode timesAppliedPromocode,
+            Promotion currentPromotion,
+            DateTime? firstUpgradeDate,
+            PlanDiscountInformation currentDiscountPlan,
+            decimal creditsDiscount,
+            BillingInformation billingInformation,
+            CurrencyRate currencyRate)
         {
+            billingInformation ??= new BillingInformation
+            {
+                PaymentMethod = (int)PaymentMethodEnum.CC
+            };
+
             currentPlan ??= new UserPlan
             {
                 Fee = 0,
@@ -194,8 +212,37 @@ namespace Doppler.AccountPlans.Helpers
                 result.NextMonthTotal = nextMonthTotal;
                 result.MajorThat21st = now.Day > 21;
 
-                var nexMonnthInvoiceDate = !isMonthPlan ? now.AddMonths(differenceBetweenMonthPlans) : now.AddMonths(1);
+
+                var nexMonnthInvoiceDate = now.AddMonths(differenceBetweenMonthPlans);
                 result.NextMonthDate = new DateTime(nexMonnthInvoiceDate.Year, nexMonnthInvoiceDate.Month, 1);
+
+                result.PlanFee = newPlan.Fee;
+
+                if (billingInformation.PaymentMethod == (int)PaymentMethodEnum.TRANSF && billingInformation.Country.ToUpper() == "AR")
+                {
+                    var rate = currencyRate.Rate ?? 1;
+                    decimal coefficient = 0.21m;
+
+                    result.CurrencyDate = currencyRate.UTCFromDate;
+
+                    /* Plan Fee */
+                    result.PlanFee = decimal.Round(result.PlanFee * rate, 2, MidpointRounding.AwayFromZero);
+
+                    /* DiscountPaymentAlreadyPaid */
+                    result.DiscountPaymentAlreadyPaid = decimal.Round(result.DiscountPaymentAlreadyPaid, 4, MidpointRounding.AwayFromZero);
+
+                    /* TaxesPercentage*/
+                    result.TaxesPercentage = 21;
+
+                    result.CurrentMonthTotal = decimal.Round(result.CurrentMonthTotal, 2, MidpointRounding.AwayFromZero);
+                    var taxes = decimal.Round(result.CurrentMonthTotal * coefficient, 4, MidpointRounding.AwayFromZero);
+                    result.Taxes = taxes;
+                    result.CurrencyRate = rate;
+
+                    result.NextMonthTotal = decimal.Round(result.NextMonthTotal, 2, MidpointRounding.AwayFromZero);
+                    taxes = decimal.Round(result.NextMonthTotal * coefficient, 4, MidpointRounding.AwayFromZero);
+                    result.NextMonthTaxes = taxes;
+                }
 
                 return result;
             }

@@ -1,10 +1,6 @@
 using Dapper;
-using Doppler.AccountPlans.Enums;
 using Doppler.AccountPlans.Model;
-using Doppler.AccountPlans.TimeCollector;
-using Microsoft.AspNetCore.Connections;
 using System;
-using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Doppler.AccountPlans.Infrastructure
@@ -23,19 +19,12 @@ namespace Doppler.AccountPlans.Infrastructure
             using var connection = connectionFactory.GetConnection();
 
             var currencyRate = await connection.QueryFirstOrDefaultAsync<CurrencyRate>(@"
-SELECT
-    IdCurrencyRate,
-	IdCurrencyTypeFrom,
-	IdCurrencyTypeTo,
-	Rate,
-	UTCFromDate,
-	Active
-FROM
-    [CurrencyRate] WITH(NOLOCK)
-WHERE
-    ((IdCurrencyTypeFrom = @idCurrencyTypeFrom AND IdCurrencyTypeTo = @idCurrencyTypeTo) OR
-	(IdCurrencyTypeFrom = @idCurrencyTypeTo AND IdCurrencyTypeTo = @idCurrencyTypeFrom)) AND
-	UTCFromDate <= @date",
+SELECT IdCurrencyRate, IdCurrencyTypeFrom, IdCurrencyTypeTo, Rate, UTCFromDate, Active
+FROM [CurrencyRate] WITH(NOLOCK)
+WHERE ((IdCurrencyTypeFrom = @idCurrencyTypeFrom AND IdCurrencyTypeTo = @idCurrencyTypeTo) OR
+(IdCurrencyTypeFrom = @idCurrencyTypeTo AND IdCurrencyTypeTo = @idCurrencyTypeFrom)) AND
+UTCFromDate <= @date
+ORDER BY UTCFromDate DESC",
                 new
                 {
                     date = DateTime.UtcNow,

@@ -486,7 +486,8 @@ SELECT
     B.CreditsQty AS EmailQty,
     B.SubscribersQty,
     B.IdUser,
-    B.Date
+    B.Date,
+    B.Taxes
 FROM
     [BillingCredits] B  WITH(NOLOCK)
 INNER JOIN [UserTypesPlans] UTP WITH(NOLOCK) ON UTP.IdUserTypePlan = B.IdUserTypePlan
@@ -569,7 +570,20 @@ SELECT
         WHEN UAO.IdAddOnType = 5
             THEN EAIBC.PromotionDuration
     ELSE NULL
-    END AS AddOnPromotionDuration
+    END AS AddOnPromotionDuration,
+    CASE
+        WHEN UAO.IdAddOnType = 1
+            THEN LPBC.Taxes
+        WHEN UAO.IdAddOnType = 2
+            THEN CPBC.Taxes
+        WHEN UAO.IdAddOnType = 3
+            THEN  OSBC.Taxes
+        WHEN UAO.IdAddOnType = 4
+            THEN PNBC.Taxes
+        WHEN UAO.IdAddOnType = 5
+            THEN EAIBC.Taxes
+    ELSE NULL
+    END AS AddOnTaxes
 FROM [UserAddOn] UAO
 /* Landings plans */
 LEFT JOIN [BillingCredits] LPBC ON LPBC.IdBillingCredit = UAO.IdCurrentBillingCredit AND UAO.IdAddOnType = 1 AND LPBC.IdBillingCreditType IN (23, 24, 26, 27)
@@ -629,6 +643,14 @@ GROUP BY UAO.IdAddOnType ,
             WHEN UAO.IdAddOnType = 4 THEN PNBC.PromotionDuration
             WHEN UAO.IdAddOnType = 5 THEN EAIBC.PromotionDuration
             ELSE NULL
+        END,
+        CASE
+            WHEN UAO.IdAddOnType = 1 THEN LPBC.Taxes
+            WHEN UAO.IdAddOnType = 2 THEN CPBC.Taxes
+            WHEN UAO.IdAddOnType = 3 THEN  OSBC.Taxes
+            WHEN UAO.IdAddOnType = 4 THEN PNBC.Taxes
+            WHEN UAO.IdAddOnType = 5 THEN EAIBC.Taxes
+        ELSE NULL
         END",
                     new
                     {
