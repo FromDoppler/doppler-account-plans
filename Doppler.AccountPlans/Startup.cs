@@ -35,6 +35,8 @@ namespace Doppler.AccountPlans
             services.AddScoped<IEncryptionService, EncryptionService>();
             services.Configure<EncryptionSettings>(Configuration.GetSection(nameof(EncryptionSettings)));
             services.AddScoped<IPromotionRepository, PromotionRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ICurrencyRepository, CurrencyRepository>();
             services.AddTimeCollector(Configuration);
 
             services.AddSwaggerGen(c =>

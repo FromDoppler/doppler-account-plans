@@ -26,6 +26,8 @@ namespace Doppler.AccountPlans.Controllers
         private readonly IAccountPlansRepository _accountPlansRepository;
         private readonly IDateTimeProvider _dateTimeProvider;
         private readonly IPromotionRepository _promotionRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly ICurrencyRepository _currencyRepository;
         private readonly IEncryptionService _encryptionService;
         private readonly ITimeCollector _timeCollector;
 
@@ -34,6 +36,8 @@ namespace Doppler.AccountPlans.Controllers
             IAccountPlansRepository accountPlansRepository,
             IDateTimeProvider dateTimeProvider,
             IPromotionRepository promotionRepository,
+            IUserRepository userRepository,
+            ICurrencyRepository currencyRepository,
             IEncryptionService encryptionService,
             ITimeCollector timeCollector)
         {
@@ -41,6 +45,8 @@ namespace Doppler.AccountPlans.Controllers
             _accountPlansRepository = accountPlansRepository;
             _dateTimeProvider = dateTimeProvider;
             _promotionRepository = promotionRepository;
+            _userRepository = userRepository;
+            _currencyRepository = currencyRepository;
             _encryptionService = encryptionService;
             _timeCollector = timeCollector;
         }
@@ -52,7 +58,8 @@ namespace Doppler.AccountPlans.Controllers
             [FromRoute] int newPlanId,
             [FromRoute] PlanTypeEnum newPlanType,
             [FromQuery] int discountId,
-            [FromQuery] string promocode = null)
+            [FromQuery] string promocode = null,
+            [FromQuery] PaymentMethodEnum paymentMethod = PaymentMethodEnum.CC)
         {
             using var _ = _timeCollector.StartScope();
 
@@ -100,6 +107,30 @@ namespace Doppler.AccountPlans.Controllers
             DateTime? firstUpgradeDate = null;
             PlanDiscountInformation currentDiscountPlan = null;
             decimal totalCreditDiscount = 0;
+
+            var billingInformation = await _userRepository.GetBillingInformation(accountName);
+
+            if (billingInformation != null)
+            {
+                billingInformation.PaymentMethod = (int)paymentMethod != billingInformation.PaymentMethod ? (int)paymentMethod : billingInformation.PaymentMethod;
+            }
+
+            CurrencyRate currencyRate = null;
+
+            if (billingInformation != null && billingInformation.Country == "AR")
+            {
+                if (currentPlan != null)
+                {
+                    var currentCurrencyDate = currentPlan.Date;
+                    var currentCurrencyRate = await _currencyRepository.GetCurrencyRate((int)CurrencyTypeEnum.UsS, (int)CurrencyTypeEnum.sARG, currentCurrencyDate);
+                    if (currentCurrencyRate != null)
+                    {
+                        currentPlan.CurrencyRate = currentCurrencyRate.Rate;
+                    }
+                }
+
+                currencyRate = await _currencyRepository.GetCurrencyRate((int)CurrencyTypeEnum.UsS, (int)CurrencyTypeEnum.sARG, DateTime.UtcNow);
+            }
 
             if (!string.IsNullOrEmpty(promocode))
             {
@@ -187,7 +218,7 @@ namespace Doppler.AccountPlans.Controllers
             }
 
             /* Marketing plan */
-            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgradeDate, currentDiscountPlan, totalCreditDiscount, newPlanType);
+            var upgradeCost = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(newPlan, discountPlan, currentPlan, _dateTimeProvider.Now, promotion, timesAppliedPromocode, currentPromotion, firstUpgradeDate, currentDiscountPlan, totalCreditDiscount, newPlanType, billingInformation, currencyRate);
 
             return new OkObjectResult(upgradeCost);
         }
@@ -197,7 +228,8 @@ namespace Doppler.AccountPlans.Controllers
         public async Task<IActionResult> GetCalculateUpgradeLandingPlanCost(
             [FromRoute] string accountName,
             [FromQuery] string landingIds,
-            [FromQuery] string landingPacks)
+            [FromQuery] string landingPacks,
+            [FromQuery] PaymentMethodEnum paymentMethod = PaymentMethodEnum.CC)
         {
             if (string.IsNullOrEmpty(landingIds))
             {
@@ -214,6 +246,30 @@ namespace Doppler.AccountPlans.Controllers
             if (currentPlan is null)
             {
                 return new BadRequestObjectResult(new { message = "The given user has no billing credit" });
+            }
+
+            var billingInformation = await _userRepository.GetBillingInformation(accountName);
+
+            if (billingInformation != null)
+            {
+                billingInformation.PaymentMethod = (int)paymentMethod != billingInformation.PaymentMethod ? (int)paymentMethod : billingInformation.PaymentMethod;
+            }
+
+            CurrencyRate currencyRate = null;
+
+            if (billingInformation != null && billingInformation.Country == "AR")
+            {
+                if (currentPlan != null)
+                {
+                    var currentCurrencyDate = currentPlan.Date;
+                    var currentCurrencyRate = await _currencyRepository.GetCurrencyRate((int)CurrencyTypeEnum.UsS, (int)CurrencyTypeEnum.sARG, currentCurrencyDate);
+                    if (currentCurrencyRate != null)
+                    {
+                        currentPlan.CurrencyRate = currentCurrencyRate.Rate;
+                    }
+                }
+
+                currencyRate = await _currencyRepository.GetCurrencyRate((int)CurrencyTypeEnum.UsS, (int)CurrencyTypeEnum.sARG, DateTime.UtcNow);
             }
 
             Promotion currentPromotion = null;
@@ -268,7 +324,7 @@ namespace Doppler.AccountPlans.Controllers
 
             var lastLandingPlan = await _accountPlansRepository.GetLastLandingPlanBillingInformation(accountName);
             var firstUpgradeDate = await _accountPlansRepository.GetFirstUpgradeDate(accountName);
-            var upgradeCost = CalculateUpgradeCostHelper.CalculateLandingPlanAmountDetails(currentPlan, _dateTimeProvider.Now, landingPlansSummary, landingPlans, discountPlan, lastLandingPlan, firstUpgradeDate, promotion, currentPromotion, timesAppliedPromocode);
+            var upgradeCost = CalculateUpgradeCostHelper.CalculateLandingPlanAmountDetails(currentPlan, _dateTimeProvider.Now, landingPlansSummary, landingPlans, discountPlan, lastLandingPlan, firstUpgradeDate, promotion, currentPromotion, timesAppliedPromocode, billingInformation, currencyRate);
 
             return new OkObjectResult(upgradeCost);
         }

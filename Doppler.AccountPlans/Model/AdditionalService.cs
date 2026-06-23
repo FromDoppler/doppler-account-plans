@@ -8,5 +8,6 @@ namespace Doppler.AccountPlans.Model
         public int? PromotionId { get; set; }
         public int? AddOnPromotionDiscount { get; set; }
         public int? AddOnPromotionDuration { get; set; }
+        public decimal? AddOnTaxes { get; set; }
     }
 }
