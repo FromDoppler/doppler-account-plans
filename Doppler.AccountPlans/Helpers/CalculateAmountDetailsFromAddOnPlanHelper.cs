@@ -215,7 +215,12 @@ namespace Doppler.AccountPlans.Helpers
             //result.NextMonthTotal = ((newPlan.ChatPlanFee ?? 0) * newDiscount.MonthPlan) - result.DiscountPlanFeeAdmin.NextAmount - result.DiscountPrepayment.NextAmount;
             result.MajorThat21st = now.Day > 21;
 
-            var nexMonnthInvoiceDate = !isMonthPlan ? now.AddMonths(differenceBetweenMonthPlans) : now.AddMonths(1);
+            var nexMonnthInvoiceDate = !isMonthPlan ?
+                now.AddMonths(differenceBetweenMonthPlans) :
+                result.MajorThat21st ?
+                new DateTime(now.Year, now.Month + 1, 1) :
+                now.AddMonths(1);
+
             result.NextMonthDate = new DateTime(nexMonnthInvoiceDate.Year, nexMonnthInvoiceDate.Month, 1);
 
             result.PlanFee = newPlan.ChatPlanFee ?? 0;

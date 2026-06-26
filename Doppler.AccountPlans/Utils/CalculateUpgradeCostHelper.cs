@@ -266,7 +266,12 @@ namespace Doppler.AccountPlans.Utils
             result.MajorThat21st = now.Day > 21;
             result.PositiveBalance = result.CurrentMonthTotal > 0 ? 0 : result.Total;
 
-            var nexMonnthInvoiceDate = !isMonthPlan ? now.AddMonths(differenceBetweenMonthPlans) : now.AddMonths(1);
+            var nexMonnthInvoiceDate = !isMonthPlan ?
+                now.AddMonths(differenceBetweenMonthPlans) :
+                result.MajorThat21st ?
+                new DateTime(now.Year, now.Month + 1, 1) :
+                now.AddMonths(1);
+
             result.NextMonthDate = new DateTime(nexMonnthInvoiceDate.Year, nexMonnthInvoiceDate.Month, 1);
 
             if (billingInformation != null && billingInformation.PaymentMethod == (int)PaymentMethodEnum.TRANSF && billingInformation.Country.ToUpper() == "AR")
