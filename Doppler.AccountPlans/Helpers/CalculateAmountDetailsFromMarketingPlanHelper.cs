@@ -42,7 +42,7 @@ namespace Doppler.AccountPlans.Helpers
 
             if (currentPlan.IdUserType == UserTypesEnum.Individual && newPlan.IdUserType != UserTypesEnum.Individual)
             {
-                return ChangeIndividualToContacsOrEmails(newPlan, newDiscount, currentPlan, now, promotion, timesAppliedPromocode, currentPromotion, creditsDiscount);
+                return ChangeIndividualToContacsOrEmails(newPlan, newDiscount, currentPlan, now, promotion, timesAppliedPromocode, currentPromotion, creditsDiscount, billingInformation, currencyRate);
             }
             else
             {
@@ -213,7 +213,12 @@ namespace Doppler.AccountPlans.Helpers
                 result.MajorThat21st = now.Day > 21;
 
 
-                var nexMonnthInvoiceDate = now.AddMonths(differenceBetweenMonthPlans);
+                var nexMonnthInvoiceDate = !isMonthPlan ?
+                    now.AddMonths(differenceBetweenMonthPlans) :
+                    result.MajorThat21st ?
+                    new DateTime(now.Year, now.Month + 1, 1) :
+                    now.AddMonths(1);
+
                 result.NextMonthDate = new DateTime(nexMonnthInvoiceDate.Year, nexMonnthInvoiceDate.Month, 1);
 
                 result.PlanFee = newPlan.Fee;
@@ -263,7 +268,9 @@ namespace Doppler.AccountPlans.Helpers
             DateTime now, Promotion promotion,
             TimesApplyedPromocode timesAppliedPromocode,
             Promotion currentPromotion,
-            decimal creditsDiscount)
+            decimal creditsDiscount,
+            BillingInformation billingInformation,
+            CurrencyRate currencyRate)
         {
             var differenceBetweenMonthPlans = newDiscount.MonthPlan;
             decimal amount = creditsDiscount;
@@ -372,6 +379,40 @@ namespace Doppler.AccountPlans.Helpers
 
             var nextMonthTotal = (newPlan.Fee * newDiscount.MonthPlan) - result.DiscountPlanFeeAdmin.NextAmount - nextDiscountPromocodeAmmount - result.DiscountPrepayment.NextAmount - result.PositiveBalance;
             result.NextMonthTotal = nextMonthTotal > 0 ? nextMonthTotal : 0;
+
+            var nexMonnthInvoiceDate = result.MajorThat21st ?
+                new DateTime(now.Year, now.Month + 1, 1) :
+                now.AddMonths(differenceBetweenMonthPlans);
+
+            result.NextMonthDate = new DateTime(nexMonnthInvoiceDate.Year, nexMonnthInvoiceDate.Month, 1);
+
+            result.PlanFee = newPlan.Fee;
+
+            if (billingInformation.PaymentMethod == (int)PaymentMethodEnum.TRANSF && billingInformation.Country.ToUpper() == "AR")
+            {
+                var rate = currencyRate.Rate ?? 1;
+                decimal coefficient = 0.21m;
+
+                result.CurrencyDate = currencyRate.UTCFromDate;
+
+                /* Plan Fee */
+                result.PlanFee = decimal.Round(result.PlanFee * rate, 2, MidpointRounding.AwayFromZero);
+
+                /* DiscountPaymentAlreadyPaid */
+                result.DiscountPaymentAlreadyPaid = decimal.Round(result.DiscountPaymentAlreadyPaid, 4, MidpointRounding.AwayFromZero);
+
+                /* TaxesPercentage*/
+                result.TaxesPercentage = 21;
+
+                result.CurrentMonthTotal = decimal.Round(result.CurrentMonthTotal, 2, MidpointRounding.AwayFromZero);
+                var taxes = decimal.Round(result.CurrentMonthTotal * coefficient, 4, MidpointRounding.AwayFromZero);
+                result.Taxes = taxes;
+                result.CurrencyRate = rate;
+
+                result.NextMonthTotal = decimal.Round(result.NextMonthTotal, 2, MidpointRounding.AwayFromZero);
+                taxes = decimal.Round(result.NextMonthTotal * coefficient, 4, MidpointRounding.AwayFromZero);
+                result.NextMonthTaxes = taxes;
+            }
 
             return result;
         }
