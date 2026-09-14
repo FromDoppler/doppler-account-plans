@@ -517,6 +517,8 @@ SELECT
             THEN PNBC.PlanFee
         WHEN UAO.IdAddOnType = 5
             THEN EAIBC.PlanFee
+        WHEN UAO.IdAddOnType = 6
+            THEN EAIBC.PlanFee
     ELSE 0
     END AS Fee,
     CASE
@@ -530,6 +532,8 @@ SELECT
             THEN  SUM(PNP.Quantity)
         WHEN UAO.IdAddOnType = 5
             THEN SUM(AOP.Quantity)
+        WHEN UAO.IdAddOnType = 6
+            THEN SUM(ADOPU.Quantity)
         ELSE 0
     END AS Qty,
     CASE
@@ -542,6 +546,8 @@ SELECT
         WHEN UAO.IdAddOnType = 4
             THEN PNBC.IdPromotion
         WHEN UAO.IdAddOnType = 5
+            THEN EAIBC.IdPromotion
+        WHEN UAO.IdAddOnType = 6
             THEN EAIBC.IdPromotion
     ELSE NULL
     END AS PromotionId,
@@ -556,6 +562,8 @@ SELECT
             THEN PNBC.DiscountPlanFeePromotion
         WHEN UAO.IdAddOnType = 5
             THEN EAIBC.DiscountPlanFeePromotion
+        WHEN UAO.IdAddOnType = 6
+            THEN EAIBC.DiscountPlanFeePromotion
     ELSE NULL
     END AS AddOnPromotionDiscount,
     CASE
@@ -569,6 +577,8 @@ SELECT
             THEN PNBC.PromotionDuration
         WHEN UAO.IdAddOnType = 5
             THEN EAIBC.PromotionDuration
+        WHEN UAO.IdAddOnType = 6
+            THEN EAIBC.PromotionDuration
     ELSE NULL
     END AS AddOnPromotionDuration,
     CASE
@@ -581,6 +591,8 @@ SELECT
         WHEN UAO.IdAddOnType = 4
             THEN PNBC.Taxes
         WHEN UAO.IdAddOnType = 5
+            THEN EAIBC.Taxes
+        WHEN UAO.IdAddOnType = 6
             THEN EAIBC.Taxes
     ELSE NULL
     END AS AddOnTaxes
@@ -605,8 +617,10 @@ LEFT JOIN [BillingCredits] PNBC ON PNBC.IdBillingCredit = UAO.IdCurrentBillingCr
 LEFT JOIN [PushNotificationPlanUser] PNPU ON PNPU.IdBillingCredit = PNBC.IdBillingCredit
 LEFT JOIN [PushNotificationPlan] PNP ON PNP.IdPushNotificationPlan = PNPU.IdPushNotificationPlan
 
-/* ECO AI */
-LEFT JOIN [BillingCredits] EAIBC ON EAIBC.IdBillingCredit = UAO.IdCurrentBillingCredit AND UAO.IdAddOnType = 5 AND EAIBC.IdBillingCreditType IN (46, 47, 49, 50)
+/* AddOnPlan-based add-ons (EcoAI and Collaborators) */
+LEFT JOIN [BillingCredits] EAIBC ON EAIBC.IdBillingCredit = UAO.IdCurrentBillingCredit AND
+    ((UAO.IdAddOnType = 5 AND EAIBC.IdBillingCreditType IN (46, 47, 49, 50)) OR
+    (UAO.IdAddOnType = 6 AND EAIBC.IdBillingCreditType IN (52, 53, 55, 56)))
 LEFT JOIN [AddOnPlanUser] ADOPU ON ADOPU.IdBillingCredit = EAIBC.IdBillingCredit
 LEFT JOIN [AddOnPlan] AOP ON AOP.IdAddOnPlan = ADOPU.IdAddOnPlan
 
@@ -618,6 +632,7 @@ GROUP BY UAO.IdAddOnType ,
             WHEN UAO.IdAddOnType = 3 THEN OSBC.PlanFee
             WHEN UAO.IdAddOnType = 4 THEN PNBC.PlanFee
             WHEN UAO.IdAddOnType = 5 THEN EAIBC.PlanFee
+            WHEN UAO.IdAddOnType = 6 THEN EAIBC.PlanFee
             ELSE 0
         END,
         CASE
@@ -626,6 +641,7 @@ GROUP BY UAO.IdAddOnType ,
             WHEN UAO.IdAddOnType = 3 THEN OSBC.IdPromotion
             WHEN UAO.IdAddOnType = 4 THEN PNBC.IdPromotion
             WHEN UAO.IdAddOnType = 5 THEN EAIBC.IdPromotion
+            WHEN UAO.IdAddOnType = 6 THEN EAIBC.IdPromotion
             ELSE NULL
         END,
         CASE
@@ -634,6 +650,7 @@ GROUP BY UAO.IdAddOnType ,
             WHEN UAO.IdAddOnType = 3 THEN  OSBC.DiscountPlanFeePromotion
             WHEN UAO.IdAddOnType = 4 THEN PNBC.DiscountPlanFeePromotion
             WHEN UAO.IdAddOnType = 5 THEN EAIBC.DiscountPlanFeePromotion
+            WHEN UAO.IdAddOnType = 6 THEN EAIBC.DiscountPlanFeePromotion
             ELSE NULL
         END,
         CASE
@@ -642,6 +659,7 @@ GROUP BY UAO.IdAddOnType ,
             WHEN UAO.IdAddOnType = 3 THEN  OSBC.PromotionDuration
             WHEN UAO.IdAddOnType = 4 THEN PNBC.PromotionDuration
             WHEN UAO.IdAddOnType = 5 THEN EAIBC.PromotionDuration
+            WHEN UAO.IdAddOnType = 6 THEN EAIBC.PromotionDuration
             ELSE NULL
         END,
         CASE
@@ -650,6 +668,7 @@ GROUP BY UAO.IdAddOnType ,
             WHEN UAO.IdAddOnType = 3 THEN  OSBC.Taxes
             WHEN UAO.IdAddOnType = 4 THEN PNBC.Taxes
             WHEN UAO.IdAddOnType = 5 THEN EAIBC.Taxes
+            WHEN UAO.IdAddOnType = 6 THEN EAIBC.Taxes
         ELSE NULL
         END",
                     new

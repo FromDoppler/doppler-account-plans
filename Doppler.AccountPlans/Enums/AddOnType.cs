@@ -6,6 +6,7 @@ namespace Doppler.AccountPlans.Enums
         Chat = 2,
         OnSite = 3,
         PushNotification = 4,
-        EcoAI = 5
+        EcoAI = 5,
+        Collaborators = 6
     }
 }

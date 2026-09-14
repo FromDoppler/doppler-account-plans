@@ -773,5 +773,35 @@ namespace Doppler.AccountPlans
         }
 
         #endregion
+
+        [Fact]
+        public void CalculateUpgradeCostHelper_Collaborators_addon_should_discount_the_current_collaborators_plan()
+        {
+            var currentPlan = new UserPlan
+            {
+                IdUserType = UserTypesEnum.Monthly,
+                TotalMonthPlan = 1,
+                CurrentMonthPlan = 1,
+                AdditionalServices = [new AdditionalService { IdAddOnType = (int)AddOnType.Collaborators, Fee = 15, Qty = 3 }]
+            };
+
+            var result = CalculateUpgradeCostHelper.CalculatePlanAmountDetails(
+                new PlanInformation { ChatPlanFee = 20 },
+                new PlanDiscountInformation { MonthPlan = 1, DiscountPlanFee = 0 },
+                currentPlan,
+                new DateTime(2021, 9, 6),
+                promotion: null,
+                timesAppliedPromocode: null,
+                currentPromotion: null,
+                firstUpgradeDate: null,
+                currentDiscountPlan: new PlanDiscountInformation { MonthPlan = 1, DiscountPlanFee = 0 },
+                creditsDiscount: 0,
+                planType: PlanTypeEnum.Collaborators,
+                billingInformation: new BillingInformation { PaymentMethod = (int)PaymentMethodEnum.CC },
+                currencyRate: null);
+
+            Assert.Equal(15, result.DiscountPaymentAlreadyPaid);
+            Assert.Equal(5, result.Total);
+        }
     }
 }
