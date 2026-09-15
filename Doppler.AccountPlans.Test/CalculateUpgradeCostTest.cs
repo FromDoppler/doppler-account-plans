@@ -1,8 +1,14 @@
 using Doppler.AccountPlans.Model;
 using Doppler.AccountPlans.Utils;
+using Doppler.AccountPlans.Controllers;
+using Doppler.AccountPlans.Encryption;
+using Doppler.AccountPlans.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using Doppler.AccountPlans.Enums;
+using System.Threading.Tasks;
 using Xunit;
 using System.Collections.Generic;
 
@@ -802,6 +808,83 @@ namespace Doppler.AccountPlans
 
             Assert.Equal(15, result.DiscountPaymentAlreadyPaid);
             Assert.Equal(5, result.Total);
+        }
+
+        [Fact]
+        public async Task CalculateUpgradeCostWithAddOns_Collaborators_should_use_the_requested_quantity()
+        {
+            var accountPlansRepository = new Mock<IAccountPlansRepository>();
+            accountPlansRepository
+                .Setup(x => x.GetAddOnPlanInformation((int)AddOnType.Collaborators, 1))
+                .ReturnsAsync(new BasePlanInformation { Fee = 10 });
+            accountPlansRepository
+                .Setup(x => x.GetCurrentPlanWithAdditionalServices("account@doppler.com"))
+                .ReturnsAsync(new UserPlan
+                {
+                    IdUserType = UserTypesEnum.Monthly,
+                    TotalMonthPlan = 1,
+                    CurrentMonthPlan = 1,
+                    AdditionalServices = [new AdditionalService { IdAddOnType = (int)AddOnType.Collaborators, Fee = 40, Qty = 2 }]
+                });
+            accountPlansRepository
+                .Setup(x => x.GetDiscountInformation(It.IsAny<int>()))
+                .ReturnsAsync(new PlanDiscountInformation { MonthPlan = 1, DiscountPlanFee = 0 });
+            accountPlansRepository
+                .Setup(x => x.GetFirstUpgradeDate("account@doppler.com"))
+                .ReturnsAsync((DateTime?)null);
+
+            var dateTimeProvider = new Mock<IDateTimeProvider>();
+            dateTimeProvider.Setup(x => x.Now).Returns(new DateTime(2021, 9, 6));
+
+            var userRepository = new Mock<IUserRepository>();
+            userRepository
+                .Setup(x => x.GetBillingInformation("account@doppler.com"))
+                .ReturnsAsync(new BillingInformation { PaymentMethod = (int)PaymentMethodEnum.CC });
+
+            var controller = new AccountPlansController(
+                Mock.Of<ILogger<AccountPlansController>>(),
+                accountPlansRepository.Object,
+                dateTimeProvider.Object,
+                Mock.Of<IPromotionRepository>(),
+                userRepository.Object,
+                Mock.Of<ICurrencyRepository>(),
+                Mock.Of<IEncryptionService>(),
+                new Doppler.AccountPlans.TimeCollector.TimeCollector());
+
+            var response = await controller.GetCalculateUpgradeCostWithAddOns(
+                "account@doppler.com",
+                1,
+                PlanTypeEnum.Collaborators,
+                discountId: 0,
+                quantity: 5);
+
+            var result = Assert.IsType<OkObjectResult>(response);
+            var amountDetails = Assert.IsType<PlanAmountDetails>(result.Value);
+            Assert.Equal(50, amountDetails.PlanFee);
+            Assert.Equal(40, amountDetails.DiscountPaymentAlreadyPaid);
+            Assert.Equal(10, amountDetails.Total);
+        }
+
+        [Fact]
+        public async Task CalculateUpgradeCostWithAddOns_Collaborators_should_require_a_positive_quantity()
+        {
+            var controller = new AccountPlansController(
+                Mock.Of<ILogger<AccountPlansController>>(),
+                Mock.Of<IAccountPlansRepository>(),
+                Mock.Of<IDateTimeProvider>(),
+                Mock.Of<IPromotionRepository>(),
+                Mock.Of<IUserRepository>(),
+                Mock.Of<ICurrencyRepository>(),
+                Mock.Of<IEncryptionService>(),
+                new Doppler.AccountPlans.TimeCollector.TimeCollector());
+
+            var response = await controller.GetCalculateUpgradeCostWithAddOns(
+                "account@doppler.com",
+                1,
+                PlanTypeEnum.Collaborators,
+                discountId: 0);
+
+            Assert.IsType<BadRequestObjectResult>(response);
         }
     }
 }

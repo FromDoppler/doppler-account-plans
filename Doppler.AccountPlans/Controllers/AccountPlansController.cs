@@ -59,7 +59,8 @@ namespace Doppler.AccountPlans.Controllers
             [FromRoute] PlanTypeEnum newPlanType,
             [FromQuery] int discountId,
             [FromQuery] string promocode = null,
-            [FromQuery] PaymentMethodEnum paymentMethod = PaymentMethodEnum.CC)
+            [FromQuery] PaymentMethodEnum paymentMethod = PaymentMethodEnum.CC,
+            [FromQuery] int? quantity = null)
         {
             using var _ = _timeCollector.StartScope();
 
@@ -91,8 +92,15 @@ namespace Doppler.AccountPlans.Controllers
                     addOnType = AddOnType.EcoAI;
                     break;
                 case PlanTypeEnum.Collaborators:
+                    if (!quantity.HasValue || quantity.Value <= 0)
+                    {
+                        return new BadRequestObjectResult(new { message = "The 'quantity' query parameter is required for collaborators and must be greater than zero" });
+                    }
+
                     var newCollaboratorsAddOnPlan = await _accountPlansRepository.GetAddOnPlanInformation((int)AddOnType.Collaborators, newPlanId);
-                    newPlan = new PlanInformation { PrintQty = newCollaboratorsAddOnPlan.Quantity, ChatPlanFee = newCollaboratorsAddOnPlan.Fee };
+                    newPlan = newCollaboratorsAddOnPlan == null
+                        ? null
+                        : new PlanInformation { PrintQty = quantity.Value, ChatPlanFee = newCollaboratorsAddOnPlan.Fee * quantity.Value };
                     addOnType = AddOnType.Collaborators;
                     break;
                 default:

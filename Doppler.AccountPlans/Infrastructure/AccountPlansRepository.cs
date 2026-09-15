@@ -518,7 +518,7 @@ SELECT
         WHEN UAO.IdAddOnType = 5
             THEN EAIBC.PlanFee
         WHEN UAO.IdAddOnType = 6
-            THEN EAIBC.PlanFee
+            THEN EAIBC.PlanFee * ADOPU.Quantity
     ELSE 0
     END AS Fee,
     CASE
@@ -632,7 +632,7 @@ GROUP BY UAO.IdAddOnType ,
             WHEN UAO.IdAddOnType = 3 THEN OSBC.PlanFee
             WHEN UAO.IdAddOnType = 4 THEN PNBC.PlanFee
             WHEN UAO.IdAddOnType = 5 THEN EAIBC.PlanFee
-            WHEN UAO.IdAddOnType = 6 THEN EAIBC.PlanFee
+            WHEN UAO.IdAddOnType = 6 THEN EAIBC.PlanFee * ADOPU.Quantity
             ELSE 0
         END,
         CASE
