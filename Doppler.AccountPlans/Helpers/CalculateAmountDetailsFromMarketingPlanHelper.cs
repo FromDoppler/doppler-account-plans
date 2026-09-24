@@ -249,6 +249,8 @@ namespace Doppler.AccountPlans.Helpers
                     result.NextMonthTaxes = taxes;
                 }
 
+                result.CurrentMonthTotal = result.CurrentMonthTotal >= 0 ? result.CurrentMonthTotal : 0;
+
                 return result;
             }
         }
