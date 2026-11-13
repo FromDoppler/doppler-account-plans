@@ -7,6 +7,7 @@ namespace Doppler.AccountPlans.Enums
         Landing = 3,
         OnSite = 4,
         PushNotification = 5,
-        EcoAI = 6
+        EcoAI = 6,
+        Collaborators = 7
     }
 }

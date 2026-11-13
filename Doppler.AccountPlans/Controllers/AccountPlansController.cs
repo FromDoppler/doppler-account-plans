@@ -59,7 +59,8 @@ namespace Doppler.AccountPlans.Controllers
             [FromRoute] PlanTypeEnum newPlanType,
             [FromQuery] int discountId,
             [FromQuery] string promocode = null,
-            [FromQuery] PaymentMethodEnum paymentMethod = PaymentMethodEnum.CC)
+            [FromQuery] PaymentMethodEnum paymentMethod = PaymentMethodEnum.CC,
+            [FromQuery] int? quantity = null)
         {
             using var _ = _timeCollector.StartScope();
 
@@ -89,6 +90,18 @@ namespace Doppler.AccountPlans.Controllers
                     var newAddOnPlan = await _accountPlansRepository.GetAddOnPlanInformation((int)AddOnType.EcoAI, newPlanId);
                     newPlan = new PlanInformation { PrintQty = newAddOnPlan.Quantity, ChatPlanFee = newAddOnPlan.Fee };
                     addOnType = AddOnType.EcoAI;
+                    break;
+                case PlanTypeEnum.Collaborators:
+                    if (!quantity.HasValue || quantity.Value <= 0)
+                    {
+                        return new BadRequestObjectResult(new { message = "The 'quantity' query parameter is required for collaborators and must be greater than zero" });
+                    }
+
+                    var newCollaboratorsAddOnPlan = await _accountPlansRepository.GetAddOnPlanInformation((int)AddOnType.Collaborators, newPlanId);
+                    newPlan = newCollaboratorsAddOnPlan == null
+                        ? null
+                        : new PlanInformation { PrintQty = quantity.Value, ChatPlanFee = newCollaboratorsAddOnPlan.Fee * quantity.Value };
+                    addOnType = AddOnType.Collaborators;
                     break;
                 default:
                     newPlan = null;
@@ -629,6 +642,10 @@ namespace Doppler.AccountPlans.Controllers
                         var ecoAIPlan = await _accountPlansRepository.GetAddOnPlanInformation((int)AddOnType.EcoAI, addOnPromotion.IdAddOnPlan ?? 0);
                         addOnPlanQuantity = ecoAIPlan != null ? ecoAIPlan.Quantity.ToString() : string.Empty;
                         break;
+                    case AddOnType.Collaborators:
+                        var collaboratorsPlan = await _accountPlansRepository.GetAddOnPlanInformation((int)AddOnType.Collaborators, addOnPromotion.IdAddOnPlan ?? 0);
+                        addOnPlanQuantity = collaboratorsPlan != null ? collaboratorsPlan.Quantity.ToString() : string.Empty;
+                        break;
                 }
 
                 addOnPromotion.Quantity = addOnPlanQuantity;
@@ -645,6 +662,7 @@ namespace Doppler.AccountPlans.Controllers
                 AddOnType.OnSite => new OnSiteMapper(_accountPlansRepository),
                 AddOnType.PushNotification => new PushNotificationMapper(_accountPlansRepository),
                 AddOnType.EcoAI => new AddOnMapper(_accountPlansRepository),
+                AddOnType.Collaborators => new AddOnMapper(_accountPlansRepository),
                 _ => null,
             };
         }
